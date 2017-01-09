@@ -1,0 +1,27 @@
+{
+  "name": "clab-builder",
+  "version": "0.0.1",
+  "description": "Contactlab build utility",
+  "main": "src/index.js",
+  "repository": {
+    "type": "git",
+    "url": "http://gitlab.contactlab.com/product-devs/clab-builder.git"
+  },
+  "keywords": [
+    "build",
+    "minify",
+    "vulcanize",
+    "webpack"
+  ],
+  "author": "Contactlab Product Team",
+  "bin": {
+    "clab-builder": "src/index.js"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "fs-extra": "^1.0.0",
+    "node-minify": "^2.0.2",
+    "vulcanize": "^1.15.2",
+    "webpack": "^1.14.0"
+  }
+}
