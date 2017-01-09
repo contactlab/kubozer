@@ -1,6 +1,6 @@
 {
   "name": "clab-builder",
-  "version": "0.0.1",
+  "version": "0.0.1-1",
   "description": "Contactlab build utility",
   "main": "src/index.js",
   "repository": {
@@ -14,14 +14,12 @@
     "webpack"
   ],
   "author": "Contactlab Product Team",
-  "bin": {
-    "clab-builder": "src/index.js"
-  },
   "license": "Apache-2.0",
   "dependencies": {
     "fs-extra": "^1.0.0",
     "node-minify": "^2.0.2",
     "vulcanize": "^1.15.2",
-    "webpack": "^1.14.0"
+    "webpack": "^1.14.0",
+    "clab-builder-cli": "file:///home/developer/Projects/clab-builder-cli"
   }
 }

@@ -5,18 +5,11 @@ const compressor = require('node-minify');
 const webpack = require('webpack');
 const Vulcanize = require('vulcanize');
 
-const webpackConfig = require('../webpack.config');
-const config = require('../build.conf.js');
+const webpackConfigPath = path.resolve('webpack.config');
+const configPath = path.resolve('build.conf');
 
-const NODE_ENV = process.env.NODE_ENV;
-
-const isProduction = () => {
-  return NODE_ENV === 'production';
-};
-
-const isStaging = () => {
-  return NODE_ENV === 'staging';
-};
+const webpackConfig = require(webpackConfigPath);
+const config = require(configPath);
 
 const deletePrevBuild = () => {
   fs.removeSync(path.resolve(config.buildFolder));
@@ -128,34 +121,12 @@ const minifyJS = () => {
   });
 };
 
-const buildStaging = () => {
-  deletePrevBuild(() => {});
-  copyAssetsAndBundles();
-  compileWebpack();
-  runVulcanize();
-  copyManifest();
+module.exports = {
+  deletePrevBuild: deletePrevBuild,
+  copyAssetsAndBundles: copyAssetsAndBundles,
+  compileWebpack: compileWebpack,
+  runVulcanize: runVulcanize,
+  buildCSS: buildCSS,
+  copyManifest: copyManifest,
+  minifyJS: minifyJS
 };
-
-const buildProduction = () => {
-  deletePrevBuild(() => {});
-  copyAssetsAndBundles();
-  compileWebpack()
-    .then(minifyJS)
-    .catch(err => {
-      console.log(err);
-    });
-  runVulcanize();
-  copyManifest();
-};
-
-const main = () => {
-  if (isStaging()) {
-    buildStaging();
-  }
-
-  if (isProduction()) {
-    buildProduction();
-  }
-};
-
-main();
