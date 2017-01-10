@@ -6,7 +6,7 @@ const webpack = require('webpack');
 const Vulcanize = require('vulcanize');
 
 const webpackConfigPath = path.resolve('webpack.config');
-const configPath = path.resolve('build.conf');
+const configPath = path.resolve('clab-builder.conf');
 
 const webpackConfig = require(webpackConfigPath);
 const config = require(configPath);
@@ -57,7 +57,7 @@ const copyAssetsAndBundles = () => {
 };
 
 const compileWebpack = () => {
-  webpackConfig.output.filename = './build/bundle.js';
+  webpackConfig.output.filename = config.buildJS;
   const compiler = webpack(webpackConfig);
 
   return new Promise((resolve, reject) => {
@@ -73,25 +73,20 @@ const compileWebpack = () => {
 };
 
 const runVulcanize = () => {
-  const vulcan = new Vulcanize({
-    stripComments: true,
-    inlineScripts: true,
-    inlineStyles: true,
-    excludes: ['./app/bundle.js']
-  });
+  const vulcan = new Vulcanize(config.vulcanize.conf);
 
-  vulcan.process('./app/index.html', (err, inlinedHTML) => {
+  vulcan.process(config.vulcanize.srcTarget, (err, inlinedHTML) => {
     if (err) {
       console.error(err);
       return;
     }
 
-    fs.writeFile('./build/index.html', inlinedHTML, err => {
+    fs.writeFile(config.vulcanize.buildTarget, inlinedHTML, err => {
       if (err) {
         console.error(err);
       }
 
-      console.info('Vulcanized index saved to ./build/index.html');
+      console.info('Vulcanized index saved to ' + config.vulcanize.buildTarget);
     });
   });
 };
