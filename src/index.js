@@ -11,6 +11,8 @@ const configPath = path.resolve('clab-builder.conf');
 const webpackConfig = require(webpackConfigPath);
 const config = require(configPath);
 
+const bump = require('./bump');
+
 const deletePrevBuild = () => {
   fs.removeSync(path.resolve(config.buildFolder));
   console.info('Old build removed');
@@ -123,5 +125,6 @@ module.exports = {
   runVulcanize: runVulcanize,
   buildCSS: buildCSS,
   copyManifest: copyManifest,
-  minifyJS: minifyJS
+  minifyJS: minifyJS,
+  inc: bump.inc
 };
