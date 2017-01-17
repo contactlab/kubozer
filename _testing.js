@@ -1,39 +1,5 @@
-# Kubozer
+const Kubozer = require('./dist/index');
 
-> The best tool for Contactlab projects builds :rocket:
-
-#### 🚧 WorkInProgress 🚧
-
-## Install
-
-	$ yarn add kubozer
-
-## Usage
-```javascript
-const Kubozer = require('kubozer');
-const config = {...};
-const webpackConfig = {...};
-
-// Initialize (check for required config and init workspace folder)
-const k = new Kubozer(config, webpackConfig);
-
-// Sync operation
-k.deletePrevBuild();
-
-k.copy()
-	.then(() => k.replace())
-	.then(() => k.build())
-	.then(() => k.minify())
-	.then(res => {
-		console.log(res);
-	})
-	.catch(err => {
-		console.error(err);
-	});
-```
-
-## Configuration
-```javascript
 const config = {
 	// Temporary workspace for build
 	workspace: './internalTest/workspace',
@@ -94,10 +60,6 @@ const config = {
 		}
 	}
 };
-```
-
-## Webpack configuration
-```javascript
 
 const webpackConfig = {
 	entry: './internalTest/src-test/app/index.js',
@@ -121,56 +83,18 @@ const webpackConfig = {
 		}]
 	}
 };
-```
 
-## API
+const k = new Kubozer(config, webpackConfig);
 
-### deletePrevBuild()
-Simply delete the previous build in the "workspace" directory.
+k.deletePrevBuild();
 
-### copy()
-#### return `promise`
-Copy every elements within the object `copy`.
-
-### replace()
-#### return `promise`
-HTML replace in file. Set a placeholder in your HTML and remove/replace the inner elements during the build.
-
-### build()
-#### return `promise`
-`Webpack` and `Vulcanize` following the configuration.
-
-### minify()
-#### return `promise`
-Minify `JS` and `CSS` following the configuration.
-
-
-## Development
-
-	$ git clone https://github.com/contactlab/kubozer.git#development
-	$ yarn
-
-### Build
-
-	$ yarn run build
-
-### Testing
-> XO as linter and AVA for units.
-
-	$ yarn test
-
-## TODO
-- add `test` command
-- add `oneskyapp` (or whatever) command
-
-- test for `bump` command
-- code refactor
-- review
-- (more and more...)
-
-
-### Git branching policies
-Any feature/bug fixing/refactor must be developed on a **feature branch** derived from the **develop** branch and integrate the changes through a **pull request** to have a code review.
-
-### License
-Released under the [Apache 2.0](LICENSE) license.
+k.copy()
+	.then(() => k.replace())
+	.then(() => k.build())
+	.then(() => k.minify())
+	.then(res => {
+		console.log(res);
+	})
+	.catch(err => {
+		console.error(err);
+	});
