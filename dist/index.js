@@ -139,29 +139,31 @@ var Kubozer = function () {
 		value: function replace() {
 			var optionCSS = {};
 			var optionJS = {};
+
 			if (this.config.replace && this.config.replace.css) {
 				var cssFiles = this.config.replace.css.files;
 				optionCSS.files = _path2.default.join(_path2.default.resolve(this.config.workspace), cssFiles);
 				optionCSS.replace = new RegExp(this.config.replace.css.commentRegex, 'g');
 				optionCSS.with = '\n\t\t\t<link rel="stylesheet" href="' + this.config.replace.css.with + '" />\n\t\t\t';
 			}
+
 			if (this.config.replace && this.config.replace.js) {
 				optionJS.files = _path2.default.join(_path2.default.resolve(this.config.workspace), this.config.replace.js.files);
 				optionJS.replace = new RegExp(this.config.replace.js.commentRegex, 'g');
 				optionJS.with = '\n\t\t\t<script src="' + this.config.replace.js.with + '"></script>\n\t\t\t';
 			}
 
-			console.log('OPTIONCSS', optionCSS);
-			console.log('OPTIONJS', optionJS);
 			if (optionJS.files === undefined && optionCSS.files === undefined) {
 				throw new Error('WARNING REPLACE(): replace method called but "files" not found in configuration');
 			}
 
+			// NOTE: can't use Promise.all 'cause we are modifying the same file
+			// First check for CSS option and then for JS option
 			return (0, _replaceInFile2.default)(optionCSS.files ? optionCSS : optionJS).then(function () {
 				if (optionCSS.files) {
 					return (0, _replaceInFile2.default)(optionJS);
 				}
-
+				// Return a simple promise if we have only one option
 				return new Promise(function (resolve) {
 					return resolve(true);
 				});
@@ -178,6 +180,7 @@ var Kubozer = function () {
 
 			var resWebpack = void 0;
 			var resVulcanize = void 0;
+
 			return this.Builder.webpack().then(function (res) {
 				resWebpack = res;
 				console.log('Builded WEBPACK');

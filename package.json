@@ -2,7 +2,7 @@
   "name": "kubozer",
   "version": "0.0.1-3",
   "description": "Contactlab build utility",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "scripts": {
     "pretest": "yarn run build",
     "test": "xo && ava --serial",
