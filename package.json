@@ -1,12 +1,16 @@
 {
   "name": "kubozer",
-  "version": "0.0.1-3",
+  "version": "0.0.1-4",
   "description": "Contactlab build utility",
   "main": "dist/index.js",
   "scripts": {
     "pretest": "yarn run build",
     "test": "xo && ava --serial",
     "build": "babel src -d dist"
+  },
+  "bin": {
+    "kubozer": "dist/cli.js",
+    "clab-semver": "dist/bump.js"
   },
   "xo": {
     "esnext": true,

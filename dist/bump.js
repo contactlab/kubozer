@@ -1,25 +1,33 @@
+#! /usr/bin/env node
 'use strict';
 
-var fs = require('fs');
-var path = require('path');
-var semver = require('semver');
+var _path = require('path');
 
-var configPath = path.resolve('clab-builder.conf');
-var config = require(configPath);
+var _path2 = _interopRequireDefault(_path);
 
-function inc(type) {
-	config.packageFiles.forEach(function (filePath) {
-		var fullFilePath = path.resolve(filePath);
-		var data = JSON.parse(fs.readFileSync(fullFilePath, 'utf8'));
-		var oldVersion = data.version;
-		data.version = semver.inc(data.version, type);
+var _index = require('./index');
 
-		var dataString = JSON.stringify(data, null, 2);
-		fs.writeFileSync(fullFilePath, dataString);
-		console.info('Successfully updated ' + fullFilePath + ' version from ' + oldVersion + ' to ' + data.version);
-	});
-}
+var _index2 = _interopRequireDefault(_index);
 
-module.exports = {
-	inc: inc
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var config = require(_path2.default.resolve('clab-builder.conf'));
+var webpackConfig = require(_path2.default.resolve('webpack.config'));
+
+var k = new _index2.default(config, webpackConfig);
+
+var main = function main() {
+  var incArgvIndex = process.argv.indexOf('--inc');
+  if (incArgvIndex === -1) {
+    throw new Error('You MUST provide --inc parameter');
+  }
+
+  var semverInc = process.argv[incArgvIndex + 1];
+  if (!semverInc) {
+    throw new Error('You MUST provide a incremental value');
+  }
+
+  k.bump(semverInc);
 };
+
+main();
