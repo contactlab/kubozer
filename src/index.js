@@ -22,11 +22,11 @@ class Kubozer {
 		this.Minifier = new Minifier(this.config);
 
 		// Ensure no previous workspaces are present
-		this._deleteWorkspace();
+		this.deleteWorkspace();
 		this._createWorkspace();
 	}
 
-	_deleteWorkspace() {
+	deleteWorkspace() {
 		try {
 			fs.removeSync(path.resolve(this.config.workspace));
 		} catch (err) {

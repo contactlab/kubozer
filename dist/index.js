@@ -50,13 +50,13 @@ var Kubozer = function () {
 		this.Minifier = new _minifier2.default(this.config);
 
 		// Ensure no previous workspaces are present
-		this._deleteWorkspace();
+		this.deleteWorkspace();
 		this._createWorkspace();
 	}
 
 	_createClass(Kubozer, [{
-		key: '_deleteWorkspace',
-		value: function _deleteWorkspace() {
+		key: 'deleteWorkspace',
+		value: function deleteWorkspace() {
 			try {
 				_fsExtra2.default.removeSync(_path2.default.resolve(this.config.workspace));
 			} catch (err) {

@@ -39,16 +39,32 @@ var cli = (0, _meow2.default)('\n\tUsage\n\t\t$ NODE_ENV=env_name kubozer --buil
 var buildStaging = function buildStaging() {
 	k.deletePrevBuild(function () {});
 	k.copy().then(function () {
+		return k.replace();
+	}).then(function () {
 		return k.build();
+	}).then(function (res) {
+		k.deleteWorkspace();
+		console.log(res);
+	}).catch(function (err) {
+		k.deleteWorkspace();
+		console.error(err);
 	});
 };
 
 var buildProduction = function buildProduction() {
 	k.deletePrevBuild(function () {});
 	k.copy().then(function () {
+		return k.replace();
+	}).then(function () {
 		return k.build();
 	}).then(function () {
 		return k.minify();
+	}).then(function (res) {
+		k.deleteWorkspace();
+		console.log(res);
+	}).catch(function (err) {
+		k.deleteWorkspace();
+		console.error(err);
 	});
 };
 

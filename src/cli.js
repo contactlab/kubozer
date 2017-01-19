@@ -37,14 +37,33 @@ const cli = meow(`
 
 const buildStaging = () => {
 	k.deletePrevBuild(() => {});
-	k.copy().then(() => k.build());
+  k.copy()
+    .then(() => k.replace())
+		.then(() => k.build())
+    .then(res => {
+      k.deleteWorkspace();
+      console.log(res);
+    })
+    .catch(err => {
+      k.deleteWorkspace();
+      console.error(err);
+    });
 };
 
 const buildProduction = () => {
 	k.deletePrevBuild(() => {});
 	k.copy()
+    .then(() => k.replace())
 		.then(() => k.build())
-		.then(() => k.minify());
+		.then(() => k.minify())
+    .then(res => {
+      k.deleteWorkspace();
+      console.log(res);
+    })
+    .catch(err => {
+      k.deleteWorkspace();
+      console.error(err);
+    });
 };
 
 const main = () => {
