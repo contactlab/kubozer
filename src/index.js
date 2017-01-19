@@ -1,130 +1,237 @@
-const path = require('path');
+'use strict';
 
-const fs = require('fs-extra');
-const compressor = require('node-minify');
-const webpack = require('webpack');
-const Vulcanize = require('vulcanize');
+import path from 'path';
+import fs from 'fs-extra';
+import semver from 'semver';
+import replaceInFile from 'replace-in-file';
 
-const webpackConfigPath = path.resolve('webpack.config');
-const configPath = path.resolve('clab-builder.conf');
+import Builder from './builder';
+import Minifier from './minifier';
 
-const webpackConfig = require(webpackConfigPath);
-const config = require(configPath);
+class Kubozer {
+	constructor(config, webpackConfig) {
+		if (!config || !webpackConfig) {
+			throw new Error('Missing configurations.');
+		}
 
-const bump = require('./bump');
+		this.config = config;
+		this.webpackConfig = webpackConfig;
+		this._checkForRequired();
 
-const deletePrevBuild = () => {
-  fs.removeSync(path.resolve(config.buildFolder));
-  console.info('Old build removed');
-};
+		this.Builder = new Builder(this.config, this.webpackConfig);
+		this.Minifier = new Minifier(this.config);
 
-const copyAssetsAndBundles = () => {
-  config.assets.items.forEach(asset => {
-    const baseAssetPath = path
-      .resolve(asset)
-      .slice(
-        path.dirname(
-          path.resolve(config.assets.base)
-        ).length
-      );
-    const destination = path.join(path.resolve(config.buildFolder), baseAssetPath);
-    fs.copy(asset, destination, err => {
-      if (err) {
-        console.error(err);
-        return;
-      }
+		// Ensure no previous workspaces are present
+		this.deleteWorkspace();
+		this._createWorkspace();
+	}
 
-      console.info(`Copied ${asset} to ${destination}`);
-    });
-  });
+	deleteWorkspace() {
+		try {
+			fs.removeSync(path.resolve(this.config.workspace));
+		} catch (err) {
+			throw new Error(err);
+		}
+	}
 
-  config.bundles.items.forEach(bundle => {
-    const baseBundlePath = path
-      .resolve(bundle)
-      .slice(
-        path.dirname(
-          path.resolve(config.bundles.base)
-        ).length
-      );
-    const destination = path.join(path.resolve(config.buildFolder), baseBundlePath);
-    fs.copy(bundle, destination, err => {
-      if (err) {
-        console.error(err);
-        return;
-      }
+	_createWorkspace() {
+		try {
+			const pathWorkspace = path.resolve(this.config.workspace);
+			fs.ensureDirSync(pathWorkspace);
+			fs.copySync(path.resolve(this.config.sourceApp), pathWorkspace);
+		} catch (err) {
+			throw new Error(err);
+		}
+	}
 
-      console.info(`Copied ${bundle} to ${destination}`);
-    });
-  });
-};
+	_copyManifest() {
+		try {
+			const pathManifest = path.resolve(path.join(this.config.workspace, 'manifest.json'));
+			const pathManifestDist = path.resolve(path.join(this.config.buildFolder, 'manifest.json'));
+			const exist = fs.existsSync(pathManifest);
+			if (exist) {
+				fs.copySync(pathManifest, pathManifestDist);
+				return true;
+			}
+			console.warn('WARNING: manifest.json not found. --->', pathManifest);
+			return false;
+		} catch (err) {
+			throw new Error(err);
+		}
+	}
 
-const compileWebpack = () => {
-  webpackConfig.output.filename = config.buildJS;
-  const compiler = webpack(webpackConfig);
+	deletePrevBuild() {
+		try {
+			const pathToBuild = path.resolve(this.config.buildFolder);
+			fs.removeSync(path.resolve(pathToBuild));
+		} catch (err) {
+			throw new Error(err);
+		}
+	}
 
-  return new Promise((resolve, reject) => {
-    compiler.run((err, stats) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-      console.info('Webpack compilation completed');
-      resolve(stats);
-    });
-  });
-};
+	/**
+	 * {string} type: 'assets' || 'bundles'
+	 *
+	 */
+	copy() {
+		return new Promise((resolve, reject) => {
+			if (this.config.manifest) {
+				this._copyManifest();
+			}
 
-const runVulcanize = () => {
-  const vulcan = new Vulcanize(config.vulcanize.conf);
+			this.config.copy.forEach(type => {
+				type.items.forEach(item => {
+					const itemPath = path.join(
+						path.resolve(this.config.workspace),
+						type.base,
+						item
+					);
+					const destination = path.join(
+						path.resolve(this.config.buildFolder),
+						type.base,
+						item
+					);
 
-  vulcan.process(config.vulcanize.srcTarget, (err, inlinedHTML) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
+					try {
+						fs.copySync(itemPath, destination);
+						console.info(`Copied ${itemPath} to ${destination}`);
+						resolve(this);
+					} catch (err) {
+						reject(err);
+					}
+				});
+			});
 
-    fs.writeFile(config.vulcanize.buildTarget, inlinedHTML, err => {
-      if (err) {
-        console.error(err);
-      }
+			// If "copy" is empty
+			const err = new Error();
+			err.message = 'copy() method was called but "copy" property is empty.';
+			reject(err);
+		});
+	}
 
-      console.info('Vulcanized index saved to ' + config.vulcanize.buildTarget);
-    });
-  });
-};
+	replace() {
+		const optionCSS = {};
+		const optionJS = {};
 
-const buildCSS = () => {
+		if (this.config.replace && this.config.replace.css) {
+			const cssFiles = this.config.replace.css.files;
+			optionCSS.files = path.join(
+				path.resolve(this.config.workspace),
+				cssFiles
+			);
+			optionCSS.replace = new RegExp(this.config.replace.css.commentRegex, 'g');
+			optionCSS.with = `
+			<link rel="stylesheet" href="${this.config.replace.css.with}" />
+			`;
+		}
 
-};
+		if (this.config.replace && this.config.replace.js) {
+			optionJS.files = path.join(
+				path.resolve(this.config.workspace),
+				this.config.replace.js.files
+			);
+			optionJS.replace = new RegExp(this.config.replace.js.commentRegex, 'g');
+			optionJS.with = `
+			<script src="${this.config.replace.js.with}"></script>
+			`;
+		}
 
-const copyManifest = () => {
-  fs.copy(config.manifest, path.resolve(path.join(config.buildFolder, 'manifest.json')));
-};
+		if (optionJS.files === undefined && optionCSS.files === undefined) {
+			throw new Error('WARNING REPLACE(): replace method called but "files" not found in configuration');
+		}
 
-const minifyJS = () => {
-  const buildPath = path.resolve(config.buildJS);
-  compressor.minify({
-    compressor: 'gcc',
-    input: buildPath,
-    output: buildPath,
-    callback: function (err, min) {
-      if (err) {
-        console.error('Minification error');
-        console.error(err);
-        return;
-      }
-      console.info('Javascript minification complete');
-    }
-  });
-};
+		// NOTE: can't use Promise.all 'cause we are modifying the same file
+		// First check for CSS option and then for JS option
+		return replaceInFile(optionCSS.files ? optionCSS : optionJS)
+			.then(() => {
+				if (optionCSS.files) {
+					return replaceInFile(optionJS);
+				}
+				// Return a simple promise if we have only one option
+				return new Promise(resolve => resolve(true));
+			})
+			.then(() => {
+				return true;
+			})
+			.catch(err => {
+				throw new Error(err);
+			});
+	}
 
-module.exports = {
-  deletePrevBuild: deletePrevBuild,
-  copyAssetsAndBundles: copyAssetsAndBundles,
-  compileWebpack: compileWebpack,
-  runVulcanize: runVulcanize,
-  buildCSS: buildCSS,
-  copyManifest: copyManifest,
-  minifyJS: minifyJS,
-  inc: bump.inc
-};
+	build() {
+		let resWebpack;
+		let resVulcanize;
+
+		return this.Builder.webpack()
+			.then(res => {
+				resWebpack = res;
+				console.log('Builded WEBPACK');
+				return this.Builder.vulcanize();
+			})
+			.then(res => {
+				console.log('loooooog', res);
+				resVulcanize = res;
+				return {
+					resWebpack,
+					resVulcanize
+				};
+			})
+			.catch(err => {
+				console.log('loggo', err);
+				throw new Error(err);
+			});
+	}
+
+	minify() {
+		const pJS = this.Minifier.minifyJS();
+		const pCSS = this.Minifier.minifyCSS();
+		return Promise.all([pJS, pCSS])
+			.then(res => {
+				return res;
+			});
+	}
+
+	bump(type) {
+		this.config.packageFiles.forEach(filePath => {
+			const fullFilePath = path.resolve(filePath);
+			const data = JSON.parse(fs.readFileSync(fullFilePath, 'utf8'));
+			const oldVersion = data.version;
+			data.version = semver.inc(data.version, type);
+
+			const dataString = JSON.stringify(data, null, 2);
+			fs.writeFileSync(fullFilePath, dataString);
+			console.info(`Successfully updated ${fullFilePath} version from ${oldVersion} to ${data.version}`);
+		});
+	}
+
+	_pathErrHandler(entity) {
+		const err = new Error();
+		const msg = 'Path must be a string. Received undefined';
+		err.message = `${msg} --> ${entity}`;
+		return err;
+	}
+
+	_checkForRequired() {
+		if (!this.config.workspace || this.config.workspace === '') {
+			throw this._pathErrHandler('config.workspace');
+		}
+
+		if (!this.config.sourceApp || this.config.sourceApp === '') {
+			throw this._pathErrHandler('config.sourceApp');
+		}
+
+		if (!this.config.buildFolder || this.config.buildFolder === '') {
+			throw this._pathErrHandler('config.buildFolder');
+		}
+
+		if (!this.config.buildJS || this.config.buildJS === '') {
+			this.config.buildJS = 'bundle.js';
+		}
+
+		if (!this.config.copy) {
+			this.config.copy = [];
+		}
+	}
+}
+
+export default Kubozer;
