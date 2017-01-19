@@ -161,7 +161,7 @@ class Kubozer {
 	build() {
 		let resWebpack;
 		let resVulcanize;
-		
+
 		return this.Builder.webpack()
 			.then(res => {
 				resWebpack = res;
@@ -234,4 +234,4 @@ class Kubozer {
 	}
 }
 
-module.exports = Kubozer;
+export default Kubozer;
