@@ -8,32 +8,9 @@
 
 	$ yarn add kubozer
 
-## Usage
-```javascript
-const Kubozer = require('kubozer');
-const config = {...};
-const webpackConfig = {...};
-
-// Initialize (check for required config and init workspace folder)
-const k = new Kubozer(config, webpackConfig);
-
-// Sync operation
-k.deletePrevBuild();
-
-k.copy()
-	.then(() => k.replace())
-	.then(() => k.build())
-	.then(() => k.minify())
-	.then(res => {
-		console.log(res);
-	})
-	.catch(err => {
-		console.error(err);
-	});
-```
-
 ## Configuration
 ```javascript
+// kubozer.conf.js
 const config = {
 	// Temporary workspace for build
 	workspace: './internalTest/workspace',
@@ -94,6 +71,48 @@ const config = {
 		}
 	}
 };
+```
+
+## CLI
+
+### kubozer
+
+```bash
+  Usage
+    $ NODE_ENV=env_name kubozer --build
+    $ NODE_ENV=env_name kubozer --bump semverlabel
+
+  Options
+  --bump Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease
+
+  Examples
+    $ NODE_ENV=staging kubozer --build
+    $ NODE_ENV=staging kubozer --bump minor
+```
+
+
+## Usage
+```javascript
+const Kubozer = require('kubozer');
+const config = {...};
+const webpackConfig = {...};
+
+// Initialize (check for required config and init workspace folder)
+const k = new Kubozer(config, webpackConfig);
+
+// Sync operation
+k.deletePrevBuild();
+
+k.copy()
+	.then(() => k.replace())
+	.then(() => k.build())
+	.then(() => k.minify())
+	.then(res => {
+		console.log(res);
+	})
+	.catch(err => {
+		console.error(err);
+	});
 ```
 
 ## Webpack configuration
