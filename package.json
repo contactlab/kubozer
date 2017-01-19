@@ -1,6 +1,6 @@
 {
   "name": "kubozer",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Contactlab build utility",
   "main": "dist/index.js",
   "scripts": {
@@ -29,7 +29,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "http://gitlab.contactlab.com/product-devs/clab-builder.git"
+    "url": "https://github.com/contactlab/kubozer.git"
   },
   "keywords": [
     "build",
