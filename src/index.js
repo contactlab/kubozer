@@ -22,11 +22,10 @@ class Kubozer {
 		this.Minifier = new Minifier(this.config);
 
 		// Ensure no previous workspaces are present
-		this._deleteWorkspace();
-		this._createWorkspace();
+		this.deleteWorkspace();
 	}
 
-	_deleteWorkspace() {
+	deleteWorkspace() {
 		try {
 			fs.removeSync(path.resolve(this.config.workspace));
 		} catch (err) {
@@ -44,7 +43,17 @@ class Kubozer {
 		}
 	}
 
+	_ensureWorkspace() {
+		if (fs.existsSync(path.resolve(this.config.workspace))) {
+			return true;
+		}
+
+		this._createWorkspace();
+	}
+
 	_copyManifest() {
+		this._ensureWorkspace();
+
 		try {
 			const pathManifest = path.resolve(path.join(this.config.workspace, 'manifest.json'));
 			const pathManifestDist = path.resolve(path.join(this.config.buildFolder, 'manifest.json'));
@@ -74,6 +83,8 @@ class Kubozer {
 	 *
 	 */
 	copy() {
+		this._ensureWorkspace();
+
 		return new Promise((resolve, reject) => {
 			if (this.config.manifest) {
 				this._copyManifest();
@@ -110,6 +121,8 @@ class Kubozer {
 	}
 
 	replace() {
+		this._ensureWorkspace();
+
 		const optionCSS = {};
 		const optionJS = {};
 
@@ -159,6 +172,8 @@ class Kubozer {
 	}
 
 	build() {
+		this._ensureWorkspace();
+
 		let resWebpack;
 		let resVulcanize;
 

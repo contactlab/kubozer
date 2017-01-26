@@ -51,7 +51,7 @@ var Kubozer = function () {
 
 		// Ensure no previous workspaces are present
 		this.deleteWorkspace();
-		this._createWorkspace();
+		// this._createWorkspace();
 	}
 
 	_createClass(Kubozer, [{
@@ -75,8 +75,19 @@ var Kubozer = function () {
 			}
 		}
 	}, {
+		key: '_ensureWorkspace',
+		value: function _ensureWorkspace() {
+			if (_fsExtra2.default.existsSync(_path2.default.resolve(this.config.workspace))) {
+				return true;
+			}
+
+			this._createWorkspace();
+		}
+	}, {
 		key: '_copyManifest',
 		value: function _copyManifest() {
+			this._ensureWorkspace();
+
 			try {
 				var pathManifest = _path2.default.resolve(_path2.default.join(this.config.workspace, 'manifest.json'));
 				var pathManifestDist = _path2.default.resolve(_path2.default.join(this.config.buildFolder, 'manifest.json'));
@@ -112,6 +123,8 @@ var Kubozer = function () {
 		value: function copy() {
 			var _this = this;
 
+			this._ensureWorkspace();
+
 			return new Promise(function (resolve, reject) {
 				if (_this.config.manifest) {
 					_this._copyManifest();
@@ -141,6 +154,8 @@ var Kubozer = function () {
 	}, {
 		key: 'replace',
 		value: function replace() {
+			this._ensureWorkspace();
+
 			var optionCSS = {};
 			var optionJS = {};
 
@@ -181,6 +196,8 @@ var Kubozer = function () {
 		key: 'build',
 		value: function build() {
 			var _this2 = this;
+
+			this._ensureWorkspace();
 
 			var resWebpack = void 0;
 			var resVulcanize = void 0;

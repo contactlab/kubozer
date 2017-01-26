@@ -242,6 +242,8 @@ test('correct bump() method', async t => {
 		const webpackConfig = confWebpack;
 		const fn = new Fn(config, webpackConfig);
 		const resBump = await fn.bump('major');
+		// Check if workspace was NOT created correclty
+		t.false(fs.existsSync(config.workspace), 'workspace correctly not created during the bump task');
 		t.true(Array.isArray(resBump));
 		t.not(typeof resBump[0].version, null);
 });

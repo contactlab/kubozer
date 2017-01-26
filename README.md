@@ -1,5 +1,8 @@
 # Kubozer
 
+[![Build Status](https://travis-ci.org/contactlab/kubozer.svg?branch=master)](https://travis-ci.org/contactlab/kubozer) [![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/contactlab/kubozer)
+
+
 > The best tool for Contactlab projects builds :rocket:
 
 #### 🚧 WorkInProgress 🚧
@@ -22,8 +25,7 @@ Other commands are included in the bundle of Kubozer:
 
 ```bash
   Usage
-    $ [NODE_ENV=env_name] kubozer --build
-    $ [NODE_ENV=env_name] kubozer --bump semverlabel
+    $ [NODE_ENV=env_name] kubozer [command]
 
   Options
   --bump Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease
