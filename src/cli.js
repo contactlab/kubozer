@@ -15,64 +15,59 @@ const isProduction = () => {
 	return NODE_ENV === 'production';
 };
 
-const isStaging = () => {
-	return NODE_ENV === 'staging';
-};
-
 const k = new Kubozer(config, webpackConfig);
 
 const cli = meow(`
 	Usage
-		$ NODE_ENV=env_name kubozer --build
-		$ NODE_ENV=env_name kubozer --bump semverlabel
+		$ [NODE_ENV=env_name] kubozer [command]
 
 	Options
 		--bump Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease
 
 	Examples
-		$ NODE_ENV=staging kubozer --build
-		$ NODE_ENV=staging kubozer --bump minor
+		$ NODE_ENV=production kubozer --build
+		$ kubozer --bump minor
 
 `);
 
 const buildStaging = () => {
 	k.deletePrevBuild(() => {});
-  k.copy()
-    .then(() => k.replace())
+	k.copy()
+		.then(() => k.replace())
 		.then(() => k.build())
-    .then(res => {
-      k.deleteWorkspace();
-      console.log(res);
-    })
-    .catch(err => {
-      k.deleteWorkspace();
-      console.error(err);
-    });
+		.then(res => {
+			k.deleteWorkspace();
+			console.log(res);
+		})
+		.catch(err => {
+			k.deleteWorkspace();
+			console.error(err);
+		});
 };
 
 const buildProduction = () => {
 	k.deletePrevBuild(() => {});
 	k.copy()
-    .then(() => k.replace())
+		.then(() => k.replace())
 		.then(() => k.build())
 		.then(() => k.minify())
-    .then(res => {
-      k.deleteWorkspace();
-      console.log(res);
-    })
-    .catch(err => {
-      k.deleteWorkspace();
-      console.error(err);
-    });
+		.then(res => {
+			k.deleteWorkspace();
+			console.log(res);
+		})
+		.catch(err => {
+			k.deleteWorkspace();
+			console.error(err);
+		});
 };
 
 const main = () => {
-	if (isStaging() && hasFlag('build')) {
-		buildStaging();
+	if (isProduction() && hasFlag('build')) {
+		return buildProduction();
 	}
 
-	if (isProduction() && hasFlag('build')) {
-		buildProduction();
+	if (hasFlag('build')) {
+		return buildStaging();
 	}
 
 	if (hasFlag('bump')) {

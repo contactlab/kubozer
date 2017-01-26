@@ -28,13 +28,9 @@ var isProduction = function isProduction() {
 	return NODE_ENV === 'production';
 };
 
-var isStaging = function isStaging() {
-	return NODE_ENV === 'staging';
-};
-
 var k = new _index2.default(config, webpackConfig);
 
-var cli = (0, _meow2.default)('\n\tUsage\n\t\t$ NODE_ENV=env_name kubozer --build\n\t\t$ NODE_ENV=env_name kubozer --bump semverlabel\n\n\tOptions\n\t\t--bump Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease\n\n\tExamples\n\t\t$ NODE_ENV=staging kubozer --build\n\t\t$ NODE_ENV=staging kubozer --bump minor\n\n');
+var cli = (0, _meow2.default)('\n\tUsage\n\t\t$ [NODE_ENV=env_name] kubozer [command]\n\n\tOptions\n\t\t--bump Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease\n\n\tExamples\n\t\t$ NODE_ENV=production kubozer --build\n\t\t$ kubozer --bump minor\n\n');
 
 var buildStaging = function buildStaging() {
 	k.deletePrevBuild(function () {});
@@ -69,12 +65,12 @@ var buildProduction = function buildProduction() {
 };
 
 var main = function main() {
-	if (isStaging() && (0, _hasFlag2.default)('build')) {
-		buildStaging();
+	if (isProduction() && (0, _hasFlag2.default)('build')) {
+		return buildProduction();
 	}
 
-	if (isProduction() && (0, _hasFlag2.default)('build')) {
-		buildProduction();
+	if ((0, _hasFlag2.default)('build')) {
+		return buildStaging();
 	}
 
 	if ((0, _hasFlag2.default)('bump')) {
