@@ -1,28 +1,66 @@
 # Kubozer
 
+[![Build Status](https://travis-ci.org/contactlab/kubozer.svg?branch=master)](https://travis-ci.org/contactlab/kubozer) [![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/contactlab/kubozer)
+
+
 > The best tool for Contactlab projects builds :rocket:
 
 #### 🚧 WorkInProgress 🚧
+
+Kubozer is a wrapper of some tools for building production (and development) application written in Polymer 1.x. and ***ESnext*** syntax.  
+
+### Features  
+- **Copy** whatever files you need into your `build` directory 
+- **Replace** part of the `html` files where needed (like change the link within the index.html to your production-ready script) with [replace-in-file]()
+- **Build** both `js` with [Webpack]() and `html` (Polymer) with [Vulcanize]()
+- **Minify** both `js` and `css` with [node-minify]()  
+
+Other commands are included in the bundle of Kubozer: 
+- **Bump** for bump the version of your project
 
 ## Install
 
 	$ yarn add kubozer
 
+## Usage
+
+```bash
+  Usage
+    $ [NODE_ENV=env_name] kubozer [command]
+
+  Options
+  --bump Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease
+
+  Examples
+    $ kubozer --build
+    $ kubozer --bump minor
+```
+
+## Enviroment typed-build 
+
+The `PRODUCTION` build (NODE_ENV=production) will add the **minify** step to the process.  The **default** build will not produce a minified **JS** and also **CSS**.  
+
+If you want to handle a dynamic configuration, you can simply check the `process.env.NODE_ENV` within the `kubozer.conf.js` (or also `webpack.config.js`) and change the ***exported*** configuration in relation to the NODE_ENV.
+
 ## Configuration
+
+Kubozer will search for two configurations file: `kubozer.conf.js` and `webpack.config.js` (standard Webpack configuration file)
+
+### Kubozer 
 ```javascript
 // kubozer.conf.js
-const config = {
+module.exports = {
 	// Temporary workspace for build
-	workspace: './internalTest/workspace',
+	workspace: './workspace',
 	// Where all the source app is stored
-	sourceApp: './internalTest/src-test',
+	sourceApp: './src',
 	// Build folder name
-	buildFolder: './internalTest/build',
+	buildFolder: './build',
 	// Build JS name for bundle (OPTIONAL)(default: bunlde.js)
-	buildJS: 'bundle.js',
+	buildJS: 'bundle-min.js',
 	// Assets for source and build
 	assetsFolderName: 'assets',
-	srcCSS: ['/test.css'],
+	srcCSS: ['/css/test.css'],
 	buildCSS: 'style.min.css',
 	// Copy or not the manifest
 	manifest: true,
@@ -61,37 +99,46 @@ const config = {
 	replace: {
 		css: {
 			files: 'index.html',
-			commentRegex: '<!--styles!--->((.|\n)*)<!--styles!--->',
+			commentRegex: '<!--styles!-->((.|\n)*)<!--styles!-->',
 			with: 'assets/style.min.css'
 		},
 		js: {
 			files: 'index.html',
-			commentRegex: '<!--js!--->((.|\n)*)<!--js!--->',
+			commentRegex: '<!--js!-->((.|\n)*)<!--js!-->',
 			with: 'bundle.js'
 		}
 	}
 };
 ```
 
-## CLI
+### Webpack
+```javascript
 
-### kubozer
-
-```bash
-  Usage
-    $ NODE_ENV=env_name kubozer --build
-    $ NODE_ENV=env_name kubozer --bump semverlabel
-
-  Options
-  --bump Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease
-
-  Examples
-    $ NODE_ENV=staging kubozer --build
-    $ NODE_ENV=staging kubozer --bump minor
+const webpackConfig = {
+	entry: './src/index.js',
+	output: {
+		// Make sure to use [name] or [id] in output.filename
+		//  when using multiple entry points
+		path: './build',
+		filename: 'bundle.js'
+	},
+	devtool: 'source-map',
+	module: {
+		loaders: [{
+			test: /\.js?$/,
+			// exclude: /(node_modules|bower_components)/,
+			exclude: ['node_modules', 'bundle.js', 'build'],
+			loader: 'babel-loader',
+			query: {
+				presets: ['es2015'],
+				plugins: ['transform-es2015-spread', 'syntax-object-rest-spread', 'transform-object-rest-spread']
+			}
+		}]
+	}
+};
 ```
 
-
-## Usage
+## Programmatic usage
 ```javascript
 const Kubozer = require('kubozer');
 const config = {...};
@@ -115,33 +162,6 @@ k.copy()
 	});
 ```
 
-## Webpack configuration
-```javascript
-
-const webpackConfig = {
-	entry: './internalTest/src-test/app/index.js',
-	output: {
-		// Make sure to use [name] or [id] in output.filename
-		//  when using multiple entry points
-		path: './internalTest/build',
-		filename: 'bundle.js'
-	},
-	devtool: 'source-map',
-	module: {
-		loaders: [{
-			test: /\.js?$/,
-			// exclude: /(node_modules|bower_components)/,
-			exclude: ['node_modules', 'internalTest/bundle.js', 'internalTest/build'],
-			loader: 'babel-loader', // 'babel-loader' is also a legal name to reference
-			query: {
-				presets: ['es2015'],
-				plugins: ['transform-es2015-spread', 'syntax-object-rest-spread', 'transform-object-rest-spread']
-			}
-		}]
-	}
-};
-```
-
 ## API
 
 ### deletePrevBuild()
@@ -163,6 +183,10 @@ HTML replace in file. Set a placeholder in your HTML and remove/replace the inne
 #### return `promise`
 Minify `JS` and `CSS` following the configuration.
 
+### bump(type)
+#### type - [patch|minor|major|prepatch|preminor|premajor|prerelease]
+Bump to new version every file following the configuration.
+
 
 ## Development
 
@@ -178,18 +202,9 @@ Minify `JS` and `CSS` following the configuration.
 
 	$ yarn test
 
-## TODO
-- add `test` command
-- add `oneskyapp` (or whatever) command
-
-- test for `bump` command
-- code refactor
-- review
-- (more and more...)
-
 
 ### Git branching policies
 Any feature/bug fixing/refactor must be developed on a **feature branch** derived from the **develop** branch and integrate the changes through a **pull request** to have a code review.
 
 ### License
-Released under the [Apache 2.0](LICENSE) license.
+Released under the [Apache 2.0](https://github.com/contactlab/kubozer/blob/master/LICENSE) license.

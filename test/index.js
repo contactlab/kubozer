@@ -46,6 +46,23 @@ test('throw error (build()) when "vulcanize" not present in config', async t => 
 	t.is(err.message, 'Vulcanize configuration is not present. ---> config.vulcanize === undefined')
 });
 
+test('throw error when bump() method is called without params', async t => {
+		const confWebpack = require('./src-test/webpack.test.config');
+		const config = {
+			workspace: './test/workspace',
+			buildFolder: './test/build-tmp',
+			sourceApp: './test/src-test',
+			packageFiles: [
+				'./test/src-test/package.json',
+				'./test/src-test/manifest.json'
+			],
+		};
+		const webpackConfig = confWebpack;
+		const fn = new Fn(config, webpackConfig);
+		const err = await t.throws(fn.bump());
+		t.is(err.message, 'BUMP(): type must be specified.');
+});
+
 test('correct deletePrevBuild()', t => {
 	// Create the build folder
 	const pathToDir = `${__dirname}/build-tmp`;
@@ -211,13 +228,27 @@ test('correct minify() method', async t => {
 		t.true(Array.isArray(resMinify));
 });
 
+test('correct bump() method', async t => {
+		const confWebpack = require('./src-test/webpack.test.config');
+		const config = {
+			workspace: './test/workspace',
+			buildFolder: './test/build-tmp',
+			sourceApp: './test/src-test',
+			packageFiles: [
+				'./test/src-test/package.json',
+				'./test/src-test/manifest.json'
+			],
+		};
+		const webpackConfig = confWebpack;
+		const fn = new Fn(config, webpackConfig);
+		const resBump = await fn.bump('major');
+		// Check if workspace was NOT created correclty
+		t.false(fs.existsSync(config.workspace), 'workspace correctly not created during the bump task');
+		t.true(Array.isArray(resBump));
+		t.not(typeof resBump[0].version, null);
+});
+
 test.afterEach.always(t => {
-	console.log('AFTEREARCH HOOK');
   fs.removeSync('./test/build-tmp');
   fs.removeSync('./test/workspace');
 });
-
-
-
-
-// const kubo = new Kubozer(config)
