@@ -192,15 +192,24 @@ class Kubozer {
 	}
 
 	bump(type) {
-		this.config.packageFiles.forEach(filePath => {
-			const fullFilePath = path.resolve(filePath);
-			const data = JSON.parse(fs.readFileSync(fullFilePath, 'utf8'));
-			const oldVersion = data.version;
-			data.version = semver.inc(data.version, type);
+		return new Promise((resolve, reject) => {
+			if (type === null || type === undefined) {
+				return reject(new Error('BUMP(): type must be specified.'));
+			}
 
-			const dataString = JSON.stringify(data, null, 2);
-			fs.writeFileSync(fullFilePath, dataString);
-			console.info(`Successfully updated ${fullFilePath} version from ${oldVersion} to ${data.version}`);
+			const dataFiles = this.config.packageFiles.reduce((acc, filePath) => {
+				const fullFilePath = path.resolve(filePath);
+				const data = JSON.parse(fs.readFileSync(fullFilePath, 'utf8'));
+				const oldVersion = data.version;
+				data.version = semver.inc(data.version, type);
+
+				const dataString = JSON.stringify(data, null, '\t');
+				fs.writeFileSync(fullFilePath, dataString);
+				console.info(`Successfully updated ${fullFilePath} version from ${oldVersion} to ${data.version}`);
+				return acc.concat(data);
+			}, []);
+
+			return resolve(dataFiles);
 		});
 	}
 

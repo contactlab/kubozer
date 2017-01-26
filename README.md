@@ -180,7 +180,7 @@ HTML replace in file. Set a placeholder in your HTML and remove/replace the inne
 #### return `promise`
 Minify `JS` and `CSS` following the configuration.
 
-### inc(type)
+### bump(type)
 #### type - [patch|minor|major|prepatch|preminor|premajor|prerelease]
 Bump to new version every file following the configuration.
 

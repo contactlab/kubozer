@@ -213,15 +213,26 @@ var Kubozer = function () {
 	}, {
 		key: 'bump',
 		value: function bump(type) {
-			this.config.packageFiles.forEach(function (filePath) {
-				var fullFilePath = _path2.default.resolve(filePath);
-				var data = JSON.parse(_fsExtra2.default.readFileSync(fullFilePath, 'utf8'));
-				var oldVersion = data.version;
-				data.version = _semver2.default.inc(data.version, type);
+			var _this3 = this;
 
-				var dataString = JSON.stringify(data, null, 2);
-				_fsExtra2.default.writeFileSync(fullFilePath, dataString);
-				console.info('Successfully updated ' + fullFilePath + ' version from ' + oldVersion + ' to ' + data.version);
+			return new Promise(function (resolve, reject) {
+				if (type === null || type === undefined) {
+					return reject(new Error('BUMP(): type must be specified.'));
+				}
+
+				var dataFiles = _this3.config.packageFiles.reduce(function (acc, filePath) {
+					var fullFilePath = _path2.default.resolve(filePath);
+					var data = JSON.parse(_fsExtra2.default.readFileSync(fullFilePath, 'utf8'));
+					var oldVersion = data.version;
+					data.version = _semver2.default.inc(data.version, type);
+
+					var dataString = JSON.stringify(data, null, '\t');
+					_fsExtra2.default.writeFileSync(fullFilePath, dataString);
+					console.info('Successfully updated ' + fullFilePath + ' version from ' + oldVersion + ' to ' + data.version);
+					return acc.concat(data);
+				}, []);
+
+				return resolve(dataFiles);
 			});
 		}
 	}, {
