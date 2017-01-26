@@ -6,7 +6,8 @@
   "scripts": {
     "pretest": "yarn run build",
     "test": "xo && ava --serial",
-    "build": "babel src -d dist"
+    "build": "babel src -d dist",
+    "postbuild": "chmod +x dist/cli.js"
   },
   "bin": {
     "kubozer": "dist/cli.js"
