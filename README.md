@@ -8,14 +8,15 @@
 #### 🚧 WorkInProgress 🚧
 
 Kubozer is a wrapper of some tools for building production (and development) application written in Polymer 1.x. and ***ESnext*** syntax.  
-Currently the build system include:  
+
+### Features  
 - **Copy** whatever files you need into your `build` directory 
 - **Replace** part of the `html` files where needed (like change the link within the index.html to your production-ready script) with [replace-in-file]()
 - **Build** both `js` with [Webpack]() and `html` (Polymer) with [Vulcanize]()
 - **Minify** both `js` and `css` with [node-minify]()  
 
 Other commands are included in the bundle of Kubozer: 
-- **Inc** for bump the version of your project
+- **Bump** for bump the version of your project
 
 ## Install
 
@@ -206,4 +207,4 @@ Bump to new version every file following the configuration.
 Any feature/bug fixing/refactor must be developed on a **feature branch** derived from the **develop** branch and integrate the changes through a **pull request** to have a code review.
 
 ### License
-Released under the [Apache 2.0](LICENSE) license.
+Released under the [Apache 2.0](https://github.com/contactlab/kubozer/blob/master/LICENSE) license.
