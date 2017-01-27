@@ -7,15 +7,17 @@ import webpack from 'webpack';
 import Vulcanize from 'vulcanize';
 
 export default class Builder {
-	constructor(config, webpackConfig) {
+	constructor(config, webpackConfig, resFunc) {
 		this.config = config;
 		this.webpackConfig = webpackConfig;
+
+		this._res = resFunc;
 	}
 
 	webpack() {
 		return new Promise((resolve, reject) => {
 			if (fs.existsSync(this.webpackConfig.entry) === false) {
-				reject('WEBPACK: Entry file not found.');
+				reject(this._res(true, undefined, `Webpack entry point is not present. ---> webpackConfig.entry === ${this.webpackConfig.entry}`));
 			}
 
 			fs.ensureDirSync(this.config.buildFolder);
@@ -25,22 +27,19 @@ export default class Builder {
 			this.webpackConfig.output.filename = this.config.buildJS;
 
 			const compiler = webpack(this.webpackConfig);
-			compiler.run((err, stats) => {
+			compiler.run(err => {
 				if (err) {
-					reject(err);
-					return;
+					return reject(this._res(true, undefined, err));
 				}
-				console.info('Webpack compilation completed');
-				resolve(stats);
+				return resolve(this._res(undefined, [{completed: true}], 'Webpack compilation completed'));
 			});
 		});
 	}
 
 	vulcanize() {
 		return new Promise((resolve, reject) => {
-			console.log('REJECY', this.config.vulcanize);
 			if (this.config.vulcanize === undefined) {
-				reject(`Vulcanize configuration is not present. ---> config.vulcanize === undefined`);
+				reject(this._res(true, undefined, `Vulcanize configuration is not present. ---> config.vulcanize === undefined`));
 			}
 
 			const vulcan = new Vulcanize(this.config.vulcanize.conf);
@@ -54,19 +53,17 @@ export default class Builder {
 				this.config.vulcanize.buildTarget
 			);
 
-			console.log('PATHS', workspaceIndex, buildIndex);
-
 			vulcan.process(workspaceIndex, (err, inlinedHTML) => {
 				if (err) {
 					const msg = `${err.message} | Did you checked the "excludes" property of "vulcanize" configuration?`;
-					reject(err.message.search('no such file') > -1 ? msg : err.message);
+					return reject(this._res(true, undefined, err.message.search('no such file') > -1 ? msg : err.message));
 				}
 				fs.ensureFileSync(buildIndex);
 				fs.writeFile(buildIndex, inlinedHTML, err => {
 					if (err) {
-						reject(err);
+						return reject(err);
 					}
-					resolve(buildIndex);
+					return resolve(this._res(undefined, buildIndex, 'Vulcanize completed.'));
 				});
 			});
 		});

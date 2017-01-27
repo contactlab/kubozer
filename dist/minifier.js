@@ -51,6 +51,7 @@ var Minifier = function () {
 				input: this.config.srcCSS,
 				output: buildPath + '/' + buildCSS
 			});
+
 			return promise.then(function (res) {
 				return res;
 			});

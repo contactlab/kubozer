@@ -38,6 +38,7 @@ export default class Minifier {
 			input: this.config.srcCSS,
 			output: `${buildPath}/${buildCSS}`
 		});
+
 		return promise.then(res => res);
 	}
 }
