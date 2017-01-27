@@ -18,7 +18,7 @@ class Kubozer {
 		this.webpackConfig = webpackConfig;
 		this._checkForRequired();
 
-		this.Builder = new Builder(this.config, this.webpackConfig);
+		this.Builder = new Builder(this.config, this.webpackConfig, this._res);
 		this.Minifier = new Minifier(this.config);
 
 		// Ensure no previous workspaces are present
@@ -28,42 +28,6 @@ class Kubozer {
 	deleteWorkspace() {
 		try {
 			fs.removeSync(path.resolve(this.config.workspace));
-		} catch (err) {
-			throw new Error(err);
-		}
-	}
-
-	_createWorkspace() {
-		try {
-			const pathWorkspace = path.resolve(this.config.workspace);
-			fs.ensureDirSync(pathWorkspace);
-			fs.copySync(path.resolve(this.config.sourceApp), pathWorkspace);
-		} catch (err) {
-			throw new Error(err);
-		}
-	}
-
-	_ensureWorkspace() {
-		if (fs.existsSync(path.resolve(this.config.workspace))) {
-			return true;
-		}
-
-		this._createWorkspace();
-	}
-
-	_copyManifest() {
-		this._ensureWorkspace();
-
-		try {
-			const pathManifest = path.resolve(path.join(this.config.workspace, 'manifest.json'));
-			const pathManifestDist = path.resolve(path.join(this.config.buildFolder, 'manifest.json'));
-			const exist = fs.existsSync(pathManifest);
-			if (exist) {
-				fs.copySync(pathManifest, pathManifestDist);
-				return true;
-			}
-			console.warn('WARNING: manifest.json not found. --->', pathManifest);
-			return false;
 		} catch (err) {
 			throw new Error(err);
 		}
@@ -105,18 +69,15 @@ class Kubozer {
 
 					try {
 						fs.copySync(itemPath, destination);
-						console.info(`Copied ${itemPath} to ${destination}`);
-						resolve(this);
+						return resolve(this._res(undefined, {itemPath, destination}, 'Copy completed.'));
 					} catch (err) {
-						reject(err);
+						return reject(err);
 					}
 				});
 			});
 
 			// If "copy" is empty
-			const err = new Error();
-			err.message = 'copy() method was called but "copy" property is empty.';
-			reject(err);
+			reject(this._res(true, undefined, 'copy() method was called but "copy" property is empty.'));
 		});
 	}
 
@@ -180,11 +141,9 @@ class Kubozer {
 		return this.Builder.webpack()
 			.then(res => {
 				resWebpack = res;
-				console.log('Builded WEBPACK');
 				return this.Builder.vulcanize();
 			})
 			.then(res => {
-				console.log('loooooog', res);
 				resVulcanize = res;
 				return {
 					resWebpack,
@@ -192,8 +151,7 @@ class Kubozer {
 				};
 			})
 			.catch(err => {
-				console.log('loggo', err);
-				throw new Error(err);
+				throw err;
 			});
 	}
 
@@ -209,23 +167,62 @@ class Kubozer {
 	bump(type) {
 		return new Promise((resolve, reject) => {
 			if (type === null || type === undefined) {
-				return reject(new Error('BUMP(): type must be specified.'));
+				return reject(this._res(true, undefined, 'BUMP(): type must be specified.'));
 			}
 
+			let oldVersion = '';
+			let newVersion = '';
 			const dataFiles = this.config.packageFiles.reduce((acc, filePath) => {
 				const fullFilePath = path.resolve(filePath);
 				const data = JSON.parse(fs.readFileSync(fullFilePath, 'utf8'));
-				const oldVersion = data.version;
+				const old = data.version;
 				data.version = semver.inc(data.version, type);
+				oldVersion = old;
+				newVersion = data.version;
 
 				const dataString = JSON.stringify(data, null, '\t');
 				fs.writeFileSync(fullFilePath, dataString);
-				console.info(`Successfully updated ${fullFilePath} version from ${oldVersion} to ${data.version}`);
 				return acc.concat(data);
 			}, []);
 
-			return resolve(dataFiles);
+			return resolve(this._res(undefined, dataFiles, `Bump from ${oldVersion} to ${newVersion} completed.`));
 		});
+	}
+
+	_createWorkspace() {
+		try {
+			const pathWorkspace = path.resolve(this.config.workspace);
+			fs.ensureDirSync(pathWorkspace);
+			fs.copySync(path.resolve(this.config.sourceApp), pathWorkspace);
+		} catch (err) {
+			throw new Error(err);
+		}
+	}
+
+	_ensureWorkspace() {
+		if (fs.existsSync(path.resolve(this.config.workspace))) {
+			return true;
+		}
+
+		this._createWorkspace();
+	}
+
+	_copyManifest() {
+		this._ensureWorkspace();
+
+		try {
+			const pathManifest = path.resolve(path.join(this.config.workspace, 'manifest.json'));
+			const pathManifestDist = path.resolve(path.join(this.config.buildFolder, 'manifest.json'));
+			const exist = fs.existsSync(pathManifest);
+			if (exist) {
+				fs.copySync(pathManifest, pathManifestDist);
+				return true;
+			}
+
+			return false;
+		} catch (err) {
+			throw new Error(err);
+		}
 	}
 
 	_pathErrHandler(entity) {
@@ -233,6 +230,11 @@ class Kubozer {
 		const msg = 'Path must be a string. Received undefined';
 		err.message = `${msg} --> ${entity}`;
 		return err;
+	}
+
+	_res(err, data, message) {
+		const stringified = JSON.stringify({err, data, message});
+		return Object.assign({}, JSON.parse(stringified));
 	}
 
 	_checkForRequired() {
