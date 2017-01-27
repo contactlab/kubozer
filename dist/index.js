@@ -111,6 +111,8 @@ var Kubozer = function () {
 	}, {
 		key: 'replace',
 		value: function replace() {
+			var _this2 = this;
+
 			this._ensureWorkspace();
 
 			var optionCSS = {};
@@ -119,40 +121,42 @@ var Kubozer = function () {
 			if (this.config.replace && this.config.replace.css) {
 				var cssFiles = this.config.replace.css.files;
 				optionCSS.files = _path2.default.join(_path2.default.resolve(this.config.workspace), cssFiles);
-				optionCSS.replace = new RegExp(this.config.replace.css.commentRegex, 'g');
-				optionCSS.with = '\n\t\t\t<link rel="stylesheet" href="' + this.config.replace.css.with + '" />\n\t\t\t';
+				optionCSS.replace = this.config.replace.css.commentRegex.map(function (item) {
+					return new RegExp(item, 'g');
+				});
+				optionCSS.with = this.config.replace.css.with.map(function (item) {
+					return '\n\t\t\t\t<link rel="stylesheet" href="' + item + '" />\n\t\t\t\t';
+				});
 			}
 
 			if (this.config.replace && this.config.replace.js) {
 				optionJS.files = _path2.default.join(_path2.default.resolve(this.config.workspace), this.config.replace.js.files);
-				optionJS.replace = new RegExp(this.config.replace.js.commentRegex, 'g');
-				optionJS.with = '\n\t\t\t<script src="' + this.config.replace.js.with + '"></script>\n\t\t\t';
+				optionJS.replace = this.config.replace.js.commentRegex.map(function (item) {
+					return new RegExp(item, 'g');
+				});
+				optionJS.with = this.config.replace.js.with.map(function (item) {
+					return '\n\t\t\t\t<link rel="stylesheet" href="' + item + '" />\n\t\t\t\t';
+				});
 			}
 
 			if (optionJS.files === undefined && optionCSS.files === undefined) {
 				throw new Error('WARNING REPLACE(): replace method called but "files" not found in configuration');
 			}
 
-			// NOTE: can't use Promise.all 'cause we are modifying the same file
-			// First check for CSS option and then for JS option
-			return (0, _replaceInFile2.default)(optionCSS.files ? optionCSS : optionJS).then(function () {
-				if (optionCSS.files) {
-					return (0, _replaceInFile2.default)(optionJS);
+			return new Promise(function (resolve, reject) {
+				try {
+					var changedCSS = _replaceInFile2.default.sync(optionCSS);
+					var changedJS = _replaceInFile2.default.sync(optionJS);
+					return resolve(_this2._res(undefined, { changedCSS: changedCSS, changedJS: changedJS }, 'Replace-in-file completed.'));
+				} catch (err) {
+					reject(_this2._res(true, undefined, err));
 				}
-				// Return a simple promise if we have only one option
-				return new Promise(function (resolve) {
-					return resolve(true);
-				});
-			}).then(function () {
-				return true;
-			}).catch(function (err) {
-				throw new Error(err);
 			});
 		}
 	}, {
 		key: 'build',
 		value: function build() {
-			var _this2 = this;
+			var _this3 = this;
 
 			this._ensureWorkspace();
 
@@ -161,7 +165,7 @@ var Kubozer = function () {
 
 			return this.Builder.webpack().then(function (res) {
 				resWebpack = res;
-				return _this2.Builder.vulcanize();
+				return _this3.Builder.vulcanize();
 			}).then(function (res) {
 				resVulcanize = res;
 				return {
@@ -184,16 +188,16 @@ var Kubozer = function () {
 	}, {
 		key: 'bump',
 		value: function bump(type) {
-			var _this3 = this;
+			var _this4 = this;
 
 			return new Promise(function (resolve, reject) {
 				if (type === null || type === undefined) {
-					return reject(_this3._res(true, undefined, 'BUMP(): type must be specified.'));
+					return reject(_this4._res(true, undefined, 'BUMP(): type must be specified.'));
 				}
 
 				var oldVersion = '';
 				var newVersion = '';
-				var dataFiles = _this3.config.packageFiles.reduce(function (acc, filePath) {
+				var dataFiles = _this4.config.packageFiles.reduce(function (acc, filePath) {
 					var fullFilePath = _path2.default.resolve(filePath);
 					var data = JSON.parse(_fsExtra2.default.readFileSync(fullFilePath, 'utf8'));
 					var old = data.version;
@@ -206,7 +210,7 @@ var Kubozer = function () {
 					return acc.concat(data);
 				}, []);
 
-				return resolve(_this3._res(undefined, dataFiles, 'Bump from ' + oldVersion + ' to ' + newVersion + ' completed.'));
+				return resolve(_this4._res(undefined, dataFiles, 'Bump from ' + oldVersion + ' to ' + newVersion + ' completed.'));
 			});
 		}
 	}, {

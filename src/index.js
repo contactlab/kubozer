@@ -93,10 +93,14 @@ class Kubozer {
 				path.resolve(this.config.workspace),
 				cssFiles
 			);
-			optionCSS.replace = new RegExp(this.config.replace.css.commentRegex, 'g');
-			optionCSS.with = `
-			<link rel="stylesheet" href="${this.config.replace.css.with}" />
-			`;
+			optionCSS.replace = this.config.replace.css.commentRegex.map(item => {
+				return new RegExp(item, 'g');
+			});
+			optionCSS.with = this.config.replace.css.with.map(item => {
+				return `
+				<link rel="stylesheet" href="${item}" />
+				`;
+			});
 		}
 
 		if (this.config.replace && this.config.replace.js) {
@@ -104,32 +108,29 @@ class Kubozer {
 				path.resolve(this.config.workspace),
 				this.config.replace.js.files
 			);
-			optionJS.replace = new RegExp(this.config.replace.js.commentRegex, 'g');
-			optionJS.with = `
-			<script src="${this.config.replace.js.with}"></script>
-			`;
+			optionJS.replace = this.config.replace.js.commentRegex.map(item => {
+				return new RegExp(item, 'g');
+			});
+			optionJS.with = this.config.replace.js.with.map(item => {
+				return `
+				<link rel="stylesheet" href="${item}" />
+				`;
+			});
 		}
 
 		if (optionJS.files === undefined && optionCSS.files === undefined) {
 			throw new Error('WARNING REPLACE(): replace method called but "files" not found in configuration');
 		}
 
-		// NOTE: can't use Promise.all 'cause we are modifying the same file
-		// First check for CSS option and then for JS option
-		return replaceInFile(optionCSS.files ? optionCSS : optionJS)
-			.then(() => {
-				if (optionCSS.files) {
-					return replaceInFile(optionJS);
-				}
-				// Return a simple promise if we have only one option
-				return new Promise(resolve => resolve(true));
-			})
-			.then(() => {
-				return true;
-			})
-			.catch(err => {
-				throw new Error(err);
-			});
+		return new Promise((resolve, reject) => {
+			try {
+				const changedCSS = replaceInFile.sync(optionCSS);
+				const changedJS = replaceInFile.sync(optionJS);
+				return resolve(this._res(undefined, {changedCSS, changedJS}, 'Replace-in-file completed.'));
+			}	catch (err) {
+				reject(this._res(true, undefined, err));
+			}
+		});
 	}
 
 	build() {

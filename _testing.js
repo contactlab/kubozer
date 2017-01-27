@@ -50,13 +50,13 @@ const config = {
 	replace: {
 		css: {
 			files: 'index.html',
-			commentRegex: '<!--styles!--->((.|\n)*)<!--styles!--->',
-			with: 'assets/style.min.css'
+			commentRegex: ['<!--styles!--->((.|\n)*)<!--styles!--->', '<!--anotherCSS!--->((.|\n)*)<!--anotherCSS!--->'],
+			with: ['assets/style.min.css', 'assets/asd.min.css']
 		},
 		js: {
 			files: 'index.html',
-			commentRegex: '<!--js!--->((.|\n)*)<!--js!--->',
-			with: 'bundle.js'
+			commentRegex: ['<!--js!--->((.|\n)*)<!--js!--->'],
+			with: ['bundle.js']
 		}
 	}
 };
@@ -84,17 +84,20 @@ const webpackConfig = {
 	}
 };
 
-const k = new Kubozer(config, webpackConfig);
+console.log()
+
+const k = new Kubozer.default(config, webpackConfig);
 
 k.deletePrevBuild();
 
 k.copy()
 	.then(() => k.replace())
-	.then(() => k.build())
-	.then(() => k.minify())
-	.then(res => {
-		console.log(res);
-	})
-	.catch(err => {
-		console.error(err);
-	});
+	.then(res => {console.log('ressssss', res)})
+	// .then(() => k.build())
+	// .then(() => k.minify())
+	// .then(res => {
+	// 	console.log(res);
+	// })
+	// .catch(err => {
+	// 	console.error(err);
+	// });

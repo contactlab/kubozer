@@ -215,13 +215,13 @@ test('correct replace() method', async t => {
 		replace: {
 	    css: {
 				files: 'index.html',
-				commentRegex: '<!--styles!--->((.|\n)*)<!--styles!--->',
-				with: '/assets/style.css'
+				commentRegex: ['<!--styles!--->((.|\n)*)<!--styles!--->'],
+				with: ['/assets/style.css']
 	    },
 			 js: {
 				files: 'index.html',
-	 			commentRegex: '<!--js!--->((.|\n)*)<!--js!--->',
-				with: '/assets/javascript.js'
+	 			commentRegex: ['<!--js!--->((.|\n)*)<!--js!--->'],
+				with: ['/assets/javascript.js']
 			 }
 	  }
 	};
@@ -229,7 +229,9 @@ test('correct replace() method', async t => {
 	const fn = new Fn(config, webpackConfig);
 	const replRes = await fn.replace();
 	const res = await fn.build();
-	t.true(replRes);
+	t.is(replRes.err, undefined);
+	t.true(Array.isArray(replRes.data.changedCSS));
+	t.true(Array.isArray(replRes.data.changedJS));
 });
 
 test('correct minify() method', async t => {
