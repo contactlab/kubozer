@@ -18,7 +18,8 @@
       "import/no-dynamic-require": 0
     },
     "ignores": [
-      "test/**/*"
+      "test/**/*",
+      "_testing.js"
     ]
   },
   "ava": {
@@ -46,7 +47,7 @@
     "has-flag": "^2.0.0",
     "meow": "^3.7.0",
     "node-minify": "^2.0.2",
-    "replace-in-file": "^2.0.3",
+    "replace-in-file": "^2.2.2",
     "semver": "^5.3.0",
     "vulcanize": "^1.15.2",
     "webpack": "^1.14.0"

@@ -99,13 +99,13 @@ module.exports = {
 	replace: {
 		css: {
 			files: 'index.html',
-			commentRegex: '<!--styles!-->((.|\n)*)<!--styles!-->',
-			with: 'assets/style.min.css'
+			commentRegex: ['<!--styles!-->((.|\n)*)<!--styles!-->'],
+			with: ['assets/style.min.css']
 		},
 		js: {
 			files: 'index.html',
-			commentRegex: '<!--js!-->((.|\n)*)<!--js!-->',
-			with: 'bundle.js'
+			commentRegex: ['<!--js!-->((.|\n)*)<!--js!-->'],
+			with: ['bundle.js']
 		}
 	}
 };
