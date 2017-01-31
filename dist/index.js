@@ -22,11 +22,11 @@ var _replaceInFile = require('replace-in-file');
 
 var _replaceInFile2 = _interopRequireDefault(_replaceInFile);
 
-var _builder = require('./builder');
+var _builder = require('./lib/builder');
 
 var _builder2 = _interopRequireDefault(_builder);
 
-var _minifier = require('./minifier');
+var _minifier = require('./lib/minifier');
 
 var _minifier2 = _interopRequireDefault(_minifier);
 

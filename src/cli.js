@@ -4,6 +4,7 @@ import path from 'path';
 import meow from 'meow';
 import hasFlag from 'has-flag';
 
+import Logger from './lib/logger';
 import Kubozer from './index';
 
 const config = require(path.resolve('kubozer.conf'));
@@ -30,8 +31,19 @@ const cli = meow(`
 
 `);
 
+// Start spinner
+const log = new Logger();
+const msgs = [
+	'COPY: Files copied correctly.',
+	'REPLACE: HTML content replaced correctly.',
+	'BUILD: Build JS and HTML completed correctly.',
+	'MINIFY: Minify JS and CSS completed correctly.'
+];
+
+let currentStep = 0;
+
 const buildStaging = () => {
-	k.deletePrevBuild(() => {});
+	k.deletePrevBuild();
 	k.copy()
 		.then(() => k.replace())
 		.then(() => k.build())
@@ -46,18 +58,40 @@ const buildStaging = () => {
 };
 
 const buildProduction = () => {
-	k.deletePrevBuild(() => {});
+	log.set('Started PRODUCTION build', 'red');
+
+	k.deletePrevBuild();
+
+	log.set('Copying...');
 	k.copy()
-		.then(() => k.replace())
-		.then(() => k.build())
-		.then(() => k.minify())
-		.then(res => {
+		.then(() => {
+			currentStep += 1;
+			log.success(msgs[currentStep]);
+			log.set('Replacing...');
+			return k.replace();
+		})
+		.then(() => {
+			currentStep += 1;
+			log.success(msgs[currentStep]);
+			log.set('Building...');
+			return k.build();
+		})
+		.then(() => {
+			currentStep += 1;
+			log.success(msgs[currentStep]);
+			log.set('Minifying...');
+			return k.minify();
+		})
+		.then(() => {
+			currentStep += 1;
+			log.success(msgs[currentStep]);
+			log.success('Everything works with charme 🚀');
 			k.deleteWorkspace();
-			console.log(res);
 		})
 		.catch(err => {
-			k.deleteWorkspace();
-			console.error(err);
+			log.fail(msgs[currentStep]);
+			console.error('ERROR:', err.message);
+			return k.deleteWorkspace();
 		});
 };
 
@@ -75,4 +109,6 @@ const main = () => {
 	}
 };
 
-main();
+setTimeout(() => {
+	main();
+}, 2000);

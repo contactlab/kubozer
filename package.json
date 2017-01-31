@@ -49,6 +49,7 @@
     "has-flag": "^2.0.0",
     "meow": "^3.7.0",
     "node-minify": "^2.0.2",
+    "ora": "^1.1.0",
     "replace-in-file": "^2.2.2",
     "semver": "^5.3.0",
     "vulcanize": "^1.15.2",
@@ -59,6 +60,7 @@
     "babel-cli": "^6.18.0",
     "babel-preset-env": "^1.1.8",
     "coveralls": "^2.11.15",
+    "get-stream": "^3.0.0",
     "nyc": "^10.1.2",
     "xo": "^0.17.1"
   }

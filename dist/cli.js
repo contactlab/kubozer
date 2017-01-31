@@ -13,6 +13,10 @@ var _hasFlag = require('has-flag');
 
 var _hasFlag2 = _interopRequireDefault(_hasFlag);
 
+var _logger = require('./lib/logger');
+
+var _logger2 = _interopRequireDefault(_logger);
+
 var _index = require('./index');
 
 var _index2 = _interopRequireDefault(_index);
@@ -32,8 +36,14 @@ var k = new _index2.default(config, webpackConfig);
 
 var cli = (0, _meow2.default)('\n\tUsage\n\t\t$ [NODE_ENV=env_name] kubozer [command]\n\n\tOptions\n\t\t--bump Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease\n\n\tExamples\n\t\t$ NODE_ENV=production kubozer --build\n\t\t$ kubozer --bump minor\n\n');
 
+// Start spinner
+var log = new _logger2.default();
+var msgs = ['COPY: Files copied correctly.', 'REPLACE: HTML content replaced correctly.', 'BUILD: Build JS and HTML completed correctly.', 'MINIFY: Minify JS and CSS completed correctly.'];
+
+var currentStep = 0;
+
 var buildStaging = function buildStaging() {
-	k.deletePrevBuild(function () {});
+	k.deletePrevBuild();
 	k.copy().then(function () {
 		return k.replace();
 	}).then(function () {
@@ -48,19 +58,35 @@ var buildStaging = function buildStaging() {
 };
 
 var buildProduction = function buildProduction() {
-	k.deletePrevBuild(function () {});
+	log.set('Started PRODUCTION build', 'red');
+
+	k.deletePrevBuild();
+
+	log.set('Copying...');
 	k.copy().then(function () {
+		currentStep += 1;
+		log.success(msgs[currentStep]);
+		log.set('Replacing...');
 		return k.replace();
 	}).then(function () {
+		currentStep += 1;
+		log.success(msgs[currentStep]);
+		log.set('Building...');
 		return k.build();
 	}).then(function () {
+		currentStep += 1;
+		log.success(msgs[currentStep]);
+		log.set('Minifying...');
 		return k.minify();
-	}).then(function (res) {
+	}).then(function () {
+		currentStep += 1;
+		log.success(msgs[currentStep]);
+		log.success('Everything works with charme 🚀');
 		k.deleteWorkspace();
-		console.log(res);
 	}).catch(function (err) {
-		k.deleteWorkspace();
-		console.error(err);
+		log.fail(msgs[currentStep]);
+		console.error('ERROR:', err.message);
+		return k.deleteWorkspace();
 	});
 };
 
@@ -78,4 +104,6 @@ var main = function main() {
 	}
 };
 
-main();
+setTimeout(function () {
+	main();
+}, 2000);
