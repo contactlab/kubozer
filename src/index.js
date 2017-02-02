@@ -5,8 +5,8 @@ import fs from 'fs-extra';
 import semver from 'semver';
 import replaceInFile from 'replace-in-file';
 
-import Builder from './builder';
-import Minifier from './minifier';
+import Builder from './lib/builder';
+import Minifier from './lib/minifier';
 
 class Kubozer {
 	constructor(config, webpackConfig) {
@@ -18,7 +18,7 @@ class Kubozer {
 		this.webpackConfig = webpackConfig;
 		this._checkForRequired();
 
-		this.Builder = new Builder(this.config, this.webpackConfig);
+		this.Builder = new Builder(this.config, this.webpackConfig, this._res);
 		this.Minifier = new Minifier(this.config);
 
 		// Ensure no previous workspaces are present
@@ -28,42 +28,6 @@ class Kubozer {
 	deleteWorkspace() {
 		try {
 			fs.removeSync(path.resolve(this.config.workspace));
-		} catch (err) {
-			throw new Error(err);
-		}
-	}
-
-	_createWorkspace() {
-		try {
-			const pathWorkspace = path.resolve(this.config.workspace);
-			fs.ensureDirSync(pathWorkspace);
-			fs.copySync(path.resolve(this.config.sourceApp), pathWorkspace);
-		} catch (err) {
-			throw new Error(err);
-		}
-	}
-
-	_ensureWorkspace() {
-		if (fs.existsSync(path.resolve(this.config.workspace))) {
-			return true;
-		}
-
-		this._createWorkspace();
-	}
-
-	_copyManifest() {
-		this._ensureWorkspace();
-
-		try {
-			const pathManifest = path.resolve(path.join(this.config.workspace, 'manifest.json'));
-			const pathManifestDist = path.resolve(path.join(this.config.buildFolder, 'manifest.json'));
-			const exist = fs.existsSync(pathManifest);
-			if (exist) {
-				fs.copySync(pathManifest, pathManifestDist);
-				return true;
-			}
-			console.warn('WARNING: manifest.json not found. --->', pathManifest);
-			return false;
 		} catch (err) {
 			throw new Error(err);
 		}
@@ -105,18 +69,15 @@ class Kubozer {
 
 					try {
 						fs.copySync(itemPath, destination);
-						console.info(`Copied ${itemPath} to ${destination}`);
-						resolve(this);
+						return resolve(this._res(undefined, {itemPath, destination}, 'Copy completed.'));
 					} catch (err) {
-						reject(err);
+						return reject(err);
 					}
 				});
 			});
 
 			// If "copy" is empty
-			const err = new Error();
-			err.message = 'copy() method was called but "copy" property is empty.';
-			reject(err);
+			reject(this._res(true, undefined, 'copy() method was called but "copy" property is empty.'));
 		});
 	}
 
@@ -132,10 +93,14 @@ class Kubozer {
 				path.resolve(this.config.workspace),
 				cssFiles
 			);
-			optionCSS.replace = new RegExp(this.config.replace.css.commentRegex, 'g');
-			optionCSS.with = `
-			<link rel="stylesheet" href="${this.config.replace.css.with}" />
-			`;
+			optionCSS.replace = this.config.replace.css.commentRegex.map(item => {
+				return new RegExp(item, 'g');
+			});
+			optionCSS.with = this.config.replace.css.with.map(item => {
+				return `
+				<link rel="stylesheet" href="${item}" />
+				`;
+			});
 		}
 
 		if (this.config.replace && this.config.replace.js) {
@@ -143,32 +108,29 @@ class Kubozer {
 				path.resolve(this.config.workspace),
 				this.config.replace.js.files
 			);
-			optionJS.replace = new RegExp(this.config.replace.js.commentRegex, 'g');
-			optionJS.with = `
-			<script src="${this.config.replace.js.with}"></script>
-			`;
+			optionJS.replace = this.config.replace.js.commentRegex.map(item => {
+				return new RegExp(item, 'g');
+			});
+			optionJS.with = this.config.replace.js.with.map(item => {
+				return `
+				<link rel="stylesheet" href="${item}" />
+				`;
+			});
 		}
 
 		if (optionJS.files === undefined && optionCSS.files === undefined) {
 			throw new Error('WARNING REPLACE(): replace method called but "files" not found in configuration');
 		}
 
-		// NOTE: can't use Promise.all 'cause we are modifying the same file
-		// First check for CSS option and then for JS option
-		return replaceInFile(optionCSS.files ? optionCSS : optionJS)
-			.then(() => {
-				if (optionCSS.files) {
-					return replaceInFile(optionJS);
-				}
-				// Return a simple promise if we have only one option
-				return new Promise(resolve => resolve(true));
-			})
-			.then(() => {
-				return true;
-			})
-			.catch(err => {
-				throw new Error(err);
-			});
+		return new Promise((resolve, reject) => {
+			try {
+				const changedCSS = replaceInFile.sync(optionCSS);
+				const changedJS = replaceInFile.sync(optionJS);
+				return resolve(this._res(undefined, {changedCSS, changedJS}, 'Replace-in-file completed.'));
+			}	catch (err) {
+				reject(this._res(true, undefined, err));
+			}
+		});
 	}
 
 	build() {
@@ -180,11 +142,9 @@ class Kubozer {
 		return this.Builder.webpack()
 			.then(res => {
 				resWebpack = res;
-				console.log('Builded WEBPACK');
 				return this.Builder.vulcanize();
 			})
 			.then(res => {
-				console.log('loooooog', res);
 				resVulcanize = res;
 				return {
 					resWebpack,
@@ -192,8 +152,7 @@ class Kubozer {
 				};
 			})
 			.catch(err => {
-				console.log('loggo', err);
-				throw new Error(err);
+				throw err;
 			});
 	}
 
@@ -208,24 +167,65 @@ class Kubozer {
 
 	bump(type) {
 		return new Promise((resolve, reject) => {
-			if (type === null || type === undefined) {
-				return reject(new Error('BUMP(): type must be specified.'));
+			const types = ['patch', 'minor', 'major', 'prepatch', 'preminor', 'premajor', 'prerelease'];
+			const notAType = types.indexOf(type) === -1;
+			if (type === null || type === undefined || typeof type !== 'string' || notAType) {
+				return reject(this._res(true, undefined, `BUMP(): type must be specified. This is not a valid type --> '${type}'`));
 			}
 
+			let oldVersion = '';
+			let newVersion = '';
 			const dataFiles = this.config.packageFiles.reduce((acc, filePath) => {
 				const fullFilePath = path.resolve(filePath);
 				const data = JSON.parse(fs.readFileSync(fullFilePath, 'utf8'));
-				const oldVersion = data.version;
+				const old = data.version;
 				data.version = semver.inc(data.version, type);
+				oldVersion = old;
+				newVersion = data.version;
 
 				const dataString = JSON.stringify(data, null, '\t');
 				fs.writeFileSync(fullFilePath, dataString);
-				console.info(`Successfully updated ${fullFilePath} version from ${oldVersion} to ${data.version}`);
 				return acc.concat(data);
 			}, []);
 
-			return resolve(dataFiles);
+			return resolve(this._res(undefined, dataFiles, `Bump from ${oldVersion} to ${newVersion} completed.`));
 		});
+	}
+
+	_createWorkspace() {
+		try {
+			const pathWorkspace = path.resolve(this.config.workspace);
+			fs.ensureDirSync(pathWorkspace);
+			fs.copySync(path.resolve(this.config.sourceApp), pathWorkspace);
+		} catch (err) {
+			throw new Error(err);
+		}
+	}
+
+	_ensureWorkspace() {
+		if (fs.existsSync(path.resolve(this.config.workspace))) {
+			return true;
+		}
+
+		this._createWorkspace();
+	}
+
+	_copyManifest() {
+		this._ensureWorkspace();
+
+		try {
+			const pathManifest = path.resolve(path.join(this.config.workspace, 'manifest.json'));
+			const pathManifestDist = path.resolve(path.join(this.config.buildFolder, 'manifest.json'));
+			const exist = fs.existsSync(pathManifest);
+			if (exist) {
+				fs.copySync(pathManifest, pathManifestDist);
+				return true;
+			}
+
+			return false;
+		} catch (err) {
+			throw new Error(err);
+		}
 	}
 
 	_pathErrHandler(entity) {
@@ -233,6 +233,11 @@ class Kubozer {
 		const msg = 'Path must be a string. Received undefined';
 		err.message = `${msg} --> ${entity}`;
 		return err;
+	}
+
+	_res(err, data, message) {
+		const stringified = JSON.stringify({err, data, message});
+		return Object.assign({}, JSON.parse(stringified));
 	}
 
 	_checkForRequired() {

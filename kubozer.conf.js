@@ -16,9 +16,8 @@ module.exports = {
 	manifest: true,
 	// Package files where search for bump version
 	packageFiles: [
-		'package.json',
-		'bower.json',
-		'app/manifest.json'
+		'./test/src-test/package.json',
+		'./test/src-test/manifest.json'
 	],
 	// Copy object
 	copy: [
@@ -49,13 +48,13 @@ module.exports = {
 	replace: {
 		css: {
 			files: 'index.html',
-			commentRegex: '<!--styles!--->((.|\n)*)<!--styles!--->',
-			with: 'assets/style.min.css'
+			commentRegex: ['<!--styles!--->((.|\n)*)<!--styles!--->'],
+			with: ['assets/style.min.css']
 		},
 		js: {
 			files: 'index.html',
-			commentRegex: '<!--js!--->((.|\n)*)<!--js!--->',
-			with: 'bundle.js'
+			commentRegex: ['<!--js!--->((.|\n)*)<!--js!--->'],
+			with: ['bundle.js']
 		}
 	}
 };

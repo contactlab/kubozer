@@ -2,3 +2,6 @@ node_modules/
 
 test/src-test/package.json
 test/src-test/manifest.json
+
+coverage
+.nyc_output

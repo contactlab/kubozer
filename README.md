@@ -1,6 +1,6 @@
 # Kubozer
 
-[![Build Status](https://travis-ci.org/contactlab/kubozer.svg?branch=master)](https://travis-ci.org/contactlab/kubozer) [![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/contactlab/kubozer)
+[![Build Status](https://travis-ci.org/contactlab/kubozer.svg?branch=master)](https://travis-ci.org/contactlab/kubozer) [![Coverage Status](https://coveralls.io/repos/github/contactlab/kubozer/badge.svg?branch=master)](https://coveralls.io/github/contactlab/kubozer?branch=master) [![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/contactlab/kubozer)
 
 
 > The best tool for Contactlab projects builds :rocket:
@@ -99,13 +99,13 @@ module.exports = {
 	replace: {
 		css: {
 			files: 'index.html',
-			commentRegex: '<!--styles!-->((.|\n)*)<!--styles!-->',
-			with: 'assets/style.min.css'
+			commentRegex: ['<!--styles!-->((.|\n)*)<!--styles!-->'],
+			with: ['assets/style.min.css']
 		},
 		js: {
 			files: 'index.html',
-			commentRegex: '<!--js!-->((.|\n)*)<!--js!-->',
-			with: 'bundle.js'
+			commentRegex: ['<!--js!-->((.|\n)*)<!--js!-->'],
+			with: ['bundle.js']
 		}
 	}
 };
