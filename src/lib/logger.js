@@ -1,25 +1,24 @@
-import Ora from 'ora';
+import chalk from 'chalk';
 
 class Logger {
 	constructor() {
-		this.spinner = new Ora({text: 'Preparing rockets and fuel to start Kubozer...', spinner: 'dots', color: 'green'});
-		this.spinner.start();
+		this.log = console.log;
+		this.logError = console.error;
+		this.colors = chalk;
+		this.error = chalk.bold.underline.red;
+		this.success = chalk.bold.green;
 	}
 
 	set(msg, color) {
-		this.spinner.color = color || 'cyan';
-		this.spinner.text = msg;
-		this.spinner.start();
+		this.log(this.colors[color].underline(msg));
 	}
 
 	success(msg) {
-		this.spinner.color = 'green';
-		this.spinner.succeed(msg);
+		this.log(this.success(msg));
 	}
 
 	fail(msg) {
-		this.spinner.color = 'red';
-		this.spinner.fail(msg);
+		this.logError(this.error(msg));
 	}
 }
 

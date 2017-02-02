@@ -13,6 +13,10 @@ var _hasFlag = require('has-flag');
 
 var _hasFlag2 = _interopRequireDefault(_hasFlag);
 
+var _spinner = require('./lib/spinner');
+
+var _spinner2 = _interopRequireDefault(_spinner);
+
 var _logger = require('./lib/logger');
 
 var _logger2 = _interopRequireDefault(_logger);
@@ -36,74 +40,79 @@ var k = new _index2.default(config, webpackConfig);
 
 var cli = (0, _meow2.default)('\n\tUsage\n\t\t$ [NODE_ENV=env_name] kubozer [command]\n\n\tOptions\n\t\t--bump Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease\n\n\tExamples\n\t\t$ NODE_ENV=production kubozer --build\n\t\t$ kubozer --bump minor\n\n');
 
-// Start spinner
 var log = new _logger2.default();
+// Start spinner
+var spinner = new _spinner2.default('Preparing rockets and fuel to start Kubozer...');
 var msgs = ['COPY: Files copied correctly.', 'REPLACE: HTML content replaced correctly.', 'BUILD: Build JS and HTML completed correctly.', 'MINIFY: Minify JS and CSS completed correctly.'];
 
 var currentStep = 0;
 
-var buildStaging = function buildStaging() {
-	k.deletePrevBuild();
-	k.copy().then(function () {
-		return k.replace();
-	}).then(function () {
-		return k.build();
-	}).then(function (res) {
-		k.deleteWorkspace();
-		console.log(res);
-	}).catch(function (err) {
-		k.deleteWorkspace();
-		console.error(err);
-	});
-};
-
-var buildProduction = function buildProduction() {
-	log.set('Started PRODUCTION build', 'red');
+var build = function build(isProd) {
+	if (isProd) {
+		log.set('\n# Started PRODUCTION build', 'cyan');
+	} else {
+		log.set('\n# Started STAGING build', 'blue');
+	}
 
 	k.deletePrevBuild();
 
-	log.set('Copying...');
+	spinner.set('## Copying...');
 	k.copy().then(function () {
 		currentStep += 1;
-		log.success(msgs[currentStep]);
-		log.set('Replacing...');
+		spinner.success(msgs[currentStep]);
+		spinner.set('## Replacing...');
 		return k.replace();
 	}).then(function () {
 		currentStep += 1;
-		log.success(msgs[currentStep]);
-		log.set('Building...');
+		spinner.success(msgs[currentStep]);
+		spinner.set('## Building...');
 		return k.build();
 	}).then(function () {
 		currentStep += 1;
-		log.success(msgs[currentStep]);
-		log.set('Minifying...');
-		return k.minify();
+
+		if (isProd) {
+			spinner.success(msgs[currentStep]);
+			spinner.set('## Minifying...');
+			return k.minify();
+		}
+
+		return new Promise(function (resolve) {
+			return resolve(true);
+		});
 	}).then(function () {
 		currentStep += 1;
-		log.success(msgs[currentStep]);
-		log.success('Everything works with charme 🚀');
-		k.deleteWorkspace();
+		spinner.success(msgs[currentStep]);
+		spinner.success('Everything works with charme 🚀');
+		return k.deleteWorkspace();
 	}).catch(function (err) {
-		log.fail(msgs[currentStep]);
-		console.error('ERROR:', err.message);
+		spinner.fail(msgs[currentStep]);
+		log.fail('\u26A0\uFE0F ERROR: ' + err.message);
 		return k.deleteWorkspace();
 	});
 };
 
-var main = function main() {
-	if (isProduction() && (0, _hasFlag2.default)('build')) {
-		return buildProduction();
-	}
+var bump = function bump(type) {
+	log.set('\n# Bumping version', 'yellow');
 
+	k.bump(type).then(function (res) {
+		spinner.success(res.message);
+	}).catch(function (err) {
+		spinner.fail('Bumped version.');
+		log.fail('\u26A0\uFE0F ERROR: ' + err.message);
+	});
+};
+
+var main = function main() {
 	if ((0, _hasFlag2.default)('build')) {
-		return buildStaging();
+		return build(isProduction());
 	}
 
 	if ((0, _hasFlag2.default)('bump')) {
-		k.bump(cli.flags.bump);
+		return bump(cli.flags.bump);
 	}
 };
 
+// Just to start the spinner
 setTimeout(function () {
 	main();
-}, 2000);
+}, 1000);

@@ -4,6 +4,7 @@ import path from 'path';
 import meow from 'meow';
 import hasFlag from 'has-flag';
 
+import Spinner from './lib/spinner';
 import Logger from './lib/logger';
 import Kubozer from './index';
 
@@ -31,8 +32,9 @@ const cli = meow(`
 
 `);
 
-// Start spinner
 const log = new Logger();
+// Start spinner
+const spinner = new Spinner('Preparing rockets and fuel to start Kubozer...');
 const msgs = [
 	'COPY: Files copied correctly.',
 	'REPLACE: HTML content replaced correctly.',
@@ -42,73 +44,77 @@ const msgs = [
 
 let currentStep = 0;
 
-const buildStaging = () => {
-	k.deletePrevBuild();
-	k.copy()
-		.then(() => k.replace())
-		.then(() => k.build())
-		.then(res => {
-			k.deleteWorkspace();
-			console.log(res);
-		})
-		.catch(err => {
-			k.deleteWorkspace();
-			console.error(err);
-		});
-};
-
-const buildProduction = () => {
-	log.set('Started PRODUCTION build', 'red');
+const build = isProd => {
+	if (isProd) {
+		log.set('\n# Started PRODUCTION build', 'cyan');
+	} else {
+		log.set('\n# Started STAGING build', 'blue');
+	}
 
 	k.deletePrevBuild();
 
-	log.set('Copying...');
+	spinner.set('## Copying...');
 	k.copy()
 		.then(() => {
 			currentStep += 1;
-			log.success(msgs[currentStep]);
-			log.set('Replacing...');
+			spinner.success(msgs[currentStep]);
+			spinner.set('## Replacing...');
 			return k.replace();
 		})
 		.then(() => {
 			currentStep += 1;
-			log.success(msgs[currentStep]);
-			log.set('Building...');
+			spinner.success(msgs[currentStep]);
+			spinner.set('## Building...');
 			return k.build();
 		})
 		.then(() => {
 			currentStep += 1;
-			log.success(msgs[currentStep]);
-			log.set('Minifying...');
-			return k.minify();
+
+			if (isProd) {
+				spinner.success(msgs[currentStep]);
+				spinner.set('## Minifying...');
+				return k.minify();
+			}
+
+			return new Promise(resolve => resolve(true));
 		})
 		.then(() => {
 			currentStep += 1;
-			log.success(msgs[currentStep]);
-			log.success('Everything works with charme 🚀');
-			k.deleteWorkspace();
+			spinner.success(msgs[currentStep]);
+			spinner.success('Everything works with charme 🚀');
+			return k.deleteWorkspace();
 		})
 		.catch(err => {
-			log.fail(msgs[currentStep]);
-			console.error('ERROR:', err.message);
+			spinner.fail(msgs[currentStep]);
+			log.fail(`⚠️ ERROR: ${err.message}`);
 			return k.deleteWorkspace();
 		});
 };
 
-const main = () => {
-	if (isProduction() && hasFlag('build')) {
-		return buildProduction();
-	}
+const bump = type => {
+	log.set('\n# Bumping version', 'yellow');
 
+	k.bump(type)
+		.then(res => {
+			spinner.success(res.message);
+		})
+		.catch(err => {
+			spinner.fail('Bumped version.');
+			log.fail(`⚠️ ERROR: ${err.message}`);
+		});
+};
+
+const main = () => {
 	if (hasFlag('build')) {
-		return buildStaging();
+		return build(isProduction());
 	}
 
 	if (hasFlag('bump')) {
-		k.bump(cli.flags.bump);
+		return bump(cli.flags.bump);
 	}
 };
 
+// Just to start the spinner
 setTimeout(() => {
 	main();
-}, 2000);
+}, 1000);
