@@ -1,65 +1,69 @@
 {
-  "name": "kubozer",
-  "version": "0.1.2",
-  "description": "Contactlab build utility",
-  "main": "dist/index.js",
-  "scripts": {
-    "pretest": "yarn run build",
-    "test": "xo && nyc ava --serial",
-    "report": "nyc report --reporter=html",
-    "coverage": "nyc report --reporter=text-lcov | coveralls",
-    "build": "babel src -d dist",
-    "postbuild": "chmod +x dist/cli.js"
-  },
-  "bin": {
-    "kubozer": "dist/cli.js"
-  },
-  "xo": {
-    "esnext": true,
-    "rules": {
-      "import/no-dynamic-require": 0
-    },
-    "ignores": [
-      "test/**/*",
-      "_testing.js"
-    ]
-  },
-  "ava": {
-    "files": [
-      "test/*.js",
-      "!test/webpack.test.config.js",
-      "!test/src-test/**/*"
-    ]
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/contactlab/kubozer.git"
-  },
-  "keywords": [
-    "build",
-    "minify",
-    "vulcanize",
-    "webpack"
-  ],
-  "author": "Contactlab Product Team",
-  "license": "Apache-2.0",
-  "dependencies": {
-    "babel-loader": "^6.2.10",
-    "fs-extra": "^1.0.0",
-    "has-flag": "^2.0.0",
-    "meow": "^3.7.0",
-    "node-minify": "^2.0.2",
-    "replace-in-file": "^2.2.2",
-    "semver": "^5.3.0",
-    "vulcanize": "^1.15.2",
-    "webpack": "^1.14.0"
-  },
-  "devDependencies": {
-    "ava": "^0.17.0",
-    "babel-cli": "^6.18.0",
-    "babel-preset-env": "^1.1.8",
-    "coveralls": "^2.11.15",
-    "nyc": "^10.1.2",
-    "xo": "^0.17.1"
-  }
+	"name": "kubozer",
+	"version": "0.2.1",
+	"description": "Contactlab build utility",
+	"main": "dist/index.js",
+	"scripts": {
+		"pretest": "yarn run build",
+		"test": "xo && nyc ava --serial",
+		"report": "nyc report --reporter=html",
+		"coverage": "nyc report --reporter=text-lcov | coveralls",
+		"build": "babel src -d dist",
+		"postbuild": "chmod +x dist/cli.js"
+	},
+	"bin": {
+		"kubozer": "dist/cli.js"
+	},
+	"xo": {
+		"esnext": true,
+		"rules": {
+			"import/no-dynamic-require": 0
+		},
+		"ignores": [
+			"test/**/*",
+			"_testing.js"
+		]
+	},
+	"ava": {
+		"files": [
+			"test/*.js",
+			"!test/webpack.test.config.js",
+			"!test/src-test/**/*"
+		]
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/contactlab/kubozer.git"
+	},
+	"keywords": [
+		"build",
+		"minify",
+		"vulcanize",
+		"webpack"
+	],
+	"author": "Contactlab Product Team",
+	"license": "Apache-2.0",
+	"dependencies": {
+		"babel-loader": "6.2.10",
+		"fs-extra": "1.0.0",
+		"has-flag": "2.0.0",
+		"meow": "3.7.0",
+		"node-minify": "2.0.2",
+		"ora": "1.1.0",
+		"replace-in-file": "2.2.2",
+		"semver": "5.3.0",
+		"vulcanize": "1.15.2",
+		"webpack": "1.14.0"
+	},
+	"devDependencies": {
+		"ava": "^0.17.0",
+		"babel-cli": "^6.18.0",
+		"babel-preset-env": "^1.1.8",
+		"chalk": "^1.1.3",
+		"coveralls": "^2.11.15",
+		"figures": "^2.0.0",
+		"get-stream": "^3.0.0",
+		"nyc": "^10.1.2",
+		"xo": "^0.17.1"
+	}
 }

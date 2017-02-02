@@ -5,8 +5,8 @@ import fs from 'fs-extra';
 import semver from 'semver';
 import replaceInFile from 'replace-in-file';
 
-import Builder from './builder';
-import Minifier from './minifier';
+import Builder from './lib/builder';
+import Minifier from './lib/minifier';
 
 class Kubozer {
 	constructor(config, webpackConfig) {

@@ -16,9 +16,8 @@ module.exports = {
 	manifest: true,
 	// Package files where search for bump version
 	packageFiles: [
-		'package.json',
-		'bower.json',
-		'app/manifest.json'
+		'./test/src-test/package.json',
+		'./test/src-test/manifest.json'
 	],
 	// Copy object
 	copy: [
