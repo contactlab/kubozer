@@ -13,9 +13,9 @@ class Logger {
 		this.log(this.colors[color].underline(msg));
 	}
 
-	success(msg) {
-		this.log(this.success(msg));
-	}
+	// success(msg) {
+	// 	this.log(this.success(msg));
+	// }
 
 	fail(msg) {
 		this.logError(this.error(msg));

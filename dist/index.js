@@ -191,8 +191,10 @@ var Kubozer = function () {
 			var _this4 = this;
 
 			return new Promise(function (resolve, reject) {
-				if (type === null || type === undefined) {
-					return reject(_this4._res(true, undefined, 'BUMP(): type must be specified.'));
+				var types = ['patch', 'minor', 'major', 'prepatch', 'preminor', 'premajor', 'prerelease'];
+				var notAType = types.indexOf(type) === -1;
+				if (type === null || type === undefined || typeof type !== 'string' || notAType) {
+					return reject(_this4._res(true, undefined, 'BUMP(): type must be specified. This is not a valid type --> \'' + type + '\''));
 				}
 
 				var oldVersion = '';

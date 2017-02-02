@@ -92,7 +92,7 @@ test('throw error when bump() method is called without params', async t => {
 		const webpackConfig = confWebpack;
 		const fn = new Fn(config, webpackConfig);
 		const err = await t.throws(fn.bump());
-		t.is(err.message, 'BUMP(): type must be specified.');
+		t.is(err.message, `BUMP(): type must be specified. This is not a valid type --> 'undefined'`);
 });
 
 test('throw error vulcanize throws and error', async t => {
