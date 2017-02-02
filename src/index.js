@@ -167,8 +167,10 @@ class Kubozer {
 
 	bump(type) {
 		return new Promise((resolve, reject) => {
-			if (type === null || type === undefined) {
-				return reject(this._res(true, undefined, 'BUMP(): type must be specified.'));
+			const types = ['patch', 'minor', 'major', 'prepatch', 'preminor', 'premajor', 'prerelease'];
+			const notAType = types.indexOf(type) === -1;
+			if (type === null || type === undefined || typeof type !== 'string' || notAType) {
+				return reject(this._res(true, undefined, `BUMP(): type must be specified. This is not a valid type --> '${type}'`));
 			}
 
 			let oldVersion = '';

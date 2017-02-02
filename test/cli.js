@@ -43,20 +43,18 @@ test('throws when a file is not found during BUMP', async t => {
 		}
 	}
 };`);
-	const msg = (await execa(__dirname + '/../dist/cli.js', ['--bump'])).stderr;
+	const msg = (await execa(__dirname + '/../dist/cli.js', ['--bump', 'major'])).stderr;
 	let expectedOutput = chalk.red(figures.cross) + ' Bumped version.';
 	expectedOutput += chalk.bold.underline.red(`\n⚠️ ERROR: ENOENT: no such file or directory, open '${__dirname}/bower.json'`);
 	t.is(msg, expectedOutput);
 })
 
-
-// TODO: when #20 is solved
-// test('throws param is not passed to BUMP', async t => {
-// 	const msg = (await execa(__dirname + '/../dist/cli.js', ['--bump'])).stderr;
-// 	let expectedOutput = chalk.red(figures.cross) + ' Bumped version.';
-// 	expectedOutput += chalk.bold.underline.red(`\n⚠️ ERROR: Not found a correct type of bump'`);
-// 	t.is(msg, expectedOutput);
-// })
+test('throws param is not passed to BUMP', async t => {
+	const msg = (await execa(__dirname + '/../dist/cli.js', ['--bump'])).stderr;
+	let expectedOutput = chalk.red(figures.cross) + ' Bumped version.';
+	expectedOutput += chalk.bold.underline.red(`\n⚠️ ERROR: BUMP(): type must be specified. This is not a valid type --> 'true'`);
+	t.is(msg, expectedOutput);
+})
 
 test('throw if `copy` object is not present', async t => {
 	const wrote = fs.writeFileSync(__dirname + '/../kubozer.conf.js', `module.exports = {
@@ -255,6 +253,12 @@ test('do PRODUCTION build with NODE_ENV declared', async t => {
 test('do build and remove workspace correctly', async t => {
 	const msg = (await execa(__dirname + '/../dist/cli.js', ['--build'])).stdout
   t.false(fs.existsSync(__dirname + '/workspace'))
+})
+
+test('do BUMP', async t => {
+	const msg = (await execa(__dirname + '/../dist/cli.js', ['--bump', 'major'])).stderr;
+	let expectedOutput = chalk.green(figures.tick) + ' Bump from 2.0.0 to 3.0.0 completed.';
+	t.is(msg, expectedOutput);
 })
 
 test.afterEach.always(t => {

@@ -30,11 +30,11 @@ var Logger = function () {
 		value: function set(msg, color) {
 			this.log(this.colors[color].underline(msg));
 		}
-	}, {
-		key: 'success',
-		value: function success(msg) {
-			this.log(this.success(msg));
-		}
+
+		// success(msg) {
+		// 	this.log(this.success(msg));
+		// }
+
 	}, {
 		key: 'fail',
 		value: function fail(msg) {
