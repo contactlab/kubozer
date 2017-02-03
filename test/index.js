@@ -188,6 +188,48 @@ test('correct replace() method', async t => {
 	t.true(Array.isArray(replRes.data.changedJS));
 });
 
+test('replace() products correct output', async t => {
+	const confWebpack = require('./src-test/webpack.test.config');
+	const config = {
+		workspace: './test/workspace',
+		sourceApp: './test/src-test',
+		buildFolder: './test/build-tmp',
+		// OPTIONAL
+		buildJS: 'bundle-test.js',
+		manifest: true,
+		vulcanize: {
+			srcTarget: 'index.html',
+			buildTarget: 'index.html',
+			conf: {
+				stripComments: true,
+				inlineScripts: true,
+				inlineStyles: true,
+				excludes: [
+					'javascript.js'
+				]
+			}
+		},
+		replace: {
+			css: {
+				files: 'index.html',
+				commentRegex: ['<!--styles!--->((.|\n)*)<!--styles!--->'],
+				with: ['/assets/style.css']
+			},
+			 js: {
+				files: 'index.html',
+				commentRegex: ['<!--js!--->((.|\n)*)<!--js!--->'],
+				with: ['/assets/javascript.js']
+			 }
+		}
+	};
+	const webpackConfig = confWebpack;
+	const fn = new Fn(config, webpackConfig);
+	const replRes = await fn.replace();
+	const res = await fn.build();
+	const fileReplace = fs.readFileSync(`${__dirname}/build-tmp/index.html`, 'utf8');
+	t.is(fileReplace, `<!DOCTYPE html><html><head>\n\t\t<meta charset=\"utf-8\">\n\t\t<title></title>\n\n\t\t\t\n\t\t\t\t<link rel=\"stylesheet\" href=\"/assets/style.css\">\n\t\t\t\t\n\n\t\t\t\n\t\t\t\t<script src=\"/assets/javascript.js\"></script>\n\t\t\t\t\n\n\t</head>\n\t<body>\n\n\t\n\n</body></html>`);
+});
+
 test('correct minify() method', async t => {
 	const confWebpack = require('./src-test/webpack.test.config');
 	const config = {

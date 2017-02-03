@@ -113,7 +113,7 @@ class Kubozer {
 			});
 			optionJS.with = this.config.replace.js.with.map(item => {
 				return `
-				<link rel="stylesheet" href="${item}" />
+				<script src="${item}"></script>
 				`;
 			});
 		}
