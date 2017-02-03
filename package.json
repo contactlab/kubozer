@@ -1,6 +1,6 @@
 {
 	"name": "kubozer",
-	"version": "0.2.1",
+	"version": "0.2.2",
 	"description": "Contactlab build utility",
 	"main": "dist/index.js",
 	"scripts": {
