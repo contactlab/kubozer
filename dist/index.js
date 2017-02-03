@@ -135,7 +135,7 @@ var Kubozer = function () {
 					return new RegExp(item, 'g');
 				});
 				optionJS.with = this.config.replace.js.with.map(function (item) {
-					return '\n\t\t\t\t<link rel="stylesheet" href="' + item + '" />\n\t\t\t\t';
+					return '\n\t\t\t\t<script src="' + item + '"></script>\n\t\t\t\t';
 				});
 			}
 
