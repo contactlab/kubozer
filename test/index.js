@@ -142,7 +142,6 @@ test('correct build() when webpack entry is an object', async t => {
 	}
 	const fn = new Fn(config, webpackConfig);
 	const resBuild = await fn.build();
-	t.is(resBuild, 'ciao');
 	t.not(resBuild.resWebpack, undefined, 'Webpack build result not UNDEFINED');
 	t.not(resBuild.resVulcanize, undefined, 'Vulcanize build result not UNDEFINED');
 	t.is(fs.existsSync(`${__dirname}/build-tmp/index.html`), true);
