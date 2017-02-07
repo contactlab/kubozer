@@ -42,23 +42,23 @@ var Builder = function () {
 			var _this = this;
 
 			return new Promise(function (resolve, reject) {
-				if (_fsExtra2.default.existsSync(_this.webpackConfig.entry) === false) {
-					reject(_this._res(true, undefined, 'Webpack entry point is not present. ---> webpackConfig.entry === ' + _this.webpackConfig.entry));
-				}
-
 				_fsExtra2.default.ensureDirSync(_this.config.buildFolder);
 				_fsExtra2.default.ensureFileSync(_path2.default.resolve(_this.config.buildFolder, _this.config.buildJS));
 
 				_this.webpackConfig.output.path = _this.config.buildFolder;
 				_this.webpackConfig.output.filename = _this.config.buildJS;
 
-				var compiler = (0, _webpack3.default)(_this.webpackConfig);
-				compiler.run(function (err) {
-					if (err) {
-						return reject(_this._res(true, undefined, err));
-					}
-					return resolve(_this._res(undefined, [{ completed: true }], 'Webpack compilation completed'));
-				});
+				try {
+					var compiler = (0, _webpack3.default)(_this.webpackConfig);
+					compiler.run(function (err) {
+						if (err) {
+							return reject(_this._res(true, undefined, err));
+						}
+						return resolve(_this._res(undefined, [{ completed: true }], 'Webpack compilation completed'));
+					});
+				} catch (err) {
+					return reject(_this._res(err.name, undefined, err.message));
+				}
 			});
 		}
 	}, {

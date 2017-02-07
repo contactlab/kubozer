@@ -35,14 +35,23 @@ test('throw error (build()) when "entry" within the "webpack configuration" is n
 		workspace: './test/workspace',
 		sourceApp: './test/src-test',
 		buildFolder: './test/build-tmp',
+		vulcanize: {
+				srcTarget: 'index.html',
+				buildTarget: 'index.html',
+				conf: {
+					stripComments: true,
+					inlineScripts: true,
+					inlineStyles: true
+				}
+			}
 	};
 
 	const webpackConfig = Object.assign({}, confWebpack);
 	delete webpackConfig.entry;
 	const fn = new Fn(config, webpackConfig);
 	const err = await t.throws(fn.build());
-	t.true(err.err);
-	t.is(err.message, 'Webpack entry point is not present. ---> webpackConfig.entry === undefined')
+	t.is(err.err, 'WebpackOptionsValidationError');
+	t.is(err.message, `Invalid configuration object. Webpack has been initialised using a configuration object that does not match the API schema.\n - configuration misses the property 'entry'.\n   object { <key>: non-empty string | [non-empty string] } | non-empty string | [non-empty string] | function\n   The entry point(s) of the compilation.`)
 });
 
 
@@ -102,14 +111,14 @@ test('throw error vulcanize throws and error', async t => {
 			buildFolder: './test/build-tmp',
 			sourceApp: './test/src-test',
 			vulcanize: {
-		    srcTarget: 'asdasdasdaindex.html',
-		    buildTarget: 'index.html',
-		    conf: {
-		      stripComments: true,
-		      inlineScripts: true,
-		      inlineStyles: true
-		    }
-	  	}
+				srcTarget: 'asdasdasdaindex.html',
+				buildTarget: 'index.html',
+				conf: {
+					stripComments: true,
+					inlineScripts: true,
+					inlineStyles: true
+				}
+			}
 		};
 		const webpackConfig = confWebpack;
 		const fn = new Fn(config, webpackConfig);

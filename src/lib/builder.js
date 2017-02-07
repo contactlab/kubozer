@@ -16,23 +16,23 @@ export default class Builder {
 
 	webpack() {
 		return new Promise((resolve, reject) => {
-			if (fs.existsSync(this.webpackConfig.entry) === false) {
-				reject(this._res(true, undefined, `Webpack entry point is not present. ---> webpackConfig.entry === ${this.webpackConfig.entry}`));
-			}
-
 			fs.ensureDirSync(this.config.buildFolder);
 			fs.ensureFileSync(path.resolve(this.config.buildFolder, this.config.buildJS));
 
 			this.webpackConfig.output.path = this.config.buildFolder;
 			this.webpackConfig.output.filename = this.config.buildJS;
 
-			const compiler = webpack(this.webpackConfig);
-			compiler.run(err => {
-				if (err) {
-					return reject(this._res(true, undefined, err));
-				}
-				return resolve(this._res(undefined, [{completed: true}], 'Webpack compilation completed'));
-			});
+			try {
+				const compiler = webpack(this.webpackConfig);
+				compiler.run(err => {
+					if (err) {
+						return reject(this._res(true, undefined, err));
+					}
+					return resolve(this._res(undefined, [{completed: true}], 'Webpack compilation completed'));
+				});
+			} catch (err) {
+				return reject(this._res(err.name, undefined, err.message));
+			}
 		});
 	}
 
