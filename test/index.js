@@ -112,6 +112,43 @@ test('correct copy() method', async t => {
 	t.is(fs.existsSync(`${__dirname}/build-tmp/manifest.json`), true, 'Manifest is correctly copied');
 });
 
+test('correct build() when webpack entry is an object', async t => {
+	const confWebpack = require('./src-test/webpack.test.config');
+	const config = {
+		workspace: './test/workspace',
+		sourceApp: './test/src-test',
+		buildFolder: './test/build-tmp',
+		// OPTIONAL
+		buildJS: 'bundle-test.js',
+		manifest: true,
+		vulcanize: {
+			srcTarget: 'index.html',
+			buildTarget: 'index.html',
+			conf: {
+				stripComments: true,
+				inlineScripts: true,
+				inlineStyles: true,
+				excludes: [
+					'bundle-fake.js',
+					'js.js'
+				]
+			}
+		}
+	};
+	const webpackConfig = confWebpack;
+	webpackConfig.entry = {
+		main: webpackConfig.entry,
+		vendors: ['ava']
+	}
+	const fn = new Fn(config, webpackConfig);
+	const resBuild = await fn.build();
+	t.not(resBuild.resWebpack, undefined, 'Webpack build result not UNDEFINED');
+	t.not(resBuild.resVulcanize, undefined, 'Vulcanize build result not UNDEFINED');
+	t.is(fs.existsSync(`${__dirname}/build-tmp/index.html`), true);
+	t.is(fs.existsSync(`${__dirname}/build-tmp/bundle-test.js`), true);
+	t.is(fs.existsSync(`${__dirname}/build-tmp/bundle-test.js.map`), true);
+});
+
 test('correct build() method', async t => {
 	const confWebpack = require('./src-test/webpack.test.config');
 	const config = {
