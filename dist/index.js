@@ -90,22 +90,24 @@ var Kubozer = function () {
 					_this._copyManifest();
 				}
 
-				_this.config.copy.forEach(function (type) {
-					type.items.forEach(function (item) {
-						var itemPath = _path2.default.join(_path2.default.resolve(_this.config.workspace), type.base, item);
-						var destination = _path2.default.join(_path2.default.resolve(_this.config.buildFolder), type.base, item);
+				if (_this.config.copy) {
+					_this.config.copy.forEach(function (type) {
+						type.items.forEach(function (item) {
+							try {
+								var itemPath = _path2.default.join(_path2.default.resolve(_this.config.workspace), type.baseFolder, item);
+								var destination = _path2.default.join(_path2.default.resolve(_this.config.buildFolder), type.baseFolder, item);
 
-						try {
-							_fsExtra2.default.copySync(itemPath, destination);
-							return resolve(_this._res(undefined, { itemPath: itemPath, destination: destination }, 'Copy completed.'));
-						} catch (err) {
-							return reject(err);
-						}
+								_fsExtra2.default.copySync(itemPath, destination);
+								return resolve(_this._res(undefined, { itemPath: itemPath, destination: destination }, 'Copy completed.'));
+							} catch (err) {
+								return reject(err);
+							}
+						});
 					});
-				});
+				}
 
 				// If "copy" is empty
-				reject(_this._res(true, undefined, 'copy() method was called but "copy" property is empty.'));
+				reject(_this._res(true, undefined, 'copy() method was called but "copy" property is empty or undefined.'));
 			});
 		}
 	}, {
@@ -155,7 +157,7 @@ var Kubozer = function () {
 		}
 	}, {
 		key: 'build',
-		value: function build() {
+		value: function build(minify) {
 			var _this3 = this;
 
 			this._ensureWorkspace();
@@ -163,26 +165,30 @@ var Kubozer = function () {
 			var resWebpack = void 0;
 			var resVulcanize = void 0;
 
-			return this.Builder.webpack().then(function (res) {
+			return this.Builder.webpack(minify).then(function (res) {
 				resWebpack = res;
-				return _this3.Builder.vulcanize();
+
+				var promises = [_this3.Builder.vulcanize()];
+				if (minify) {
+					promises = promises.concat(_this3.Minifier.minifyCSS());
+				}
+
+				return Promise.all(promises);
 			}).then(function (res) {
-				resVulcanize = res;
-				return {
+				resVulcanize = res[0];
+				var dataReturn = {
 					resWebpack: resWebpack,
 					resVulcanize: resVulcanize
 				};
+				// Present only with `minify` true or just undefined
+				var resMinifiedCss = res[1];
+				if (resMinifiedCss) {
+					dataReturn.resMinifiedCss = resMinifiedCss;
+				}
+
+				return dataReturn;
 			}).catch(function (err) {
 				throw err;
-			});
-		}
-	}, {
-		key: 'minify',
-		value: function minify() {
-			var pJS = this.Minifier.minifyJS();
-			var pCSS = this.Minifier.minifyCSS();
-			return Promise.all([pJS, pCSS]).then(function (res) {
-				return res;
 			});
 		}
 	}, {
@@ -199,7 +205,7 @@ var Kubozer = function () {
 
 				var oldVersion = '';
 				var newVersion = '';
-				var dataFiles = _this4.config.packageFiles.reduce(function (acc, filePath) {
+				var dataFiles = _this4.config.bump.files.reduce(function (acc, filePath) {
 					var fullFilePath = _path2.default.resolve(filePath);
 					var data = JSON.parse(_fsExtra2.default.readFileSync(fullFilePath, 'utf8'));
 					var old = data.version;
@@ -221,7 +227,7 @@ var Kubozer = function () {
 			try {
 				var pathWorkspace = _path2.default.resolve(this.config.workspace);
 				_fsExtra2.default.ensureDirSync(pathWorkspace);
-				_fsExtra2.default.copySync(_path2.default.resolve(this.config.sourceApp), pathWorkspace);
+				_fsExtra2.default.copySync(_path2.default.resolve(this.config.sourceFolder), pathWorkspace);
 			} catch (err) {
 				throw new Error(err);
 			}
@@ -275,8 +281,8 @@ var Kubozer = function () {
 				throw this._pathErrHandler('config.workspace');
 			}
 
-			if (!this.config.sourceApp || this.config.sourceApp === '') {
-				throw this._pathErrHandler('config.sourceApp');
+			if (!this.config.sourceFolder || this.config.sourceFolder === '') {
+				throw this._pathErrHandler('config.sourceFolder');
 			}
 
 			if (!this.config.buildFolder || this.config.buildFolder === '') {

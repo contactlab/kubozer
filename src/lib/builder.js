@@ -5,6 +5,7 @@ import path from 'path';
 import fs from 'fs-extra';
 import webpack from 'webpack';
 import Vulcanize from 'vulcanize';
+import ClosureCompilerPlugin from 'webpack-closure-compiler';
 
 export default class Builder {
 	constructor(config, webpackConfig, resFunc) {
@@ -14,13 +15,25 @@ export default class Builder {
 		this._res = resFunc;
 	}
 
-	webpack() {
+	webpack(minify) {
 		return new Promise((resolve, reject) => {
 			fs.ensureDirSync(this.config.buildFolder);
-			fs.ensureFileSync(path.resolve(this.config.buildFolder, this.config.buildJS));
 
-			this.webpackConfig.output.path = this.config.buildFolder;
-			this.webpackConfig.output.filename = this.config.buildJS;
+			if (minify) {
+				const closure = new ClosureCompilerPlugin({
+					compiler: {
+						/* eslint-disable camelcase */
+						language_in: 'ECMASCRIPT6',
+						/* eslint-disable camelcase */
+						language_out: 'ECMASCRIPT5',
+						/* eslint-disable camelcase */
+						compilation_level: 'ADVANCED'
+					},
+					concurrency: 1
+				});
+
+				this.webpackConfig.plugins = this.webpackConfig.plugins ? this.webpackConfig.plugins.concat(closure) : [closure];
+			}
 
 			try {
 				const compiler = webpack(this.webpackConfig);

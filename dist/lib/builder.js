@@ -22,6 +22,10 @@ var _vulcanize = require('vulcanize');
 
 var _vulcanize2 = _interopRequireDefault(_vulcanize);
 
+var _webpackClosureCompiler = require('webpack-closure-compiler');
+
+var _webpackClosureCompiler2 = _interopRequireDefault(_webpackClosureCompiler);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -38,15 +42,27 @@ var Builder = function () {
 
 	_createClass(Builder, [{
 		key: 'webpack',
-		value: function webpack() {
+		value: function webpack(minify) {
 			var _this = this;
 
 			return new Promise(function (resolve, reject) {
 				_fsExtra2.default.ensureDirSync(_this.config.buildFolder);
-				_fsExtra2.default.ensureFileSync(_path2.default.resolve(_this.config.buildFolder, _this.config.buildJS));
 
-				_this.webpackConfig.output.path = _this.config.buildFolder;
-				_this.webpackConfig.output.filename = _this.config.buildJS;
+				if (minify) {
+					var closure = new _webpackClosureCompiler2.default({
+						compiler: {
+							/* eslint-disable camelcase */
+							language_in: 'ECMASCRIPT6',
+							/* eslint-disable camelcase */
+							language_out: 'ECMASCRIPT5',
+							/* eslint-disable camelcase */
+							compilation_level: 'ADVANCED'
+						},
+						concurrency: 1
+					});
+
+					_this.webpackConfig.plugins = _this.webpackConfig.plugins ? _this.webpackConfig.plugins.concat(closure) : [closure];
+				}
 
 				try {
 					var compiler = (0, _webpack3.default)(_this.webpackConfig);

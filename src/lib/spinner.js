@@ -21,6 +21,10 @@ class Spinner {
 		this.spinner.color = 'red';
 		this.spinner.fail(msg);
 	}
+
+	clear() {
+		this.spinner.clear();
+	}
 }
 
 export default Spinner;

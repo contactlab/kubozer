@@ -22,7 +22,7 @@ var Logger = function () {
 		this.logError = console.error;
 		this.colors = _chalk2.default;
 		this.error = _chalk2.default.bold.underline.red;
-		this.success = _chalk2.default.bold.green;
+		this.warning = _chalk2.default.underline.yellow;
 	}
 
 	_createClass(Logger, [{
@@ -30,11 +30,11 @@ var Logger = function () {
 		value: function set(msg, color) {
 			this.log(this.colors[color].underline(msg));
 		}
-
-		// success(msg) {
-		// 	this.log(this.success(msg));
-		// }
-
+	}, {
+		key: 'warn',
+		value: function warn(msg) {
+			this.log(this.warning(msg));
+		}
 	}, {
 		key: 'fail',
 		value: function fail(msg) {

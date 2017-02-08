@@ -38,7 +38,7 @@ Other commands are included in the bundle of Kubozer:
 
 ## Enviroment typed-build 
 
-The `PRODUCTION` build (NODE_ENV=production) will add the **minify** step to the process.  The **default** build will not produce a minified **JS** and also **CSS**.  
+The `PRODUCTION` build `(NODE_ENV=production)` will add the **minify** step to the process.  The **default** build will not produce a minified **JS** and also **CSS**.  
 
 If you want to handle a dynamic configuration, you can simply check the `process.env.NODE_ENV` within the `kubozer.conf.js` (or also `webpack.config.js`) and change the ***exported*** configuration in relation to the NODE_ENV.
 
@@ -47,55 +47,36 @@ If you want to handle a dynamic configuration, you can simply check the `process
 Kubozer will search for two configurations file: `kubozer.conf.js` and `webpack.config.js` (standard Webpack configuration file)
 
 ### Kubozer 
-```javascript
+```javascript 
 // kubozer.conf.js
 module.exports = {
-	// Temporary workspace for build
-	workspace: './workspace',
-	// Where all the source app is stored
-	sourceApp: './src',
-	// Build folder name
-	buildFolder: './build',
-	// Build JS name for bundle (OPTIONAL)(default: bunlde.js)
-	buildJS: 'bundle-min.js',
-	// Assets for source and build
-	assetsFolderName: 'assets',
-	srcCSS: ['/css/test.css'],
-	buildCSS: 'style.min.css',
-	// Copy or not the manifest
+	workspace: './test/workspace',
+	sourceFolder: './test/src-test',
+	buildFolder: './test/build',
+	// Relative to you workspace
+	assetsFolder: 'assets',
+	sourceCssFiles: ['/test.css'],	
+	buildCssFile: 'style.min.css',
 	manifest: true,
-	// Package files where search for bump version
-	packageFiles: [
-		'package.json',
-		'bower.json',
-		'app/manifest.json'
-	],
-	// Copy object
+	bump: {
+		files: [
+			'./test/src-test/package.json',
+			'./test/src-test/manifest.json'
+		]
+	},
 	copy: [
 		{
-			base: 'assets',
+			baseFolder: 'assets',
 			items: [
 				'imgs-others'
 			]
 		}, {
-			base: 'bundles',
+			baseFolder: 'bundles',
 			items: [
 				''
 			]
 		}
-	],
-	// Vulcanize object
-	vulcanize: {
-		srcTarget: 'index.html',
-		buildTarget: 'index.html',
-		conf: {
-			stripComments: true,
-			inlineScripts: true,
-			inlineStyles: true,
-			excludes: ['bundle.js']
-		}
-	},
-	// Replace object
+	],	
 	replace: {
 		css: {
 			files: 'index.html',
@@ -108,19 +89,34 @@ module.exports = {
 			with: ['bundle.js']
 		}
 	}
+	vulcanize: {
+		srcTarget: 'index.html',
+		buildTarget: 'index.html',
+		conf: {
+			stripComments: true,
+			inlineScripts: true,
+			inlineStyles: true,
+			excludes: ['bundle.js']
+		}
+	}
 };
 ```
 
 ### Webpack
 ```javascript
-
-const webpackConfig = {
-	entry: './src/index.js',
+// webpack.config.js
+module.exports = {
+	entry: {
+		main: './src/index.js',
+		// Other modules
+		vendors: ['fetch', 'array-from']
+	}
 	output: {
+		// Make sure this path is the same of the `buildFolder` of `kubozer.conf.js` if you want to build everithing in the same directory
+		path: './test/build',
 		// Make sure to use [name] or [id] in output.filename
 		//  when using multiple entry points
-		path: './build',
-		filename: 'bundle.js'
+		filename: '[name].bundle.js'
 	},
 	devtool: 'source-map',
 	module: {
@@ -144,6 +140,8 @@ const Kubozer = require('kubozer');
 const config = {...};
 const webpackConfig = {...};
 
+const isProd = process.env.NODE_ENV === 'production';
+
 // Initialize (check for required config and init workspace folder)
 const k = new Kubozer(config, webpackConfig);
 
@@ -152,8 +150,7 @@ k.deletePrevBuild();
 
 k.copy()
 	.then(() => k.replace())
-	.then(() => k.build())
-	.then(() => k.minify())
+	.then(() => k.build(isProd))
 	.then(res => {
 		console.log(res);
 	})
@@ -175,13 +172,13 @@ Copy every elements within the object `copy`.
 #### return `promise`
 HTML replace in file. Set a placeholder in your HTML and remove/replace the inner elements during the build.
 
-### build()
+### build(minify)
+#### minify  
+Type `boolean`  
+Choose if minify the content of js files with GCC  
 #### return `promise`
 `Webpack` and `Vulcanize` following the configuration.
 
-### minify()
-#### return `promise`
-Minify `JS` and `CSS` following the configuration.
 
 ### bump(type)
 #### type - [patch|minor|major|prepatch|preminor|premajor|prerelease]

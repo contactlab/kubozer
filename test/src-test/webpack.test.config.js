@@ -1,5 +1,5 @@
 let entry = './test/src-test/app/index.js';
-let outputPath = './test/src-test/build-tmp/';
+let outputPath = './test/build';
 let output = 'bundle.js';
 let devtool = 'source-map';
 

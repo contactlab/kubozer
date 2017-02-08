@@ -9,8 +9,8 @@ test('correct _createWorkspace when needed (build())', async t => {
 	const pathToDir = `${__dirname}/workspace`;
 	const config = {
 		workspace: './test/workspace',
-		sourceApp: './test/src-test',
-		buildFolder: './test/build-tmp',
+		sourceFolder: './test/src-test',
+		buildFolder: './test/build',
 		vulcanize: {
 			srcTarget: 'index.html',
 			buildTarget: 'index.html',
@@ -33,8 +33,8 @@ test('correct deleteWorkspace()', async t => {
 	const pathToDir = `${__dirname}/workspace`;
 	const config = {
 		workspace: './test/workspace',
-		sourceApp: './test/src-test',
-		buildFolder: './test/build-tmp',
+		sourceFolder: './test/src-test',
+		buildFolder: './test/build',
 		vulcanize: {
 				srcTarget: 'index.html',
 				buildTarget: 'index.html',
@@ -55,13 +55,13 @@ test('correct deleteWorkspace()', async t => {
 test('correct deletePrevBuild()', t => {
 	const confWebpack = require('./src-test/webpack.test.config');
 	// Create the build folder
-	const pathToDir = `${__dirname}/build-tmp`;
+	const pathToDir = `${__dirname}/build`;
 	fs.ensureDirSync(pathToDir);
 
 	const config = {
 		workspace: './test/workspace',
-		sourceApp: './test/src-test',
-		buildFolder: './test/build-tmp'
+		sourceFolder: './test/src-test',
+		buildFolder: './test/build'
 	};
 	const webpackConfig = confWebpack;
 	const fn = new Fn(config, webpackConfig);
@@ -69,34 +69,20 @@ test('correct deletePrevBuild()', t => {
 	t.false(fs.existsSync(pathToDir), 'Correctly removed old build.');
 });
 
-test('correct copy() method without MANIFEST and files', async t => {
-	const config = {
-		workspace: './test/workspace',
-		sourceApp: './test/src-test',
-		buildFolder: './test/build-tmp',
-		manifest: false
-	};
-	const webpackConfig = {};
-	const fn = new Fn(config, webpackConfig);
-	const err = await t.throws(fn.copy());
-	t.is(err.message, 'copy() method was called but "copy" property is empty.');
-	t.false(fs.existsSync(`${__dirname}/build-tmp/manifest.json`), 'Manifest is correctly NOT copied');
-});
-
 test('correct copy() method', async t => {
 	const config = {
 		workspace: './test/workspace',
-		sourceApp: './test/src-test',
-		buildFolder: './test/build-tmp',
+		sourceFolder: './test/src-test',
+		buildFolder: './test/build',
 		manifest: true,
 		copy: [
 			{
-				base: 'assets',
+				baseFolder: 'assets',
 				items: [
 					'imgs-others'
 				]
 			}, {
-				base: 'bundles',
+				baseFolder: 'bundles',
 				items: [
 					''
 				]
@@ -107,89 +93,50 @@ test('correct copy() method', async t => {
 	const webpackConfig = {};
 	const fn = new Fn(config, webpackConfig);
 	const copiedBundles = await fn.copy('bundles');
-	t.is(fs.existsSync(`${__dirname}/build-tmp/assets/imgs-others`), true);
-	t.is(fs.existsSync(`${__dirname}/build-tmp/bundles`), true);
-	t.is(fs.existsSync(`${__dirname}/build-tmp/manifest.json`), true, 'Manifest is correctly copied');
+	t.is(fs.existsSync(`${__dirname}/build/assets/imgs-others`), true);
+	t.is(fs.existsSync(`${__dirname}/build/bundles`), true);
+	t.is(fs.existsSync(`${__dirname}/build/manifest.json`), true, 'Manifest is correctly copied');
 });
 
-test('correct build() when webpack entry is an object', async t => {
-	const confWebpack = require('./src-test/webpack.test.config');
+test('not thrown when manifest is NOT present during _copyManifest()', async t => {
+	fs.copySync(__dirname + '/src-test/manifest.json', __dirname + '/src-test/manifest.backup.json');
+	fs.removeSync(__dirname + '/src-test/manifest.json');
 	const config = {
 		workspace: './test/workspace',
-		sourceApp: './test/src-test',
-		buildFolder: './test/build-tmp',
-		// OPTIONAL
-		buildJS: 'bundle-test.js',
+		sourceFolder: './test/src-test',
+		buildFolder: './test/build',
 		manifest: true,
-		vulcanize: {
-			srcTarget: 'index.html',
-			buildTarget: 'index.html',
-			conf: {
-				stripComments: true,
-				inlineScripts: true,
-				inlineStyles: true,
-				excludes: [
-					'bundle-fake.js',
-					'js.js'
+		copy: [
+			{
+				baseFolder: 'assets',
+				items: [
+					'imgs-others'
+				]
+			}, {
+				baseFolder: 'bundles',
+				items: [
+					''
 				]
 			}
-		}
-	};
-	const webpackConfig = confWebpack;
-	webpackConfig.entry = {
-		main: webpackConfig.entry,
-		vendors: ['ava']
-	}
-	const fn = new Fn(config, webpackConfig);
-	const resBuild = await fn.build();
-	t.not(resBuild.resWebpack, undefined, 'Webpack build result not UNDEFINED');
-	t.not(resBuild.resVulcanize, undefined, 'Vulcanize build result not UNDEFINED');
-	t.is(fs.existsSync(`${__dirname}/build-tmp/index.html`), true);
-	t.is(fs.existsSync(`${__dirname}/build-tmp/bundle-test.js`), true);
-	t.is(fs.existsSync(`${__dirname}/build-tmp/bundle-test.js.map`), true);
-});
+		]
 
-test('correct build() method', async t => {
-	const confWebpack = require('./src-test/webpack.test.config');
-	const config = {
-		workspace: './test/workspace',
-		sourceApp: './test/src-test',
-		buildFolder: './test/build-tmp',
-		// OPTIONAL
-		buildJS: 'bundle-test.js',
-		manifest: true,
-		vulcanize: {
-			srcTarget: 'index.html',
-			buildTarget: 'index.html',
-			conf: {
-				stripComments: true,
-				inlineScripts: true,
-				inlineStyles: true,
-				excludes: [
-					'bundle-fake.js',
-					'js.js'
-				]
-			}
-		}
 	};
-	const webpackConfig = confWebpack;
+	const webpackConfig = {};
 	const fn = new Fn(config, webpackConfig);
-	const resBuild = await fn.build();
-	t.not(resBuild.resWebpack, undefined, 'Webpack build result not UNDEFINED');
-	t.not(resBuild.resVulcanize, undefined, 'Vulcanize build result not UNDEFINED');
-	t.is(fs.existsSync(`${__dirname}/build-tmp/index.html`), true);
-	t.is(fs.existsSync(`${__dirname}/build-tmp/bundle-test.js`), true);
-	t.is(fs.existsSync(`${__dirname}/build-tmp/bundle-test.js.map`), true);
+	const copiedBundles = await fn.copy();
+	t.is(fs.existsSync(`${__dirname}/build/assets/imgs-others`), true);
+	t.is(fs.existsSync(`${__dirname}/build/bundles`), true);
+	t.is(fs.existsSync(`${__dirname}/build/manifest.json`), false, 'Manifest is correctly NOT copied and no errors thrown');
+	fs.copySync(__dirname + '/src-test/manifest.backup.json', __dirname + '/src-test/manifest.json');
+	fs.removeSync(__dirname + '/src-test/manifest.backup.json');
 });
 
 test('correct replace() method', async t => {
 	const confWebpack = require('./src-test/webpack.test.config');
 	const config = {
 		workspace: './test/workspace',
-		sourceApp: './test/src-test',
-		buildFolder: './test/build-tmp',
-		// OPTIONAL
-		buildJS: 'bundle-test.js',
+		sourceFolder: './test/src-test',
+		buildFolder: './test/build',
 		manifest: true,
 		vulcanize: {
 			srcTarget: 'index.html',
@@ -229,10 +176,8 @@ test('replace() products correct output', async t => {
 	const confWebpack = require('./src-test/webpack.test.config');
 	const config = {
 		workspace: './test/workspace',
-		sourceApp: './test/src-test',
-		buildFolder: './test/build-tmp',
-		// OPTIONAL
-		buildJS: 'bundle-test.js',
+		sourceFolder: './test/src-test',
+		buildFolder: './test/build',
 		manifest: true,
 		vulcanize: {
 			srcTarget: 'index.html',
@@ -263,40 +208,8 @@ test('replace() products correct output', async t => {
 	const fn = new Fn(config, webpackConfig);
 	const replRes = await fn.replace();
 	const res = await fn.build();
-	const fileReplace = fs.readFileSync(`${__dirname}/build-tmp/index.html`, 'utf8');
+	const fileReplace = fs.readFileSync(`${__dirname}/build/index.html`, 'utf8');
 	t.is(fileReplace, `<!DOCTYPE html><html><head>\n\t\t<meta charset=\"utf-8\">\n\t\t<title></title>\n\n\t\t\t\n\t\t\t\t<link rel=\"stylesheet\" href=\"/assets/style.css\">\n\t\t\t\t\n\n\t\t\t\n\t\t\t\t<script src=\"/assets/javascript.js\"></script>\n\t\t\t\t\n\n\t</head>\n\t<body>\n\n\t\n\n</body></html>`);
-});
-
-test('correct minify() method', async t => {
-	const confWebpack = require('./src-test/webpack.test.config');
-	const config = {
-		workspace: './test/workspace',
-		sourceApp: './test/src-test',
-		buildFolder: './test/build-tmp',
-		assetsFolderName: 'assets',
-		srcCSS: ['/test.css'],
-		// OPTIONAL
-		buildCSS: 'style.min.css',
-		// OPTIONAL
-		buildJS: 'bundle-test.js',
-		vulcanize: {
-			srcTarget: 'index.html',
-			buildTarget: 'index.html',
-			conf: {
-				stripComments: true,
-				inlineScripts: true,
-				inlineStyles: true,
-				excludes: [
-					'js.js'
-				]
-			}
-		},
-	};
-	const webpackConfig = confWebpack;
-	const fn = new Fn(config, webpackConfig);
-	const resBuild = await fn.build();
-	const resMinify = await fn.minify();
-	t.true(Array.isArray(resMinify));
 });
 
 test('correct bump() method', async t => {
@@ -305,12 +218,14 @@ test('correct bump() method', async t => {
 	const confWebpack = require('./src-test/webpack.test.config');
 	const config = {
 		workspace: './test/workspace',
-		buildFolder: './test/build-tmp',
-		sourceApp: './test/src-test',
-		packageFiles: [
-			'./test/src-test/package.json',
-			'./test/src-test/manifest.json'
-		],
+		buildFolder: './test/build',
+		sourceFolder: './test/src-test',
+		bump: {
+			files: [
+				'./test/src-test/package.json',
+				'./test/src-test/manifest.json'
+			]
+		}
 	};
 	const webpackConfig = confWebpack;
 	const fn = new Fn(config, webpackConfig);
@@ -321,7 +236,111 @@ test('correct bump() method', async t => {
 	t.is(resBump.data[0].version, '2.0.0');
 });
 
+test('correct build() method', async t => {
+	const confWebpack = require('./src-test/webpack.test.config');
+	const config = {
+		workspace: './test/workspace',
+		sourceFolder: './test/src-test',
+		buildFolder: './test/build',
+		manifest: true,
+		vulcanize: {
+			srcTarget: 'index.html',
+			buildTarget: 'index.html',
+			conf: {
+				stripComments: true,
+				inlineScripts: true,
+				inlineStyles: true,
+				excludes: [
+					'bundle-fake.js',
+					'js.js'
+				]
+			}
+		}
+	};
+	const webpackConfig = confWebpack;
+	const fn = new Fn(config, webpackConfig);
+	const resBuild = await fn.build();
+	t.not(resBuild.resWebpack, undefined, 'Webpack build result not UNDEFINED');
+	t.not(resBuild.resVulcanize, undefined, 'Vulcanize build result not UNDEFINED');
+	t.is(fs.existsSync(`${__dirname}/build/index.html`), true);
+	t.is(fs.existsSync(`${__dirname}/build/bundle.js`), true);
+	t.is(fs.existsSync(`${__dirname}/build/bundle.js.map`), true);
+});
+
+test('correct build() with minify method', async t => {
+	const confWebpack = require('./src-test/webpack.test.config');
+	const config = {
+		workspace: './test/workspace',
+		sourceFolder: './test/src-test',
+		buildFolder: './test/build',
+		assetsFolder: 'assets',
+		sourceCssFiles: ['/test.css'],
+		buildCssFile: 'style.min.css',
+		manifest: true,
+		vulcanize: {
+			srcTarget: 'index.html',
+			buildTarget: 'index.html',
+			conf: {
+				stripComments: true,
+				inlineScripts: true,
+				inlineStyles: true,
+				excludes: [
+					'bundle-fake.js',
+					'js.js'
+				]
+			}
+		}
+	};
+	const webpackConfig = confWebpack;
+	const fn = new Fn(config, webpackConfig);
+	const minify = true;
+	const resBuild = await fn.build(minify);
+	t.not(resBuild.resWebpack, undefined, 'Webpack build result not UNDEFINED');
+	t.is(resBuild.resVulcanize.data, `${__dirname}/build/index.html`, 'Vulcanize data build result correct');
+	t.is(resBuild.resVulcanize.message, 'Vulcanize completed.', 'Vulcanize message build result correct');
+	t.is(resBuild.resMinifiedCss, 'test{font-size:10px}', 'Vulcanize build result correct');
+	t.is(fs.existsSync(`${__dirname}/build/index.html`), true);
+	t.is(fs.existsSync(`${__dirname}/build/bundle.js`), true);
+	t.is(fs.existsSync(`${__dirname}/build/assets/style.min.css`), true);
+});
+
+test('correct build() when webpack entry is an object', async t => {
+	const confWebpack = require('./src-test/webpack.test.config');
+	const config = {
+		workspace: './test/workspace',
+		sourceFolder: './test/src-test',
+		buildFolder: './test/build',
+		manifest: true,
+		vulcanize: {
+			srcTarget: 'index.html',
+			buildTarget: 'index.html',
+			conf: {
+				stripComments: true,
+				inlineScripts: true,
+				inlineStyles: true,
+				excludes: [
+					'bundle-fake.js',
+					'js.js'
+				]
+			}
+		}
+	};
+	const webpackConfig = confWebpack;
+	webpackConfig.entry = {
+		main: webpackConfig.entry,
+		vendors: ['ava']
+	};
+	webpackConfig.output.filename = '[name].bundle.js';
+	const fn = new Fn(config, webpackConfig);
+	const resBuild = await fn.build();
+	t.not(resBuild.resWebpack, undefined, 'Webpack build result not UNDEFINED');
+	t.not(resBuild.resVulcanize, undefined, 'Vulcanize build result not UNDEFINED');
+	t.is(fs.existsSync(`${__dirname}/build/index.html`), true);
+	t.is(fs.existsSync(`${__dirname}/build/main.bundle.js`), true);
+	t.is(fs.existsSync(`${__dirname}/build/vendors.bundle.js`), true);
+});
+
 test.afterEach.always(t => {
-	fs.removeSync('./test/build-tmp');
+	fs.removeSync('./test/build');
 	fs.removeSync('./test/workspace');
 });
