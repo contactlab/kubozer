@@ -41,6 +41,11 @@ var Spinner = function () {
 			this.spinner.color = 'red';
 			this.spinner.fail(msg);
 		}
+	}, {
+		key: 'clear',
+		value: function clear() {
+			this.spinner.clear();
+		}
 	}]);
 
 	return Spinner;

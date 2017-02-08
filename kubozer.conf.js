@@ -1,50 +1,33 @@
-
+// kubozer.conf.js
 module.exports = {
-	// Temporary workspace for build
 	workspace: './test/workspace',
-	// Where all the source app is stored
-	sourceApp: './test/src-test',
-	// Build folder name
+	sourceFolder: './test/src-test',
 	buildFolder: './test/build',
-	// Build JS name for bundle (OPTIONAL)(default: bunlde.js)
-	buildJS: 'bundle.js',
-	// Assets for source and build
-	assetsFolderName: 'assets',
-	srcCSS: ['/test.css'],
-	buildCSS: 'style.min.css',
-	// Copy or not the manifest
+	// sourceJsFiles: ['bundle.js'],
+	// buildJsFile: 'bundle.min.js'
+	assetsFolder: 'assets',
+	sourceCssFiles: ['/test.css'],
+	buildCssFile: 'style.min.css',
 	manifest: true,
-	// Package files where search for bump version
-	packageFiles: [
-		'./test/src-test/package.json',
-		'./test/src-test/manifest.json'
-	],
-	// Copy object
+	bump: {
+		files: [
+			'./test/src-test/package.json',
+			'./test/src-test/manifest.json'
+		]
+	},
 	copy: [
 		{
-			base: 'assets',
+			baseFolder: 'assets',
 			items: [
 				'imgs-others'
 			]
 		}, {
-			base: 'bundles',
+			baseFolder: 'bundles',
 			items: [
 				''
 			]
 		}
 	],
-	// Vulcanize object
-	vulcanize: {
-		srcTarget: 'index.html',
-		buildTarget: 'index.html',
-		conf: {
-			stripComments: true,
-			inlineScripts: true,
-			inlineStyles: true,
-			excludes: ['bundle.js']
-		}
-	},
-	// Replace object
 	replace: {
 		css: {
 			files: 'index.html',
@@ -55,6 +38,16 @@ module.exports = {
 			files: 'index.html',
 			commentRegex: ['<!--js!--->((.|\n)*)<!--js!--->'],
 			with: ['bundle.js']
+		}
+	},
+	vulcanize: {
+		srcTarget: 'index.html',
+		buildTarget: 'index.html',
+		conf: {
+			stripComments: true,
+			inlineScripts: true,
+			inlineStyles: true,
+			excludes: ['bundle.js']
 		}
 	}
 };

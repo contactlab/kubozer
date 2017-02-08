@@ -1,6 +1,7 @@
 'use strict';
 
 import path from 'path';
+import fs from 'fs-extra';
 import compressor from 'node-minify';
 
 export default class Minifier {
@@ -8,35 +9,26 @@ export default class Minifier {
 		this.config = config;
 	}
 
-	minifyJS() {
-		const buildPath = path.join(
-			path.resolve(this.config.buildFolder),
-			this.config.buildJS
-		);
-		const promise = compressor.minify({
-			compressor: 'gcc',
-			input: buildPath,
-			output: buildPath
-		});
-
-		return promise.then(res => res);
-	}
-
 	minifyCSS() {
 		const srcPath = path.join(
 			path.resolve(this.config.workspace),
-			this.config.assetsFolderName
+			this.config.assetsFolder
 		);
 		const buildPath = path.join(
 			path.resolve(this.config.buildFolder),
-			this.config.assetsFolderName
+			this.config.assetsFolder
 		);
-		const buildCSS = this.config.buildCSS || 'style.min.css';
+
+		const buildCSS = this.config.buildCssFile || 'style.min.css';
+		const buildFileOutput = path.join(buildPath, buildCSS);
+
+		fs.ensureFileSync(buildFileOutput);
+
 		const promise = compressor.minify({
 			compressor: 'yui-css',
 			publicFolder: srcPath,
-			input: this.config.srcCSS,
-			output: `${buildPath}/${buildCSS}`
+			input: this.config.sourceCssFiles,
+			output: buildFileOutput
 		});
 
 		return promise.then(res => res);
