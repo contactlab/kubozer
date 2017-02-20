@@ -207,9 +207,9 @@ test('warn when webpack output.path is NOT the same of kubozer buildFolder', asy
 	const msg = (await execa.shell(__dirname + '/../dist/cli.js --build'));
 	let expectedOutputErr = chalk.green(figures.tick) + ' REPLACE: HTML content replaced correctly.\n';
 		expectedOutputErr += chalk.green(figures.tick) + ' BUILD: Build JS and HTML completed correctly.\n';
-		expectedOutputErr += chalk.green(figures.tick) + ' ## Building...\n';
+		expectedOutputErr += chalk.green(figures.tick) + ' >> Building...\n';
 		expectedOutputErr += chalk.green(figures.tick) + ' Everything works with charme 🚀';
-	let expectedOutput = '\n# Started STAGING build'
+	let expectedOutput = '\n> Started STAGING build'
 	expectedOutput += chalk.underline.yellow('\n⚠️ WARNING: the "buildFolder" and the "webpackConfig.output.path" are not the same.')
 	 t.is(msg.stderr, expectedOutputErr);
 	 t.is(msg.stdout, expectedOutput);
@@ -219,21 +219,21 @@ test('warn when webpack output.path is NOT the same of kubozer buildFolder', asy
 
 test('do STAGING build without NODE_ENV declared', async t => {
 	const msg = (await execa(__dirname + '/../dist/cli.js', ['--build']));
-	t.is(msg.stdout, '\n# Started STAGING build');
+	t.is(msg.stdout, '\n> Started STAGING build');
 	let expectedOutput = chalk.green(figures.tick) + ' REPLACE: HTML content replaced correctly.\n';
 		expectedOutput += chalk.green(figures.tick) + ' BUILD: Build JS and HTML completed correctly.\n';
-		expectedOutput += chalk.green(figures.tick) + ' ## Building...\n';
+		expectedOutput += chalk.green(figures.tick) + ' >> Building...\n';
 		expectedOutput += chalk.green(figures.tick) + ' Everything works with charme 🚀';
 	t.is(msg.stderr, expectedOutput);
 })
 
 test('do PRODUCTION build with NODE_ENV declared', async t => {
 	const msg = (await execa.shell('NODE_ENV=production ' + __dirname + '/../dist/cli.js --build'));
-	t.is(msg.stdout, '\n# Started PRODUCTION build');
+	t.is(msg.stdout, '\n> Started PRODUCTION build');
 	let expectedOutput = chalk.green(figures.tick) + ' REPLACE: HTML content replaced correctly.\n';
 		expectedOutput += chalk.green(figures.tick) + ' BUILD: Build JS and HTML completed correctly.\n';
 		expectedOutput += chalk.green(figures.tick) + ' MINIFY: Minify JS and CSS completed correctly.\n';
-		expectedOutput += chalk.green(figures.tick) + ' ## Building...\n';
+		expectedOutput += chalk.green(figures.tick) + ' >> Building...\n';
 		expectedOutput += chalk.green(figures.tick) + ' Everything works with charme 🚀';
 	t.is(msg.stderr, expectedOutput);
 })
