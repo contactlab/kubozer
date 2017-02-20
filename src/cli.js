@@ -17,8 +17,6 @@ const isProduction = () => {
 	return NODE_ENV === 'production';
 };
 
-const k = new Kubozer(config, webpackConfig);
-
 const cli = meow(`
 	Usage
 		$ [NODE_ENV=env_name] kubozer [command]
@@ -44,36 +42,39 @@ const msgs = [
 
 let currentStep = 0;
 
-const build = isProd => {
+const build = (k, isProd) => {
 	if (isProd) {
-		log.set('\n# Started PRODUCTION build', 'cyan');
+		log.set('\n> Started PRODUCTION build', 'cyan');
 	} else {
-		log.set('\n# Started STAGING build', 'blue');
+		log.set('\n> Started STAGING build', 'blue');
 	}
 
 	k.deletePrevBuild();
 
-	spinner.set('## Copying...');
+	spinner.set('>> Copying...');
 	k.copy()
 		.then(() => {
 			currentStep += 1;
 			spinner.success(msgs[currentStep]);
-			spinner.set('## Replacing...');
+			spinner.set('>> Replacing...');
 			return k.replace();
 		})
 		.then(() => {
 			currentStep += 1;
 			spinner.success(msgs[currentStep]);
-			spinner.set('## Building...');
-			return k.build();
+
+			if (path.resolve(config.buildFolder) !== path.resolve(webpackConfig.output.path)) {
+				log.warn('⚠️ WARNING: the "buildFolder" and the "webpackConfig.output.path" are not the same.');
+			}
+
+			spinner.set('>> Building...');
+			return k.build(isProd);
 		})
 		.then(() => {
 			currentStep += 1;
 
 			if (isProd) {
 				spinner.success(msgs[currentStep]);
-				spinner.set('## Minifying...');
-				return k.minify();
 			}
 
 			return new Promise(resolve => resolve(true));
@@ -91,8 +92,8 @@ const build = isProd => {
 		});
 };
 
-const bump = type => {
-	log.set('\n# Bumping version', 'yellow');
+const bump = (k, type) => {
+	log.set('\n> Bumping version', 'yellow');
 
 	k.bump(type)
 		.then(res => {
@@ -105,12 +106,24 @@ const bump = type => {
 };
 
 const main = () => {
-	if (hasFlag('build')) {
-		return build(isProduction());
-	}
+	try {
+		const k = new Kubozer(config, webpackConfig);
+		spinner.clear();
 
-	if (hasFlag('bump')) {
-		return bump(cli.flags.bump);
+		if (hasFlag('build')) {
+			return build(k, isProduction());
+		}
+
+		if (hasFlag('bump')) {
+			return bump(k, cli.flags.bump);
+		}
+
+		spinner.clear();
+		cli.showHelp();
+	} catch (err) {
+		spinner.clear();
+		log.fail(`\n⚠️ ERROR: ${err.message}`);
+		process.exit();
 	}
 };
 

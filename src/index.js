@@ -54,30 +54,32 @@ class Kubozer {
 				this._copyManifest();
 			}
 
-			this.config.copy.forEach(type => {
-				type.items.forEach(item => {
-					const itemPath = path.join(
-						path.resolve(this.config.workspace),
-						type.base,
-						item
-					);
-					const destination = path.join(
-						path.resolve(this.config.buildFolder),
-						type.base,
-						item
-					);
+			if (this.config.copy) {
+				this.config.copy.forEach(type => {
+					type.items.forEach(item => {
+						try {
+							const itemPath = path.join(
+								path.resolve(this.config.workspace),
+								type.baseFolder,
+								item
+							);
+							const destination = path.join(
+								path.resolve(this.config.buildFolder),
+								type.baseFolder,
+								item
+							);
 
-					try {
-						fs.copySync(itemPath, destination);
-						return resolve(this._res(undefined, {itemPath, destination}, 'Copy completed.'));
-					} catch (err) {
-						return reject(err);
-					}
+							fs.copySync(itemPath, destination);
+							return resolve(this._res(undefined, {itemPath, destination}, 'Copy completed.'));
+						} catch (err) {
+							return reject(err);
+						}
+					});
 				});
-			});
+			}
 
 			// If "copy" is empty
-			reject(this._res(true, undefined, 'copy() method was called but "copy" property is empty.'));
+			reject(this._res(true, undefined, 'copy() method was called but "copy" property is empty or undefined.'));
 		});
 	}
 
@@ -133,35 +135,39 @@ class Kubozer {
 		});
 	}
 
-	build() {
+	build(minify) {
 		this._ensureWorkspace();
 
 		let resWebpack;
 		let resVulcanize;
 
-		return this.Builder.webpack()
+		return this.Builder.webpack(minify)
 			.then(res => {
 				resWebpack = res;
-				return this.Builder.vulcanize();
+
+				let promises = [this.Builder.vulcanize()];
+				if (minify) {
+					promises = promises.concat(this.Minifier.minifyCSS());
+				}
+
+				return Promise.all(promises);
 			})
 			.then(res => {
-				resVulcanize = res;
-				return {
+				resVulcanize = res[0];
+				const dataReturn = {
 					resWebpack,
 					resVulcanize
 				};
+				// Present only with `minify` true or just undefined
+				const resMinifiedCss = res[1];
+				if (resMinifiedCss) {
+					dataReturn.resMinifiedCss = resMinifiedCss;
+				}
+
+				return dataReturn;
 			})
 			.catch(err => {
 				throw err;
-			});
-	}
-
-	minify() {
-		const pJS = this.Minifier.minifyJS();
-		const pCSS = this.Minifier.minifyCSS();
-		return Promise.all([pJS, pCSS])
-			.then(res => {
-				return res;
 			});
 	}
 
@@ -175,7 +181,7 @@ class Kubozer {
 
 			let oldVersion = '';
 			let newVersion = '';
-			const dataFiles = this.config.packageFiles.reduce((acc, filePath) => {
+			const dataFiles = this.config.bump.files.reduce((acc, filePath) => {
 				const fullFilePath = path.resolve(filePath);
 				const data = JSON.parse(fs.readFileSync(fullFilePath, 'utf8'));
 				const old = data.version;
@@ -196,7 +202,7 @@ class Kubozer {
 		try {
 			const pathWorkspace = path.resolve(this.config.workspace);
 			fs.ensureDirSync(pathWorkspace);
-			fs.copySync(path.resolve(this.config.sourceApp), pathWorkspace);
+			fs.copySync(path.resolve(this.config.sourceFolder), pathWorkspace);
 		} catch (err) {
 			throw new Error(err);
 		}
@@ -245,8 +251,8 @@ class Kubozer {
 			throw this._pathErrHandler('config.workspace');
 		}
 
-		if (!this.config.sourceApp || this.config.sourceApp === '') {
-			throw this._pathErrHandler('config.sourceApp');
+		if (!this.config.sourceFolder || this.config.sourceFolder === '') {
+			throw this._pathErrHandler('config.sourceFolder');
 		}
 
 		if (!this.config.buildFolder || this.config.buildFolder === '') {

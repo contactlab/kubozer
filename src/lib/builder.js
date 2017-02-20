@@ -4,6 +4,7 @@ import path from 'path';
 
 import fs from 'fs-extra';
 import webpack from 'webpack';
+import WebpackNotifierPlugin from 'webpack-notifier';
 import Vulcanize from 'vulcanize';
 
 export default class Builder {
@@ -14,25 +15,36 @@ export default class Builder {
 		this._res = resFunc;
 	}
 
-	webpack() {
+	webpack(minify) {
 		return new Promise((resolve, reject) => {
-			if (fs.existsSync(this.webpackConfig.entry) === false) {
-				reject(this._res(true, undefined, `Webpack entry point is not present. ---> webpackConfig.entry === ${this.webpackConfig.entry}`));
+			fs.ensureDirSync(this.config.buildFolder);
+
+			if (minify) {
+				const uglify = new webpack.optimize.UglifyJsPlugin({
+					compress: {
+						warnings: false
+					},
+					sourceMap: true
+				});
+
+				this.webpackConfig.plugins = this.webpackConfig.plugins ? this.webpackConfig.plugins.concat(uglify) : [uglify];
+				this.webpackConfig.plugins = this.webpackConfig.plugins.concat(new WebpackNotifierPlugin({
+					title: 'Kubozer - Webpack',
+					contentImage: path.join(__dirname, './../../', 'Kubozer_Sign@2x.png')
+				}));
 			}
 
-			fs.ensureDirSync(this.config.buildFolder);
-			fs.ensureFileSync(path.resolve(this.config.buildFolder, this.config.buildJS));
-
-			this.webpackConfig.output.path = this.config.buildFolder;
-			this.webpackConfig.output.filename = this.config.buildJS;
-
-			const compiler = webpack(this.webpackConfig);
-			compiler.run(err => {
-				if (err) {
-					return reject(this._res(true, undefined, err));
-				}
-				return resolve(this._res(undefined, [{completed: true}], 'Webpack compilation completed'));
-			});
+			try {
+				const compiler = webpack(this.webpackConfig);
+				compiler.run(err => {
+					if (err) {
+						return reject(this._res(true, undefined, err));
+					}
+					return resolve(this._res(undefined, [{completed: true}], 'Webpack compilation completed'));
+				});
+			} catch (err) {
+				return reject(this._res(err.name, undefined, err.message));
+			}
 		});
 	}
 

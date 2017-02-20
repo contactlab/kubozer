@@ -36,8 +36,6 @@ var isProduction = function isProduction() {
 	return NODE_ENV === 'production';
 };
 
-var k = new _index2.default(config, webpackConfig);
-
 var cli = (0, _meow2.default)('\n\tUsage\n\t\t$ [NODE_ENV=env_name] kubozer [command]\n\n\tOptions\n\t\t--bump Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease\n\n\tExamples\n\t\t$ NODE_ENV=production kubozer --build\n\t\t$ kubozer --bump minor\n\n');
 
 var log = new _logger2.default();
@@ -47,33 +45,36 @@ var msgs = ['COPY: Files copied correctly.', 'REPLACE: HTML content replaced cor
 
 var currentStep = 0;
 
-var build = function build(isProd) {
+var build = function build(k, isProd) {
 	if (isProd) {
-		log.set('\n# Started PRODUCTION build', 'cyan');
+		log.set('\n> Started PRODUCTION build', 'cyan');
 	} else {
-		log.set('\n# Started STAGING build', 'blue');
+		log.set('\n> Started STAGING build', 'blue');
 	}
 
 	k.deletePrevBuild();
 
-	spinner.set('## Copying...');
+	spinner.set('>> Copying...');
 	k.copy().then(function () {
 		currentStep += 1;
 		spinner.success(msgs[currentStep]);
-		spinner.set('## Replacing...');
+		spinner.set('>> Replacing...');
 		return k.replace();
 	}).then(function () {
 		currentStep += 1;
 		spinner.success(msgs[currentStep]);
-		spinner.set('## Building...');
-		return k.build();
+
+		if (_path2.default.resolve(config.buildFolder) !== _path2.default.resolve(webpackConfig.output.path)) {
+			log.warn('⚠️ WARNING: the "buildFolder" and the "webpackConfig.output.path" are not the same.');
+		}
+
+		spinner.set('>> Building...');
+		return k.build(isProd);
 	}).then(function () {
 		currentStep += 1;
 
 		if (isProd) {
 			spinner.success(msgs[currentStep]);
-			spinner.set('## Minifying...');
-			return k.minify();
 		}
 
 		return new Promise(function (resolve) {
@@ -91,8 +92,8 @@ var build = function build(isProd) {
 	});
 };
 
-var bump = function bump(type) {
-	log.set('\n# Bumping version', 'yellow');
+var bump = function bump(k, type) {
+	log.set('\n> Bumping version', 'yellow');
 
 	k.bump(type).then(function (res) {
 		spinner.success(res.message);
@@ -103,12 +104,24 @@ var bump = function bump(type) {
 };
 
 var main = function main() {
-	if ((0, _hasFlag2.default)('build')) {
-		return build(isProduction());
-	}
+	try {
+		var k = new _index2.default(config, webpackConfig);
+		spinner.clear();
 
-	if ((0, _hasFlag2.default)('bump')) {
-		return bump(cli.flags.bump);
+		if ((0, _hasFlag2.default)('build')) {
+			return build(k, isProduction());
+		}
+
+		if ((0, _hasFlag2.default)('bump')) {
+			return bump(k, cli.flags.bump);
+		}
+
+		spinner.clear();
+		cli.showHelp();
+	} catch (err) {
+		spinner.clear();
+		log.fail('\n\u26A0\uFE0F ERROR: ' + err.message);
+		process.exit();
 	}
 };
 

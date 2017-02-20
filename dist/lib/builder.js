@@ -18,6 +18,10 @@ var _webpack2 = require('webpack');
 
 var _webpack3 = _interopRequireDefault(_webpack2);
 
+var _webpackNotifier = require('webpack-notifier');
+
+var _webpackNotifier2 = _interopRequireDefault(_webpackNotifier);
+
 var _vulcanize = require('vulcanize');
 
 var _vulcanize2 = _interopRequireDefault(_vulcanize);
@@ -38,27 +42,38 @@ var Builder = function () {
 
 	_createClass(Builder, [{
 		key: 'webpack',
-		value: function webpack() {
+		value: function webpack(minify) {
 			var _this = this;
 
 			return new Promise(function (resolve, reject) {
-				if (_fsExtra2.default.existsSync(_this.webpackConfig.entry) === false) {
-					reject(_this._res(true, undefined, 'Webpack entry point is not present. ---> webpackConfig.entry === ' + _this.webpackConfig.entry));
+				_fsExtra2.default.ensureDirSync(_this.config.buildFolder);
+
+				if (minify) {
+					var uglify = new _webpack3.default.optimize.UglifyJsPlugin({
+						compress: {
+							warnings: false
+						},
+						sourceMap: true
+					});
+
+					_this.webpackConfig.plugins = _this.webpackConfig.plugins ? _this.webpackConfig.plugins.concat(uglify) : [uglify];
+					_this.webpackConfig.plugins = _this.webpackConfig.plugins.concat(new _webpackNotifier2.default({
+						title: 'Kubozer - Webpack',
+						contentImage: _path2.default.join(__dirname, './../../', 'Kubozer_Sign@2x.png')
+					}));
 				}
 
-				_fsExtra2.default.ensureDirSync(_this.config.buildFolder);
-				_fsExtra2.default.ensureFileSync(_path2.default.resolve(_this.config.buildFolder, _this.config.buildJS));
-
-				_this.webpackConfig.output.path = _this.config.buildFolder;
-				_this.webpackConfig.output.filename = _this.config.buildJS;
-
-				var compiler = (0, _webpack3.default)(_this.webpackConfig);
-				compiler.run(function (err) {
-					if (err) {
-						return reject(_this._res(true, undefined, err));
-					}
-					return resolve(_this._res(undefined, [{ completed: true }], 'Webpack compilation completed'));
-				});
+				try {
+					var compiler = (0, _webpack3.default)(_this.webpackConfig);
+					compiler.run(function (err) {
+						if (err) {
+							return reject(_this._res(true, undefined, err));
+						}
+						return resolve(_this._res(undefined, [{ completed: true }], 'Webpack compilation completed'));
+					});
+				} catch (err) {
+					return reject(_this._res(err.name, undefined, err.message));
+				}
 			});
 		}
 	}, {

@@ -6,16 +6,16 @@ class Logger {
 		this.logError = console.error;
 		this.colors = chalk;
 		this.error = chalk.bold.underline.red;
-		this.success = chalk.bold.green;
+		this.warning = chalk.underline.yellow;
 	}
 
 	set(msg, color) {
 		this.log(this.colors[color].underline(msg));
 	}
 
-	// success(msg) {
-	// 	this.log(this.success(msg));
-	// }
+	warn(msg) {
+		this.log(this.warning(msg));
+	}
 
 	fail(msg) {
 		this.logError(this.error(msg));

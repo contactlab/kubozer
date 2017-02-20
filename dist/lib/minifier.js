@@ -10,6 +10,10 @@ var _path = require('path');
 
 var _path2 = _interopRequireDefault(_path);
 
+var _fsExtra = require('fs-extra');
+
+var _fsExtra2 = _interopRequireDefault(_fsExtra);
+
 var _nodeMinify = require('node-minify');
 
 var _nodeMinify2 = _interopRequireDefault(_nodeMinify);
@@ -26,30 +30,21 @@ var Minifier = function () {
 	}
 
 	_createClass(Minifier, [{
-		key: 'minifyJS',
-		value: function minifyJS() {
-			var buildPath = _path2.default.join(_path2.default.resolve(this.config.buildFolder), this.config.buildJS);
-			var promise = _nodeMinify2.default.minify({
-				compressor: 'gcc',
-				input: buildPath,
-				output: buildPath
-			});
-
-			return promise.then(function (res) {
-				return res;
-			});
-		}
-	}, {
 		key: 'minifyCSS',
 		value: function minifyCSS() {
-			var srcPath = _path2.default.join(_path2.default.resolve(this.config.workspace), this.config.assetsFolderName);
-			var buildPath = _path2.default.join(_path2.default.resolve(this.config.buildFolder), this.config.assetsFolderName);
-			var buildCSS = this.config.buildCSS || 'style.min.css';
+			var srcPath = _path2.default.join(_path2.default.resolve(this.config.workspace), this.config.assetsFolder);
+			var buildPath = _path2.default.join(_path2.default.resolve(this.config.buildFolder), this.config.assetsFolder);
+
+			var buildCSS = this.config.buildCssFile || 'style.min.css';
+			var buildFileOutput = _path2.default.join(buildPath, buildCSS);
+
+			_fsExtra2.default.ensureFileSync(buildFileOutput);
+
 			var promise = _nodeMinify2.default.minify({
 				compressor: 'yui-css',
 				publicFolder: srcPath,
-				input: this.config.srcCSS,
-				output: buildPath + '/' + buildCSS
+				input: this.config.sourceCssFiles,
+				output: buildFileOutput
 			});
 
 			return promise.then(function (res) {
