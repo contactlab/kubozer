@@ -18,6 +18,10 @@ var _webpack2 = require('webpack');
 
 var _webpack3 = _interopRequireDefault(_webpack2);
 
+var _webpackNotifier = require('webpack-notifier');
+
+var _webpackNotifier2 = _interopRequireDefault(_webpackNotifier);
+
 var _vulcanize = require('vulcanize');
 
 var _vulcanize2 = _interopRequireDefault(_vulcanize);
@@ -53,6 +57,10 @@ var Builder = function () {
 					});
 
 					_this.webpackConfig.plugins = _this.webpackConfig.plugins ? _this.webpackConfig.plugins.concat(uglify) : [uglify];
+					_this.webpackConfig.plugins = _this.webpackConfig.plugins.concat(new _webpackNotifier2.default({
+						title: 'Kubozer - Webpack',
+						contentImage: _path2.default.join(__dirname, './../../', 'Kubozer_Sign@2x.png')
+					}));
 				}
 
 				try {

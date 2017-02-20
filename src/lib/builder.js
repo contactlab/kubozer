@@ -4,6 +4,7 @@ import path from 'path';
 
 import fs from 'fs-extra';
 import webpack from 'webpack';
+import WebpackNotifierPlugin from 'webpack-notifier';
 import Vulcanize from 'vulcanize';
 
 export default class Builder {
@@ -27,6 +28,10 @@ export default class Builder {
 				});
 
 				this.webpackConfig.plugins = this.webpackConfig.plugins ? this.webpackConfig.plugins.concat(uglify) : [uglify];
+				this.webpackConfig.plugins = this.webpackConfig.plugins.concat(new WebpackNotifierPlugin({
+					title: 'Kubozer - Webpack',
+					contentImage: path.join(__dirname, './../../', 'Kubozer_Sign@2x.png')
+				}));
 			}
 
 			try {

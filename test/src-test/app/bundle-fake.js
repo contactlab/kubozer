@@ -1,1 +1,5 @@
-export default const test = 'test'
+const test = () => {
+    console.log('test');
+};
+
+export default test;
