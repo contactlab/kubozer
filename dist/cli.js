@@ -47,18 +47,18 @@ var currentStep = 0;
 
 var build = function build(k, isProd) {
 	if (isProd) {
-		log.set('\n# Started PRODUCTION build', 'cyan');
+		log.set('\n> Started PRODUCTION build', 'cyan');
 	} else {
-		log.set('\n# Started STAGING build', 'blue');
+		log.set('\n> Started STAGING build', 'blue');
 	}
 
 	k.deletePrevBuild();
 
-	spinner.set('## Copying...');
+	spinner.set('>> Copying...');
 	k.copy().then(function () {
 		currentStep += 1;
 		spinner.success(msgs[currentStep]);
-		spinner.set('## Replacing...');
+		spinner.set('>> Replacing...');
 		return k.replace();
 	}).then(function () {
 		currentStep += 1;
@@ -68,7 +68,7 @@ var build = function build(k, isProd) {
 			log.warn('⚠️ WARNING: the "buildFolder" and the "webpackConfig.output.path" are not the same.');
 		}
 
-		spinner.set('## Building...');
+		spinner.set('>> Building...');
 		return k.build(isProd);
 	}).then(function () {
 		currentStep += 1;
@@ -93,7 +93,7 @@ var build = function build(k, isProd) {
 };
 
 var bump = function bump(k, type) {
-	log.set('\n# Bumping version', 'yellow');
+	log.set('\n> Bumping version', 'yellow');
 
 	k.bump(type).then(function (res) {
 		spinner.success(res.message);
@@ -106,6 +106,8 @@ var bump = function bump(k, type) {
 var main = function main() {
 	try {
 		var k = new _index2.default(config, webpackConfig);
+		spinner.clear();
+
 		if ((0, _hasFlag2.default)('build')) {
 			return build(k, isProduction());
 		}

@@ -22,10 +22,6 @@ var _vulcanize = require('vulcanize');
 
 var _vulcanize2 = _interopRequireDefault(_vulcanize);
 
-var _webpackClosureCompiler = require('webpack-closure-compiler');
-
-var _webpackClosureCompiler2 = _interopRequireDefault(_webpackClosureCompiler);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -49,19 +45,14 @@ var Builder = function () {
 				_fsExtra2.default.ensureDirSync(_this.config.buildFolder);
 
 				if (minify) {
-					var closure = new _webpackClosureCompiler2.default({
-						compiler: {
-							/* eslint-disable camelcase */
-							language_in: 'ECMASCRIPT6',
-							/* eslint-disable camelcase */
-							language_out: 'ECMASCRIPT5',
-							/* eslint-disable camelcase */
-							compilation_level: 'ADVANCED'
+					var uglify = new _webpack3.default.optimize.UglifyJsPlugin({
+						compress: {
+							warnings: false
 						},
-						concurrency: 1
+						sourceMap: true
 					});
 
-					_this.webpackConfig.plugins = _this.webpackConfig.plugins ? _this.webpackConfig.plugins.concat(closure) : [closure];
+					_this.webpackConfig.plugins = _this.webpackConfig.plugins ? _this.webpackConfig.plugins.concat(uglify) : [uglify];
 				}
 
 				try {

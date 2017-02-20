@@ -5,7 +5,6 @@ import path from 'path';
 import fs from 'fs-extra';
 import webpack from 'webpack';
 import Vulcanize from 'vulcanize';
-import ClosureCompilerPlugin from 'webpack-closure-compiler';
 
 export default class Builder {
 	constructor(config, webpackConfig, resFunc) {
@@ -20,19 +19,14 @@ export default class Builder {
 			fs.ensureDirSync(this.config.buildFolder);
 
 			if (minify) {
-				const closure = new ClosureCompilerPlugin({
-					compiler: {
-						/* eslint-disable camelcase */
-						language_in: 'ECMASCRIPT6',
-						/* eslint-disable camelcase */
-						language_out: 'ECMASCRIPT5',
-						/* eslint-disable camelcase */
-						compilation_level: 'ADVANCED'
+				const uglify = new webpack.optimize.UglifyJsPlugin({
+					compress: {
+						warnings: false
 					},
-					concurrency: 1
+					sourceMap: true
 				});
 
-				this.webpackConfig.plugins = this.webpackConfig.plugins ? this.webpackConfig.plugins.concat(closure) : [closure];
+				this.webpackConfig.plugins = this.webpackConfig.plugins ? this.webpackConfig.plugins.concat(uglify) : [uglify];
 			}
 
 			try {

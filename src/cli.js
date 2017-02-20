@@ -44,19 +44,19 @@ let currentStep = 0;
 
 const build = (k, isProd) => {
 	if (isProd) {
-		log.set('\n# Started PRODUCTION build', 'cyan');
+		log.set('\n> Started PRODUCTION build', 'cyan');
 	} else {
-		log.set('\n# Started STAGING build', 'blue');
+		log.set('\n> Started STAGING build', 'blue');
 	}
 
 	k.deletePrevBuild();
 
-	spinner.set('## Copying...');
+	spinner.set('>> Copying...');
 	k.copy()
 		.then(() => {
 			currentStep += 1;
 			spinner.success(msgs[currentStep]);
-			spinner.set('## Replacing...');
+			spinner.set('>> Replacing...');
 			return k.replace();
 		})
 		.then(() => {
@@ -67,7 +67,7 @@ const build = (k, isProd) => {
 				log.warn('⚠️ WARNING: the "buildFolder" and the "webpackConfig.output.path" are not the same.');
 			}
 
-			spinner.set('## Building...');
+			spinner.set('>> Building...');
 			return k.build(isProd);
 		})
 		.then(() => {
@@ -93,7 +93,7 @@ const build = (k, isProd) => {
 };
 
 const bump = (k, type) => {
-	log.set('\n# Bumping version', 'yellow');
+	log.set('\n> Bumping version', 'yellow');
 
 	k.bump(type)
 		.then(res => {
@@ -108,6 +108,8 @@ const bump = (k, type) => {
 const main = () => {
 	try {
 		const k = new Kubozer(config, webpackConfig);
+		spinner.clear();
+
 		if (hasFlag('build')) {
 			return build(k, isProduction());
 		}
