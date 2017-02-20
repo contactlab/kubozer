@@ -1,15 +1,23 @@
 # Kubozer
 
-[![Build Status](https://travis-ci.org/contactlab/kubozer.svg?branch=master)](https://travis-ci.org/contactlab/kubozer) [![Coverage Status](https://coveralls.io/repos/github/contactlab/kubozer/badge.svg?branch=master)](https://coveralls.io/github/contactlab/kubozer?branch=master) [![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/contactlab/kubozer)
+[![GitHub tag](https://img.shields.io/github/release/contactlab/kubozer.svg?style=flat-square)](https://github.com/contactlab/kubozer)
+[![Build Status](https://travis-ci.org/contactlab/kubozer.svg?branch=master)](https://travis-ci.org/contactlab/kubozer)
+[![Coverage Status](https://coveralls.io/repos/github/contactlab/kubozer/badge.svg?branch=master)](https://coveralls.io/github/contactlab/kubozer?branch=master)
+[![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/contactlab/kubozer)
+[![npm](https://img.shields.io/npm/dt/kubozer.svg?style=flat-square)](https://github.com/contactlab/kubozer)
+[![Package Quality](http://npm.packagequality.com/shield/kubozer.png?style=flat-square)](http://packagequality.com/#?package=kubozer)
 
+<p align="center">
+	<img src="Kubozer.png" alt="Kubozer"/>
+</p>
+
+---
 
 > The best tool for Contactlab projects builds :rocket:
 
-#### 🚧 WorkInProgress 🚧
-
 Kubozer is a wrapper of some tools for building production (and development) application written in Polymer 1.x. and ***ESnext*** syntax.  
 
-### Features  
+## Features  
 - **Copy** whatever files you need into your `build` directory 
 - **Replace** part of the `html` files where needed (like change the link within the index.html to your production-ready script) with [replace-in-file]()
 - **Build** both `js` with [Webpack]() and `html` (Polymer) with [Vulcanize]()
