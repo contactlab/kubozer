@@ -1,6 +1,6 @@
 {
 	"name": "kubozer",
-	"version": "0.2.2",
+	"version": "1.0.0",
 	"description": "Contactlab build utility",
 	"main": "dist/index.js",
 	"scripts": {
@@ -44,7 +44,11 @@
 		"build",
 		"minify",
 		"vulcanize",
-		"webpack"
+		"webpack",
+		"kubozer",
+		"es6",
+		"projects",
+		"polymer"
 	],
 	"author": "Contactlab Product Team",
 	"license": "Apache-2.0",

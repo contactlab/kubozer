@@ -1,4 +1,10 @@
-# Kubozer
+<p align="center">
+	<img src="Kubozer.png" alt="Kubozer"/>
+</p>
+
+---
+
+> The best tool for Contactlab projects builds :rocket:
 
 [![GitHub tag](https://img.shields.io/github/release/contactlab/kubozer.svg?style=flat-square)](https://github.com/contactlab/kubozer)
 [![Build Status](https://travis-ci.org/contactlab/kubozer.svg?branch=master)](https://travis-ci.org/contactlab/kubozer)
@@ -7,13 +13,6 @@
 [![npm](https://img.shields.io/npm/dt/kubozer.svg?style=flat-square)](https://github.com/contactlab/kubozer)
 [![Package Quality](http://npm.packagequality.com/shield/kubozer.png?style=flat-square)](http://packagequality.com/#?package=kubozer)
 
-<p align="center">
-	<img src="Kubozer.png" alt="Kubozer"/>
-</p>
-
----
-
-> The best tool for Contactlab projects builds :rocket:
 
 Kubozer is a wrapper of some tools for building production (and development) application written in Polymer 1.x. and ***ESnext*** syntax.  
 
