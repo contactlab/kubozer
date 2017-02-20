@@ -14,6 +14,9 @@
 	"bin": {
 		"kubozer": "dist/cli.js"
 	},
+	"babel": {
+		"presets": ["env"]
+	},
 	"xo": {
 		"esnext": true,
 		"rules": {
