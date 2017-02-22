@@ -1,5 +1,5 @@
 <p align="center">
-	<img src="Kubozer.png" alt="Kubozer"/>
+	<img src="https://raw.githubusercontent.com/contactlab/kubozer/master/Kubozer.png" alt="Kubozer"/>
 </p>
 
 ---
