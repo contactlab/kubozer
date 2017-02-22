@@ -50,8 +50,11 @@ var Builder = function () {
 
 				if (minify) {
 					var uglify = new _webpack3.default.optimize.UglifyJsPlugin({
+						comments: false,
 						compress: {
-							warnings: false
+							warnings: false,
+							/* eslint-disable camelcase */
+							drop_console: _this.config.stripConsole
 						},
 						sourceMap: true
 					});
