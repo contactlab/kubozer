@@ -21,8 +21,11 @@ export default class Builder {
 
 			if (minify) {
 				const uglify = new webpack.optimize.UglifyJsPlugin({
+					comments: false,
 					compress: {
-						warnings: false
+						warnings: false,
+						/* eslint-disable camelcase */
+						drop_console: this.config.stripConsole
 					},
 					sourceMap: true
 				});

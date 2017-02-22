@@ -9,6 +9,7 @@ module.exports = {
 	sourceCssFiles: ['/test.css'],
 	buildCssFile: 'style.min.css',
 	manifest: true,
+	stripConsole: true,
 	bump: {
 		files: [
 			'./test/src-test/package.json',

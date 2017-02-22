@@ -19,8 +19,8 @@ Kubozer is a wrapper of some tools for building production (and development) app
 ## Features  
 - **Copy** whatever files you need into your `build` directory 
 - **Replace** part of the `html` files where needed (like change the link within the index.html to your production-ready script) with [replace-in-file]()
-- **Build** both `js` with [Webpack]() and `html` (Polymer) with [Vulcanize]()
-- **Minify** both `js` and `css` with [node-minify]()  
+- **Build** both `js` with [Webpack](https://github.com/webpack/webpack) and `html` (Polymer) with [Vulcanize](https://www.npmjs.com/package/vulcanize)
+- **Minify** minify `CSS` with [node-minify](https://www.npmjs.com/package/node-minify) and `JS` with the Uglify Webpack plugin (only with `PRODUCTION` build)
 
 Other commands are included in the bundle of Kubozer: 
 - **Bump** for bump the version of your project
@@ -54,6 +54,7 @@ If you want to handle a dynamic configuration, you can simply check the `process
 Kubozer will search for two configurations file: `kubozer.conf.js` and `webpack.config.js` (standard Webpack configuration file)
 
 ### Kubozer 
+Example configuration.  **Kubozer will not assume nothing as default**.  
 ```javascript 
 // kubozer.conf.js
 module.exports = {
@@ -65,6 +66,7 @@ module.exports = {
 	sourceCssFiles: ['/test.css'],	
 	buildCssFile: 'style.min.css',
 	manifest: true,
+	stripConsole: true,
 	bump: {
 		files: [
 			'./test/src-test/package.json',

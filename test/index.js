@@ -267,7 +267,7 @@ test('correct build() method', async t => {
 	t.is(fs.existsSync(`${__dirname}/build/bundle.js.map`), true);
 });
 
-test('correct build() with minify method', async t => {
+test('correct build() with minify method without stripConsole', async t => {
 	const confWebpack = require('./src-test/webpack.test.config');
 	const config = {
 		workspace: './test/workspace',
@@ -302,6 +302,46 @@ test('correct build() with minify method', async t => {
 	t.is(fs.existsSync(`${__dirname}/build/index.html`), true);
 	t.is(fs.existsSync(`${__dirname}/build/bundle.js`), true);
 	t.is(fs.existsSync(`${__dirname}/build/assets/style.min.css`), true);
+	t.is(fs.readFileSync(`${__dirname}/build/bundle.js`, 'utf8').includes('console.log'), true);
+});
+
+test('correct build() with minify method and stripConsole', async t => {
+	const confWebpack = require('./src-test/webpack.test.config');
+	const config = {
+		workspace: './test/workspace',
+		sourceFolder: './test/src-test',
+		buildFolder: './test/build',
+		assetsFolder: 'assets',
+		sourceCssFiles: ['/test.css'],
+		buildCssFile: 'style.min.css',
+		manifest: true,
+		stripConsole: true,
+		vulcanize: {
+			srcTarget: 'index.html',
+			buildTarget: 'index.html',
+			conf: {
+				stripComments: true,
+				inlineScripts: true,
+				inlineStyles: true,
+				excludes: [
+					'bundle-fake.js',
+					'js.js'
+				]
+			}
+		}
+	};
+	const webpackConfig = confWebpack;
+	const fn = new Fn(config, webpackConfig);
+	const minify = true;
+	const resBuild = await fn.build(minify);
+	t.not(resBuild.resWebpack, undefined, 'Webpack build result not UNDEFINED');
+	t.is(resBuild.resVulcanize.data, `${__dirname}/build/index.html`, 'Vulcanize data build result correct');
+	t.is(resBuild.resVulcanize.message, 'Vulcanize completed.', 'Vulcanize message build result correct');
+	t.is(resBuild.resMinifiedCss, 'test{font-size:10px}', 'Vulcanize build result correct');
+	t.is(fs.existsSync(`${__dirname}/build/index.html`), true);
+	t.is(fs.existsSync(`${__dirname}/build/bundle.js`), true);
+	t.is(fs.existsSync(`${__dirname}/build/assets/style.min.css`), true);
+	t.is(fs.readFileSync(`${__dirname}/build/bundle.js`, 'utf8').includes('console.log'), false);
 });
 
 test('correct build() when webpack entry is an object', async t => {
