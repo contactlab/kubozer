@@ -7,6 +7,7 @@ import replaceInFile from 'replace-in-file';
 
 import Builder from './lib/builder';
 import Minifier from './lib/minifier';
+import OneSky from './lib/i18n';
 
 class Kubozer {
 	constructor(config, webpackConfig) {
