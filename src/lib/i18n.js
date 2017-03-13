@@ -2,11 +2,9 @@ const fs = require('fs');
 const path = require('path');
 const onesky = require('onesky-utils');
 
-const config = require(path.resolve('kubozer.conf'));
-const configLocal = require(path.resolve('kubozer.conf.local'));
-
 export default class OneSky {
   constructor(config) {
+    this._checkForRequired(config);
     this.baseOptions = {
       secret: config.i18n.secret,
       apiKey: config.i18n.apiKey,
@@ -77,4 +75,36 @@ export default class OneSky {
       });
     });
   };
+
+  _pathErrHandler(entity) {
+		const err = new Error();
+		const msg = 'Path must be a string. Received undefined';
+		err.message = `${msg} --> ${entity}`;
+		return err;
+	}
+
+  _checkConfigurationKey(key) {
+    if (config.i18n && !config.i18n[key]) {
+      throw this._pathErrHandler(`config.i18n.${key}`);
+    }
+  }
+
+  _checkForRequired(config) {
+    if (!config.i18n) {
+      throw new Error(
+        'In order to use OneSky integration, you need i18n configuration'
+      );
+    }
+
+    const configurationKeys = [
+      'secret',
+      'apiKey',
+      'projectId',
+      'defaultLanguage',
+      'format',
+      'oneskyProjectID',
+      'languagesPath'
+    ];
+    configurationKeys.forEach(this._checkConfigurationKey);
+  }
 }
