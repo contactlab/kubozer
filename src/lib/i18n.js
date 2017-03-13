@@ -6,11 +6,11 @@ const config = require(path.resolve('kubozer.conf'));
 const configLocal = require(path.resolve('kubozer.conf.local'));
 
 export default class OneSky {
-  constructor(secret, apiKey, projectId) {
+  constructor(config) {
     this.baseOptions = {
-      secret: secret,
-      apiKey: apiKey,
-      projectId: projectId
+      secret: config.i18n.secret,
+      apiKey: config.i18n.apiKey,
+      projectId: config.i18n.projectId
     }
   }
 
@@ -29,24 +29,24 @@ export default class OneSky {
   upload(language) {
     const filePath = this.getFilePath(config.i18n.languagesPath, language);
 
-    fs.readFile(filePath, 'utf-8', (err, data) => {
-      if (err) {
-        throw new Error(err);
-      }
+    return new Promise((resolve, reject) => {
+      fs.readFile(filePath, 'utf-8', (err, data) => {
+        if (err) {
+          reject(err);
+        }
 
-      oneSkyAppOptions.content = data;
-      oneSkyAppOptions.format = config.i18n.format;
-      const options = Object.assign({}, this.baseOptions, {
-        language: language,
-        fileName: this.getFileName(language),
-        keepStrings: false,
-        content: data,
-        format: config.i18n.format
-      });
-      onesky.postFile(options).then(content => {
-        console.info(JSON.stringify(JSON.parse(content), null, 2));
-      }).catch(error => {
-        console.error(error);
+        const options = Object.assign({}, this.baseOptions, {
+          language: language,
+          fileName: this.getFileName(language),
+          keepStrings: false,
+          content: data,
+          format: config.i18n.format
+        });
+        onesky.postFile(options).then(content => {
+          resolve(content);
+        }).catch(error => {
+          reject(error);
+        });
       });
     });
   }
