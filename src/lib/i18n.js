@@ -83,7 +83,7 @@ export default class OneSky {
 		return err;
 	}
 
-  _checkConfigurationKey(key) {
+  _checkConfigurationKey(config, key) {
     if (config.i18n && !config.i18n[key]) {
       throw this._pathErrHandler(`config.i18n.${key}`);
     }
@@ -105,6 +105,6 @@ export default class OneSky {
       'oneskyProjectID',
       'languagesPath'
     ];
-    configurationKeys.forEach(this._checkConfigurationKey);
+    configurationKeys.forEach(key => this._checkConfigurationKey(config, key));
   }
 }

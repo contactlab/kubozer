@@ -107,7 +107,7 @@ var OneSky = function () {
     }
   }, {
     key: '_checkConfigurationKey',
-    value: function _checkConfigurationKey(key) {
+    value: function _checkConfigurationKey(config, key) {
       if (config.i18n && !config.i18n[key]) {
         throw this._pathErrHandler('config.i18n.' + key);
       }
@@ -115,12 +115,16 @@ var OneSky = function () {
   }, {
     key: '_checkForRequired',
     value: function _checkForRequired(config) {
+      var _this3 = this;
+
       if (!config.i18n) {
         throw new Error('In order to use OneSky integration, you need i18n configuration');
       }
 
       var configurationKeys = ['secret', 'apiKey', 'projectId', 'defaultLanguage', 'format', 'oneskyProjectID', 'languagesPath'];
-      configurationKeys.forEach(this._checkConfigurationKey);
+      configurationKeys.forEach(function (key) {
+        return _this3._checkConfigurationKey(config, key);
+      });
     }
   }]);
 
