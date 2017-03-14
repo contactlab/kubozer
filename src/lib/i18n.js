@@ -5,6 +5,8 @@ const onesky = require('onesky-utils');
 export default class OneSky {
   constructor(config) {
     this._checkForRequired(config);
+    this.languagesPath = config.i18n.languagesPath;
+    this.format = config.i18n.format;
     this.baseOptions = {
       secret: config.i18n.secret,
       apiKey: config.i18n.apiKey,
@@ -13,7 +15,7 @@ export default class OneSky {
   }
 
   getFilePath(languagesPath, language) {
-    path.join(languagesPath, `${language}.json`);
+    return path.join(languagesPath, `${language}.json`);
   }
 
   getFileName(language) {
@@ -25,7 +27,7 @@ export default class OneSky {
   }
 
   upload(language) {
-    const filePath = this.getFilePath(config.i18n.languagesPath, language);
+    const filePath = this.getFilePath(this.languagesPath, language);
 
     return new Promise((resolve, reject) => {
       fs.readFile(filePath, 'utf-8', (err, data) => {
@@ -38,7 +40,7 @@ export default class OneSky {
           fileName: this.getFileName(language),
           keepStrings: false,
           content: data,
-          format: config.i18n.format
+          format: this.format
         });
         onesky.postFile(options).then(content => {
           return resolve(content);
@@ -49,29 +51,25 @@ export default class OneSky {
     });
   }
 
-  download(languages) {
-    const langs = this.parseLanguages(languages);
-
+  download(language) {
     return new Promise((resolve, reject) => {
-      langs.forEach(language => {
-        const options = Object.assign({}, this.options, {
-          language: language,
-          fileName: 'EN.json'
+      const options = Object.assign({}, this.baseOptions, {
+        language: language,
+        fileName: 'EN.json'
+      });
+
+      onesky.getFile(options).then(content => {
+        const filePath = this.getFilePath(this.languagesPath, language);
+
+        fs.writeFile(filePath, content, err => {
+          if(err) {
+            return reject(err);
+          }
+
+          return resolve(content);
         });
-
-        onesky.getFile(options).then(content => {
-          const filePath = this.getFilePath(config.i18n.languagesPath, language);
-
-          fs.writeFile(filePath, content, err => {
-            if(err) {
-              return reject(err);
-            }
-
-            return resolve(content);
-          });
-        }).catch(error => {
-          return reject(error);
-        });
+      }).catch(error => {
+        return reject(error);
       });
     });
   };
@@ -102,7 +100,7 @@ export default class OneSky {
       'projectId',
       'defaultLanguage',
       'format',
-      'oneskyProjectID',
+      'projectId',
       'languagesPath'
     ];
     configurationKeys.forEach(key => this._checkConfigurationKey(config, key));

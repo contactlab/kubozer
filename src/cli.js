@@ -105,6 +105,28 @@ const bump = (k, type) => {
 		});
 };
 
+const upload = (k, language) => {
+	spinner.set(`>> Uploading translations for ${language}...`);
+	k.upload(language)
+		.then(result => {
+			spinner.success(`Translations uploaded succesfully for ${language}`);
+		})
+		.catch(error => {
+			spinner.fail(`Something went wrong uploading your translation file for ${language}: ${error.message}`);
+		});
+};
+
+const download = (k, language) => {
+	spinner.set(`>> Downloading translations for ${language}...`);
+	k.download(language)
+		.then(result => {
+			spinner.success(`Translations downloaded succesfully for ${language}`);
+		})
+		.catch(error => {
+			spinner.fail(`Something went wrong downloading your translation file for ${language}: ${error.message}`);
+		});
+};
+
 const main = () => {
 	try {
 		const k = new Kubozer(config, webpackConfig);
@@ -116,6 +138,14 @@ const main = () => {
 
 		if (hasFlag('bump')) {
 			return bump(k, cli.flags.bump);
+		}
+
+		if (hasFlag('i18n') && hasFlag('upload')) {
+			return upload(k, cli.flags.upload);
+		}
+
+		if (hasFlag('i18n') && hasFlag('download')) {
+			return download(k, cli.flags.download);
 		}
 
 		spinner.clear();

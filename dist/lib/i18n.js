@@ -17,6 +17,8 @@ var OneSky = function () {
     _classCallCheck(this, OneSky);
 
     this._checkForRequired(config);
+    this.languagesPath = config.i18n.languagesPath;
+    this.format = config.i18n.format;
     this.baseOptions = {
       secret: config.i18n.secret,
       apiKey: config.i18n.apiKey,
@@ -27,7 +29,7 @@ var OneSky = function () {
   _createClass(OneSky, [{
     key: 'getFilePath',
     value: function getFilePath(languagesPath, language) {
-      path.join(languagesPath, language + '.json');
+      return path.join(languagesPath, language + '.json');
     }
   }, {
     key: 'getFileName',
@@ -44,7 +46,7 @@ var OneSky = function () {
     value: function upload(language) {
       var _this = this;
 
-      var filePath = this.getFilePath(config.i18n.languagesPath, language);
+      var filePath = this.getFilePath(this.languagesPath, language);
 
       return new Promise(function (resolve, reject) {
         fs.readFile(filePath, 'utf-8', function (err, data) {
@@ -57,7 +59,7 @@ var OneSky = function () {
             fileName: _this.getFileName(language),
             keepStrings: false,
             content: data,
-            format: config.i18n.format
+            format: _this.format
           });
           onesky.postFile(options).then(function (content) {
             return resolve(content);
@@ -69,31 +71,27 @@ var OneSky = function () {
     }
   }, {
     key: 'download',
-    value: function download(languages) {
+    value: function download(language) {
       var _this2 = this;
 
-      var langs = this.parseLanguages(languages);
-
       return new Promise(function (resolve, reject) {
-        langs.forEach(function (language) {
-          var options = Object.assign({}, _this2.options, {
-            language: language,
-            fileName: 'EN.json'
+        var options = Object.assign({}, _this2.baseOptions, {
+          language: language,
+          fileName: 'EN.json'
+        });
+
+        onesky.getFile(options).then(function (content) {
+          var filePath = _this2.getFilePath(_this2.languagesPath, language);
+
+          fs.writeFile(filePath, content, function (err) {
+            if (err) {
+              return reject(err);
+            }
+
+            return resolve(content);
           });
-
-          onesky.getFile(options).then(function (content) {
-            var filePath = _this2.getFilePath(config.i18n.languagesPath, language);
-
-            fs.writeFile(filePath, content, function (err) {
-              if (err) {
-                return reject(err);
-              }
-
-              return resolve(content);
-            });
-          }).catch(function (error) {
-            return reject(error);
-          });
+        }).catch(function (error) {
+          return reject(error);
         });
       });
     }
@@ -121,7 +119,7 @@ var OneSky = function () {
         throw new Error('In order to use OneSky integration, you need i18n configuration');
       }
 
-      var configurationKeys = ['secret', 'apiKey', 'projectId', 'defaultLanguage', 'format', 'oneskyProjectID', 'languagesPath'];
+      var configurationKeys = ['secret', 'apiKey', 'projectId', 'defaultLanguage', 'format', 'projectId', 'languagesPath'];
       configurationKeys.forEach(function (key) {
         return _this3._checkConfigurationKey(config, key);
       });

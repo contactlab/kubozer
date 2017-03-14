@@ -50,5 +50,14 @@ module.exports = {
 			inlineStyles: true,
 			excludes: ['bundle.js']
 		}
-	}
+	},
+	i18n: {
+		secret: 'aaa',
+		apiKey: 'aaaa',
+		projectId: 'aaaaa',
+		defaultLanguage: 'en',
+		format: 'HIERARCHICAL_JSON',
+		oneskyProjectID: 94359,
+		languagesPath: './app/bundles'
+  }
 };

@@ -103,6 +103,24 @@ var bump = function bump(k, type) {
 	});
 };
 
+var upload = function upload(k, language) {
+	spinner.set('>> Uploading translations for ' + language + '...');
+	k.upload(language).then(function (result) {
+		spinner.success('Translations uploaded succesfully for ' + language);
+	}).catch(function (error) {
+		spinner.fail('Something went wrong uploading your translation file for ' + language + ': ' + error.message);
+	});
+};
+
+var download = function download(k, language) {
+	spinner.set('>> Downloading translations for ' + language + '...');
+	k.download(language).then(function (result) {
+		spinner.success('Translations downloaded succesfully for ' + language);
+	}).catch(function (error) {
+		spinner.fail('Something went wrong downloading your translation file for ' + language + ': ' + error.message);
+	});
+};
+
 var main = function main() {
 	try {
 		var k = new _index2.default(config, webpackConfig);
@@ -114,6 +132,14 @@ var main = function main() {
 
 		if ((0, _hasFlag2.default)('bump')) {
 			return bump(k, cli.flags.bump);
+		}
+
+		if ((0, _hasFlag2.default)('i18n') && (0, _hasFlag2.default)('upload')) {
+			return upload(k, cli.flags.upload);
+		}
+
+		if ((0, _hasFlag2.default)('i18n') && (0, _hasFlag2.default)('download')) {
+			return download(k, cli.flags.download);
 		}
 
 		spinner.clear();
