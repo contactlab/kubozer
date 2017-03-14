@@ -52,7 +52,6 @@ var Kubozer = function () {
 
 		this.Builder = new _builder2.default(this.config, this.webpackConfig, this._res);
 		this.Minifier = new _minifier2.default(this.config);
-		this.OneSky = new _i18n2.default(this.config);
 
 		// Ensure no previous workspaces are present
 		this.deleteWorkspace();
@@ -229,12 +228,14 @@ var Kubozer = function () {
 	}, {
 		key: 'upload',
 		value: function upload(language) {
-			return this.OneSky.upload(language);
+			var oneSky = new _i18n2.default(this.config);
+			return oneSky.upload(language);
 		}
 	}, {
 		key: 'download',
 		value: function download(languages) {
-			return this.OneSky.download(languages);
+			var oneSky = new _i18n2.default(this.config);
+			return oneSky.download(languages);
 		}
 	}, {
 		key: '_createWorkspace',

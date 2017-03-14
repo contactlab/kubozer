@@ -59,5 +59,5 @@ module.exports = {
 		format: 'HIERARCHICAL_JSON',
 		oneskyProjectID: 94359,
 		languagesPath: './app/bundles'
-  }
+	}
 };

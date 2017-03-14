@@ -108,22 +108,22 @@ const bump = (k, type) => {
 const upload = (k, language) => {
 	spinner.set(`>> Uploading translations for ${language}...`);
 	k.upload(language)
-		.then(result => {
+		.then(() => {
 			spinner.success(`Translations uploaded succesfully for ${language}`);
 		})
-		.catch(error => {
-			spinner.fail(`Something went wrong uploading your translation file for ${language}: ${error.message}`);
+		.catch(err => {
+			spinner.fail(`Something went wrong uploading your translation file for ${language}: ${err.message}`);
 		});
 };
 
 const download = (k, language) => {
 	spinner.set(`>> Downloading translations for ${language}...`);
 	k.download(language)
-		.then(result => {
+		.then(() => {
 			spinner.success(`Translations downloaded succesfully for ${language}`);
 		})
-		.catch(error => {
-			spinner.fail(`Something went wrong downloading your translation file for ${language}: ${error.message}`);
+		.catch(err => {
+			spinner.fail(`Something went wrong downloading your translation file for ${language}: ${err.message}`);
 		});
 };
 

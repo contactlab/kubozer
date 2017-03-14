@@ -21,7 +21,6 @@ class Kubozer {
 
 		this.Builder = new Builder(this.config, this.webpackConfig, this._res);
 		this.Minifier = new Minifier(this.config);
-		this.OneSky = new OneSky(this.config);
 
 		// Ensure no previous workspaces are present
 		this.deleteWorkspace();
@@ -201,11 +200,13 @@ class Kubozer {
 	}
 
 	upload(language) {
-		return this.OneSky.upload(language);
+		const oneSky = new OneSky(this.config);
+		return oneSky.upload(language);
 	}
 
 	download(languages) {
-		return this.OneSky.download(languages);
+		const oneSky = new OneSky(this.config);
+		return oneSky.download(languages);
 	}
 
 	_createWorkspace() {

@@ -105,19 +105,19 @@ var bump = function bump(k, type) {
 
 var upload = function upload(k, language) {
 	spinner.set('>> Uploading translations for ' + language + '...');
-	k.upload(language).then(function (result) {
+	k.upload(language).then(function () {
 		spinner.success('Translations uploaded succesfully for ' + language);
-	}).catch(function (error) {
-		spinner.fail('Something went wrong uploading your translation file for ' + language + ': ' + error.message);
+	}).catch(function (err) {
+		spinner.fail('Something went wrong uploading your translation file for ' + language + ': ' + err.message);
 	});
 };
 
 var download = function download(k, language) {
 	spinner.set('>> Downloading translations for ' + language + '...');
-	k.download(language).then(function (result) {
+	k.download(language).then(function () {
 		spinner.success('Translations downloaded succesfully for ' + language);
-	}).catch(function (error) {
-		spinner.fail('Something went wrong downloading your translation file for ' + language + ': ' + error.message);
+	}).catch(function (err) {
+		spinner.fail('Something went wrong downloading your translation file for ' + language + ': ' + err.message);
 	});
 };
 
