@@ -22,11 +22,16 @@ const cli = meow(`
 		$ [NODE_ENV=env_name] kubozer [command]
 
 	Options
-		--bump Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease
+		--bump     Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease
+		--i18n     Use I18N capabilities
+		--upload   Use ONLY with --i18n option: upload a translation file
+		--download Use ONLY with --i18n option: download a translation file
 
 	Examples
 		$ NODE_ENV=production kubozer --build
 		$ kubozer --bump minor
+		$ kubozer --i18n --upload en
+		$ kubozer --i18n --download it
 
 `);
 
