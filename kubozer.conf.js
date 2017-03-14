@@ -57,7 +57,7 @@ module.exports = {
 		projectId: 'aaaaa',
 		defaultLanguage: 'en',
 		format: 'HIERARCHICAL_JSON',
-		oneskyProjectID: 94359,
+		oneskyProjectID: 12345,
 		languagesPath: './app/bundles'
 	}
 };
