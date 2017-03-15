@@ -253,8 +253,13 @@ test('show help command when arg is not passed', async t => {
 	const msg = (await execa(__dirname + '/../dist/cli.js'));
 	let expectedOutput = '\n  Contactlab build utility\n';
 		expectedOutput += '\n  Usage\n  \t$ [NODE_ENV=env_name] kubozer [command]\n';
-		expectedOutput += '\n  Options\n  \t--bump Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease\n';
-		expectedOutput += '\n  Examples\n  \t$ NODE_ENV=production kubozer --build\n  \t$ kubozer --bump minor';
+		expectedOutput += '\n  Options\n  \t--bump     Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease\n  ';
+		expectedOutput += '\t--i18n     Use I18N capabilities\n  ';
+		expectedOutput += '\t--upload   Use ONLY with --i18n option: upload a translation file\n  ';
+		expectedOutput += '\t--download Use ONLY with --i18n option: download a translation file\n';
+		expectedOutput += '\n  Examples\n  \t$ NODE_ENV=production kubozer --build\n  \t$ kubozer --bump minor\n  ';
+		expectedOutput += '\t$ kubozer --i18n --upload en\n  ';
+		expectedOutput += '\t$ kubozer --i18n --download it';
 	t.is(msg.stdout, expectedOutput);
 })
 
