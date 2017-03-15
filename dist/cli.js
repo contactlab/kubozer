@@ -36,7 +36,7 @@ var isProduction = function isProduction() {
 	return NODE_ENV === 'production';
 };
 
-var cli = (0, _meow2.default)('\n\tUsage\n\t\t$ [NODE_ENV=env_name] kubozer [command]\n\n\tOptions\n\t\t--bump     Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease\n\t\t--i18n     Use I18N capabilities\n\t\t--upload   Use ONLY with --i18n option: upload a translation file\n\t\t--download Use ONLY with --i18n option: download a translation file\n\n\tExamples\n\t\t$ NODE_ENV=production kubozer --build\n\t\t$ kubozer --bump minor\n\t\t$ kubozer --i18n --upload en\n\t\t$ kubozer --i18n --download it\n\n');
+var cli = (0, _meow2.default)('\n\tUsage\n\t\t$ [NODE_ENV=env_name] kubozer [command]\n\n\tOptions\n\t\t--build    Run the build task\n\t\t--bump     Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease\n\t\t--i18n     Use I18N capabilities\n\t\t--upload   Use ONLY with --i18n option: upload a translation file\n\t\t--download Use ONLY with --i18n option: download a translation file\n\n\tExamples\n\t\t$ NODE_ENV=production kubozer --build\n\t\t$ kubozer --bump minor\n\t\t$ kubozer --i18n --upload en\n\t\t$ kubozer --i18n --download it\n\n');
 
 var log = new _logger2.default();
 // Start spinner
