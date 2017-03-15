@@ -30,6 +30,10 @@ var _minifier = require('./lib/minifier');
 
 var _minifier2 = _interopRequireDefault(_minifier);
 
+var _i18n = require('./lib/i18n');
+
+var _i18n2 = _interopRequireDefault(_i18n);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -220,6 +224,22 @@ var Kubozer = function () {
 
 				return resolve(_this4._res(undefined, dataFiles, 'Bump from ' + oldVersion + ' to ' + newVersion + ' completed.'));
 			});
+		}
+	}, {
+		key: 'upload',
+		value: function upload(language) {
+			/* istanbul ignore next */
+			var oneSky = new _i18n2.default(this.config);
+			/* istanbul ignore next */
+			return oneSky.upload(language);
+		}
+	}, {
+		key: 'download',
+		value: function download(languages) {
+			/* istanbul ignore next */
+			var oneSky = new _i18n2.default(this.config);
+			/* istanbul ignore next */
+			return oneSky.download(languages);
 		}
 	}, {
 		key: '_createWorkspace',

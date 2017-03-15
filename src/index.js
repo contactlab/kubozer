@@ -7,6 +7,7 @@ import replaceInFile from 'replace-in-file';
 
 import Builder from './lib/builder';
 import Minifier from './lib/minifier';
+import OneSky from './lib/i18n';
 
 class Kubozer {
 	constructor(config, webpackConfig) {
@@ -196,6 +197,20 @@ class Kubozer {
 
 			return resolve(this._res(undefined, dataFiles, `Bump from ${oldVersion} to ${newVersion} completed.`));
 		});
+	}
+
+	upload(language) {
+		/* istanbul ignore next */
+		const oneSky = new OneSky(this.config);
+		/* istanbul ignore next */
+		return oneSky.upload(language);
+	}
+
+	download(languages) {
+		/* istanbul ignore next */
+		const oneSky = new OneSky(this.config);
+		/* istanbul ignore next */
+		return oneSky.download(languages);
 	}
 
 	_createWorkspace() {

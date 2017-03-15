@@ -14,16 +14,17 @@
 [![Package Quality](http://npm.packagequality.com/shield/kubozer.png?style=flat-square)](http://packagequality.com/#?package=kubozer)
 
 
-Kubozer is a wrapper of some tools for building production (and development) application written in Polymer 1.x. and ***ESnext*** syntax.  
+Kubozer is a wrapper of some tools for building production (and development) application written in Polymer 1.x. and ***ESnext*** syntax.
 
-## Features  
-- **Copy** whatever files you need into your `build` directory 
+## Features
+- **Copy** whatever files you need into your `build` directory
 - **Replace** part of the `html` files where needed (like change the link within the index.html to your production-ready script) with [replace-in-file]()
 - **Build** both `js` with [Webpack](https://github.com/webpack/webpack) and `html` (Polymer) with [Vulcanize](https://www.npmjs.com/package/vulcanize)
 - **Minify** minify `CSS` with [node-minify](https://www.npmjs.com/package/node-minify) and `JS` with the Uglify Webpack plugin (only with `PRODUCTION` build)
 
-Other commands are included in the bundle of Kubozer: 
+Other commands are included in the bundle of Kubozer:
 - **Bump** for bump the version of your project
+- **Translate** with [OneSkyApp](https://www.oneskyapp.com/)
 
 ## Install
 
@@ -33,19 +34,24 @@ Other commands are included in the bundle of Kubozer:
 
 ```bash
   Usage
-    $ [NODE_ENV=env_name] kubozer [command]
+		$ [NODE_ENV=env_name] kubozer [command]
 
-  Options
-  --bump Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease
+	Options
+		--bump     Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease
+		--i18n     Use I18N capabilities
+		--upload   Use ONLY with --i18n option: upload a translation file
+		--download Use ONLY with --i18n option: download a translation file
 
-  Examples
-    $ kubozer --build
-    $ kubozer --bump minor
+	Examples
+		$ NODE_ENV=production kubozer --build
+		$ kubozer --bump minor
+		$ kubozer --i18n --upload en
+		$ kubozer --i18n --download it
 ```
 
-## Enviroment typed-build 
+## Enviroment typed-build
 
-The `PRODUCTION` build `(NODE_ENV=production)` will add the **minify** step to the process.  The **default** build will not produce a minified **JS** and also **CSS**.  
+The `PRODUCTION` build `(NODE_ENV=production)` will add the **minify** step to the process.  The **default** build will not produce a minified **JS** and also **CSS**.
 
 If you want to handle a dynamic configuration, you can simply check the `process.env.NODE_ENV` within the `kubozer.conf.js` (or also `webpack.config.js`) and change the ***exported*** configuration in relation to the NODE_ENV.
 
@@ -53,9 +59,9 @@ If you want to handle a dynamic configuration, you can simply check the `process
 
 Kubozer will search for two configurations file: `kubozer.conf.js` and `webpack.config.js` (standard Webpack configuration file)
 
-### Kubozer 
-Example configuration.  **Kubozer will not assume nothing as default**.  
-```javascript 
+### Kubozer
+Example configuration.  **Kubozer will not assume nothing as default**.
+```javascript
 // kubozer.conf.js
 module.exports = {
 	workspace: './test/workspace',
@@ -63,7 +69,7 @@ module.exports = {
 	buildFolder: './test/build',
 	// Relative to you workspace
 	assetsFolder: 'assets',
-	sourceCssFiles: ['/test.css'],	
+	sourceCssFiles: ['/test.css'],
 	buildCssFile: 'style.min.css',
 	manifest: true,
 	stripConsole: true,
@@ -85,7 +91,7 @@ module.exports = {
 				''
 			]
 		}
-	],	
+	],
 	replace: {
 		css: {
 			files: 'index.html',
@@ -107,6 +113,14 @@ module.exports = {
 			inlineStyles: true,
 			excludes: ['bundle.js']
 		}
+	},
+	i18n: {
+		secret: 'thisisyoursecret',
+		apiKey: 'heregoesyourapikey',
+		projectId: 'heyaprojectid',
+		defaultLanguage: 'en',
+		format: 'HIERARCHICAL_JSON'
+		languagesPath: './app/bundles'
 	}
 };
 ```
@@ -182,9 +196,9 @@ Copy every elements within the object `copy`.
 HTML replace in file. Set a placeholder in your HTML and remove/replace the inner elements during the build.
 
 ### build(minify)
-#### minify  
-Type `boolean`  
-Choose if minify the content of js files with GCC  
+#### minify
+Type `boolean`
+Choose if minify the content of js files with GCC
 #### return `promise`
 `Webpack` and `Vulcanize` following the configuration.
 

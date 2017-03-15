@@ -22,11 +22,16 @@ const cli = meow(`
 		$ [NODE_ENV=env_name] kubozer [command]
 
 	Options
-		--bump Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease
+		--bump     Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease
+		--i18n     Use I18N capabilities
+		--upload   Use ONLY with --i18n option: upload a translation file
+		--download Use ONLY with --i18n option: download a translation file
 
 	Examples
 		$ NODE_ENV=production kubozer --build
 		$ kubozer --bump minor
+		$ kubozer --i18n --upload en
+		$ kubozer --i18n --download it
 
 `);
 
@@ -105,9 +110,36 @@ const bump = (k, type) => {
 		});
 };
 
+const upload = (k, language) => {
+	/* istanbul ignore next */
+	spinner.set(`>> Uploading translations for ${language}...`);
+	/* istanbul ignore next */
+	k.upload(language)
+		.then(() => {
+			spinner.success(`Translations uploaded succesfully for ${language}`);
+		})
+		.catch(err => {
+			spinner.fail(`Something went wrong uploading your translation file for ${language}: ${err.message}`);
+		});
+};
+
+const download = (k, language) => {
+	/* istanbul ignore next */
+	spinner.set(`>> Downloading translations for ${language}...`);
+	/* istanbul ignore next */
+	k.download(language)
+		.then(() => {
+			spinner.success(`Translations downloaded succesfully for ${language}`);
+		})
+		.catch(err => {
+			spinner.fail(`Something went wrong downloading your translation file for ${language}: ${err.message}`);
+		});
+};
+
 const main = () => {
 	try {
 		const k = new Kubozer(config, webpackConfig);
+		/* istanbul ignore next */
 		spinner.clear();
 
 		if (hasFlag('build')) {
@@ -116,6 +148,16 @@ const main = () => {
 
 		if (hasFlag('bump')) {
 			return bump(k, cli.flags.bump);
+		}
+
+		/* istanbul ignore if */
+		if (hasFlag('i18n') && hasFlag('upload')) {
+			return upload(k, cli.flags.upload);
+		}
+
+		/* istanbul ignore if */
+		if (hasFlag('i18n') && hasFlag('download')) {
+			return download(k, cli.flags.download);
 		}
 
 		spinner.clear();

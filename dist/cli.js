@@ -36,7 +36,7 @@ var isProduction = function isProduction() {
 	return NODE_ENV === 'production';
 };
 
-var cli = (0, _meow2.default)('\n\tUsage\n\t\t$ [NODE_ENV=env_name] kubozer [command]\n\n\tOptions\n\t\t--bump Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease\n\n\tExamples\n\t\t$ NODE_ENV=production kubozer --build\n\t\t$ kubozer --bump minor\n\n');
+var cli = (0, _meow2.default)('\n\tUsage\n\t\t$ [NODE_ENV=env_name] kubozer [command]\n\n\tOptions\n\t\t--bump     Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease\n\t\t--i18n     Use I18N capabilities\n\t\t--upload   Use ONLY with --i18n option: upload a translation file\n\t\t--download Use ONLY with --i18n option: download a translation file\n\n\tExamples\n\t\t$ NODE_ENV=production kubozer --build\n\t\t$ kubozer --bump minor\n\t\t$ kubozer --i18n --upload en\n\t\t$ kubozer --i18n --download it\n\n');
 
 var log = new _logger2.default();
 // Start spinner
@@ -103,9 +103,32 @@ var bump = function bump(k, type) {
 	});
 };
 
+var upload = function upload(k, language) {
+	/* istanbul ignore next */
+	spinner.set('>> Uploading translations for ' + language + '...');
+	/* istanbul ignore next */
+	k.upload(language).then(function () {
+		spinner.success('Translations uploaded succesfully for ' + language);
+	}).catch(function (err) {
+		spinner.fail('Something went wrong uploading your translation file for ' + language + ': ' + err.message);
+	});
+};
+
+var download = function download(k, language) {
+	/* istanbul ignore next */
+	spinner.set('>> Downloading translations for ' + language + '...');
+	/* istanbul ignore next */
+	k.download(language).then(function () {
+		spinner.success('Translations downloaded succesfully for ' + language);
+	}).catch(function (err) {
+		spinner.fail('Something went wrong downloading your translation file for ' + language + ': ' + err.message);
+	});
+};
+
 var main = function main() {
 	try {
 		var k = new _index2.default(config, webpackConfig);
+		/* istanbul ignore next */
 		spinner.clear();
 
 		if ((0, _hasFlag2.default)('build')) {
@@ -114,6 +137,16 @@ var main = function main() {
 
 		if ((0, _hasFlag2.default)('bump')) {
 			return bump(k, cli.flags.bump);
+		}
+
+		/* istanbul ignore if */
+		if ((0, _hasFlag2.default)('i18n') && (0, _hasFlag2.default)('upload')) {
+			return upload(k, cli.flags.upload);
+		}
+
+		/* istanbul ignore if */
+		if ((0, _hasFlag2.default)('i18n') && (0, _hasFlag2.default)('download')) {
+			return download(k, cli.flags.download);
 		}
 
 		spinner.clear();
