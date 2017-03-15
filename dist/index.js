@@ -127,20 +127,20 @@ var Kubozer = function () {
 			if (this.config.replace && this.config.replace.css) {
 				var cssFiles = this.config.replace.css.files;
 				optionCSS.files = _path2.default.join(_path2.default.resolve(this.config.workspace), cssFiles);
-				optionCSS.replace = this.config.replace.css.commentRegex.map(function (item) {
+				optionCSS.from = this.config.replace.css.commentRegex.map(function (item) {
 					return new RegExp(item, 'g');
 				});
-				optionCSS.with = this.config.replace.css.with.map(function (item) {
+				optionCSS.to = this.config.replace.css.with.map(function (item) {
 					return '\n\t\t\t\t<link rel="stylesheet" href="' + item + '" />\n\t\t\t\t';
 				});
 			}
 
 			if (this.config.replace && this.config.replace.js) {
 				optionJS.files = _path2.default.join(_path2.default.resolve(this.config.workspace), this.config.replace.js.files);
-				optionJS.replace = this.config.replace.js.commentRegex.map(function (item) {
+				optionJS.from = this.config.replace.js.commentRegex.map(function (item) {
 					return new RegExp(item, 'g');
 				});
-				optionJS.with = this.config.replace.js.with.map(function (item) {
+				optionJS.to = this.config.replace.js.with.map(function (item) {
 					return '\n\t\t\t\t<script src="' + item + '"></script>\n\t\t\t\t';
 				});
 			}

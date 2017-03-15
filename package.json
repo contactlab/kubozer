@@ -60,7 +60,7 @@
     "node-minify": "2.0.2",
     "onesky-utils": "^1.0.0",
     "ora": "1.1.0",
-    "replace-in-file": "2.2.2",
+    "replace-in-file": "2.5.0",
     "semver": "5.3.0",
     "vulcanize": "1.15.2",
     "webpack": "^2.2.1",
