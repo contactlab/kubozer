@@ -111,7 +111,9 @@ const bump = (k, type) => {
 };
 
 const upload = (k, language) => {
+	/* istanbul ignore next */
 	spinner.set(`>> Uploading translations for ${language}...`);
+	/* istanbul ignore next */
 	k.upload(language)
 		.then(() => {
 			spinner.success(`Translations uploaded succesfully for ${language}`);
@@ -122,7 +124,9 @@ const upload = (k, language) => {
 };
 
 const download = (k, language) => {
+	/* istanbul ignore next */
 	spinner.set(`>> Downloading translations for ${language}...`);
+	/* istanbul ignore next */
 	k.download(language)
 		.then(() => {
 			spinner.success(`Translations downloaded succesfully for ${language}`);
@@ -135,6 +139,7 @@ const download = (k, language) => {
 const main = () => {
 	try {
 		const k = new Kubozer(config, webpackConfig);
+		/* istanbul ignore next */
 		spinner.clear();
 
 		if (hasFlag('build')) {
@@ -145,10 +150,12 @@ const main = () => {
 			return bump(k, cli.flags.bump);
 		}
 
+		/* istanbul ignore if */
 		if (hasFlag('i18n') && hasFlag('upload')) {
 			return upload(k, cli.flags.upload);
 		}
 
+		/* istanbul ignore if */
 		if (hasFlag('i18n') && hasFlag('download')) {
 			return download(k, cli.flags.download);
 		}

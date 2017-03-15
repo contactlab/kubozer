@@ -104,7 +104,9 @@ var bump = function bump(k, type) {
 };
 
 var upload = function upload(k, language) {
+	/* istanbul ignore next */
 	spinner.set('>> Uploading translations for ' + language + '...');
+	/* istanbul ignore next */
 	k.upload(language).then(function () {
 		spinner.success('Translations uploaded succesfully for ' + language);
 	}).catch(function (err) {
@@ -113,7 +115,9 @@ var upload = function upload(k, language) {
 };
 
 var download = function download(k, language) {
+	/* istanbul ignore next */
 	spinner.set('>> Downloading translations for ' + language + '...');
+	/* istanbul ignore next */
 	k.download(language).then(function () {
 		spinner.success('Translations downloaded succesfully for ' + language);
 	}).catch(function (err) {
@@ -124,6 +128,7 @@ var download = function download(k, language) {
 var main = function main() {
 	try {
 		var k = new _index2.default(config, webpackConfig);
+		/* istanbul ignore next */
 		spinner.clear();
 
 		if ((0, _hasFlag2.default)('build')) {
@@ -134,10 +139,12 @@ var main = function main() {
 			return bump(k, cli.flags.bump);
 		}
 
+		/* istanbul ignore if */
 		if ((0, _hasFlag2.default)('i18n') && (0, _hasFlag2.default)('upload')) {
 			return upload(k, cli.flags.upload);
 		}
 
+		/* istanbul ignore if */
 		if ((0, _hasFlag2.default)('i18n') && (0, _hasFlag2.default)('download')) {
 			return download(k, cli.flags.download);
 		}

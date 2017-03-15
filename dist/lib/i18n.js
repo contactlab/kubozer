@@ -41,14 +41,19 @@ var OneSky = function () {
 		value: function upload(language) {
 			var _this = this;
 
+			/* istanbul ignore next */
 			var filePath = this.getFilePath(this.languagesPath, language);
 
+			/* istanbul ignore next */
 			return new Promise(function (resolve, reject) {
+				/* istanbul ignore next */
 				fs.readFile(filePath, 'utf-8', function (err, data) {
+					/* istanbul ignore next */
 					if (err) {
 						return reject(err);
 					}
 
+					/* istanbul ignore next */
 					var options = Object.assign({}, _this.baseOptions, {
 						language: language,
 						fileName: _this.getFileName(language),
@@ -56,9 +61,12 @@ var OneSky = function () {
 						content: data,
 						format: _this.format
 					});
+					/* istanbul ignore next */
 					onesky.postFile(options).then(function (content) {
+						/* istanbul ignore next */
 						return resolve(content);
 					}).catch(function (err) {
+						/* istanbul ignore next */
 						return reject(err);
 					});
 				});
@@ -69,23 +77,30 @@ var OneSky = function () {
 		value: function download(language) {
 			var _this2 = this;
 
+			/* istanbul ignore next */
 			return new Promise(function (resolve, reject) {
+				/* istanbul ignore next */
 				var options = Object.assign({}, _this2.baseOptions, {
 					language: language,
 					fileName: 'EN.json'
 				});
 
+				/* istanbul ignore next */
 				onesky.getFile(options).then(function (content) {
+					/* istanbul ignore next */
 					var filePath = _this2.getFilePath(_this2.languagesPath, language);
 
 					fs.writeFile(filePath, content, function (err) {
+						/* istanbul ignore next */
 						if (err) {
 							return reject(err);
 						}
 
+						/* istanbul ignore next */
 						return resolve(content);
 					});
 				}).catch(function (err) {
+					/* istanbul ignore next */
 					return reject(err);
 				});
 			});

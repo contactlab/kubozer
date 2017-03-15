@@ -200,12 +200,16 @@ class Kubozer {
 	}
 
 	upload(language) {
+		/* istanbul ignore next */
 		const oneSky = new OneSky(this.config);
+		/* istanbul ignore next */
 		return oneSky.upload(language);
 	}
 
 	download(languages) {
+		/* istanbul ignore next */
 		const oneSky = new OneSky(this.config);
+		/* istanbul ignore next */
 		return oneSky.download(languages);
 	}
 

@@ -228,13 +228,17 @@ var Kubozer = function () {
 	}, {
 		key: 'upload',
 		value: function upload(language) {
+			/* istanbul ignore next */
 			var oneSky = new _i18n2.default(this.config);
+			/* istanbul ignore next */
 			return oneSky.upload(language);
 		}
 	}, {
 		key: 'download',
 		value: function download(languages) {
+			/* istanbul ignore next */
 			var oneSky = new _i18n2.default(this.config);
+			/* istanbul ignore next */
 			return oneSky.download(languages);
 		}
 	}, {

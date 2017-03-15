@@ -23,14 +23,19 @@ export default class OneSky {
 	}
 
 	upload(language) {
+		/* istanbul ignore next */
 		const filePath = this.getFilePath(this.languagesPath, language);
 
+		/* istanbul ignore next */
 		return new Promise((resolve, reject) => {
+			/* istanbul ignore next */
 			fs.readFile(filePath, 'utf-8', (err, data) => {
+				/* istanbul ignore next */
 				if (err) {
 					return reject(err);
 				}
 
+				/* istanbul ignore next */
 				const options = Object.assign({}, this.baseOptions, {
 					language,
 					fileName: this.getFileName(language),
@@ -38,9 +43,12 @@ export default class OneSky {
 					content: data,
 					format: this.format
 				});
+				/* istanbul ignore next */
 				onesky.postFile(options).then(content => {
+					/* istanbul ignore next */
 					return resolve(content);
 				}).catch(err => {
+					/* istanbul ignore next */
 					return reject(err);
 				});
 			});
@@ -48,23 +56,30 @@ export default class OneSky {
 	}
 
 	download(language) {
+		/* istanbul ignore next */
 		return new Promise((resolve, reject) => {
+			/* istanbul ignore next */
 			const options = Object.assign({}, this.baseOptions, {
 				language,
 				fileName: 'EN.json'
 			});
 
+			/* istanbul ignore next */
 			onesky.getFile(options).then(content => {
+				/* istanbul ignore next */
 				const filePath = this.getFilePath(this.languagesPath, language);
 
 				fs.writeFile(filePath, content, err => {
+					/* istanbul ignore next */
 					if (err) {
 						return reject(err);
 					}
 
+					/* istanbul ignore next */
 					return resolve(content);
 				});
 			}).catch(err => {
+				/* istanbul ignore next */
 				return reject(err);
 			});
 		});
