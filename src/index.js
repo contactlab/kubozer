@@ -96,10 +96,10 @@ class Kubozer {
 				path.resolve(this.config.workspace),
 				cssFiles
 			);
-			optionCSS.replace = this.config.replace.css.commentRegex.map(item => {
+			optionCSS.from = this.config.replace.css.commentRegex.map(item => {
 				return new RegExp(item, 'g');
 			});
-			optionCSS.with = this.config.replace.css.with.map(item => {
+			optionCSS.to = this.config.replace.css.with.map(item => {
 				return `
 				<link rel="stylesheet" href="${item}" />
 				`;
@@ -111,10 +111,10 @@ class Kubozer {
 				path.resolve(this.config.workspace),
 				this.config.replace.js.files
 			);
-			optionJS.replace = this.config.replace.js.commentRegex.map(item => {
+			optionJS.from = this.config.replace.js.commentRegex.map(item => {
 				return new RegExp(item, 'g');
 			});
-			optionJS.with = this.config.replace.js.with.map(item => {
+			optionJS.to = this.config.replace.js.with.map(item => {
 				return `
 				<script src="${item}"></script>
 				`;
