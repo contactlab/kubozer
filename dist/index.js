@@ -6,6 +6,9 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+// import result from './lib/result';
+
+
 var _path = require('path');
 
 var _path2 = _interopRequireDefault(_path);
@@ -23,8 +26,6 @@ var _replaceInFile = require('replace-in-file');
 var _replaceInFile2 = _interopRequireDefault(_replaceInFile);
 
 var _result = require('./lib/result');
-
-var _result2 = _interopRequireDefault(_result);
 
 var _builder = require('./lib/builder');
 
@@ -54,7 +55,7 @@ var Kubozer = function () {
     this.webpackConfig = webpackConfig;
     this._checkForRequired();
 
-    this.Builder = new _builder2.default(this.config, this.webpackConfig, _result2.default);
+    this.Builder = new _builder2.default(this.config, this.webpackConfig);
     this.Minifier = new _minifier2.default(this.config);
 
     // Ensure no previous workspaces are present
@@ -106,7 +107,8 @@ var Kubozer = function () {
                 var destination = _path2.default.join(_path2.default.resolve(_this.config.buildFolder), type.baseFolder, item);
 
                 _fsExtra2.default.copySync(itemPath, destination);
-                return resolve((0, _result2.default)(undefined, { itemPath: itemPath, destination: destination }, 'Copy completed.'));
+
+                return resolve((0, _result.success)('Copy completed.', { itemPath: itemPath, destination: destination }));
               } catch (err) {
                 return reject(err);
               }
@@ -115,7 +117,7 @@ var Kubozer = function () {
         }
 
         // If "copy" is empty
-        reject((0, _result2.default)(true, undefined, 'copy() method was called but "copy" property is empty or undefined.'));
+        reject((0, _result.error)('copy() method was called but "copy" property is empty or undefined.'));
       });
     }
   }, {
@@ -155,9 +157,10 @@ var Kubozer = function () {
         try {
           var changedCSS = _replaceInFile2.default.sync(optionCSS);
           var changedJS = _replaceInFile2.default.sync(optionJS);
-          return resolve((0, _result2.default)(undefined, { changedCSS: changedCSS, changedJS: changedJS }, 'Replace-in-file completed.'));
+
+          return resolve((0, _result.success)('Replace-in-file completed.', { changedCSS: changedCSS, changedJS: changedJS }));
         } catch (err) {
-          reject((0, _result2.default)(true, undefined, err));
+          reject((0, _result.error)(err));
         }
       });
     }
@@ -205,26 +208,31 @@ var Kubozer = function () {
       return new Promise(function (resolve, reject) {
         var types = ['patch', 'minor', 'major', 'prepatch', 'preminor', 'premajor', 'prerelease'];
         var notAType = types.indexOf(type) === -1;
+
         if (type === null || type === undefined || typeof type !== 'string' || notAType) {
-          return reject((0, _result2.default)(true, undefined, 'BUMP(): type must be specified. This is not a valid type --> \'' + type + '\''));
+          return reject((0, _result.error)('BUMP(): type must be specified. This is not a valid type --> \'' + type + '\''));
         }
 
         var oldVersion = '';
         var newVersion = '';
+
         var dataFiles = _this3.config.bump.files.reduce(function (acc, filePath) {
           var fullFilePath = _path2.default.resolve(filePath);
           var data = JSON.parse(_fsExtra2.default.readFileSync(fullFilePath, 'utf8'));
           var old = data.version;
+
           data.version = _semver2.default.inc(data.version, type);
           oldVersion = old;
           newVersion = data.version;
 
           var dataString = JSON.stringify(data, null, 2);
+
           _fsExtra2.default.writeFileSync(fullFilePath, dataString);
+
           return acc.concat(data);
         }, []);
 
-        return resolve((0, _result2.default)(undefined, dataFiles, 'Bump from ' + oldVersion + ' to ' + newVersion + ' completed.'));
+        return resolve((0, _result.success)('Bump from ' + oldVersion + ' to ' + newVersion + ' completed.', dataFiles));
       });
     }
   }, {
@@ -248,6 +256,7 @@ var Kubozer = function () {
     value: function _createWorkspace() {
       try {
         var pathWorkspace = _path2.default.resolve(this.config.workspace);
+
         _fsExtra2.default.ensureDirSync(pathWorkspace);
         _fsExtra2.default.copySync(_path2.default.resolve(this.config.sourceFolder), pathWorkspace);
       } catch (err) {
@@ -272,6 +281,7 @@ var Kubozer = function () {
         var pathManifest = _path2.default.resolve(_path2.default.join(this.config.workspace, 'manifest.json'));
         var pathManifestDist = _path2.default.resolve(_path2.default.join(this.config.buildFolder, 'manifest.json'));
         var exist = _fsExtra2.default.existsSync(pathManifest);
+
         if (exist) {
           _fsExtra2.default.copySync(pathManifest, pathManifestDist);
           return true;
@@ -287,7 +297,9 @@ var Kubozer = function () {
     value: function _pathErrHandler(entity) {
       var err = new Error();
       var msg = 'Path must be a string. Received undefined';
+
       err.message = msg + ' --> ' + entity;
+
       return err;
     }
   }, {
