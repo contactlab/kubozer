@@ -213,8 +213,9 @@ test('replace() products correct output', async t => {
 });
 
 test('correct bump() method', async t => {
-  fs.writeFileSync('./test/src-test/package.json', JSON.stringify({version: '1.0.0'}))
-  fs.writeFileSync('./test/src-test/manifest.json', JSON.stringify({version: '1.0.0'}))
+  fs.writeFileSync('./test/src-test/package.json', JSON.stringify({version: '1.0.0'}));
+  fs.writeFileSync('./test/src-test/manifest.json', JSON.stringify({version: '1.0.0'}));
+
   const confWebpack = require('./src-test/webpack.test.config');
   const config = {
     workspace: './test/workspace',
