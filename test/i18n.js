@@ -12,7 +12,7 @@ test('get correct filePath for language file', async t => {
       projectID: 94359,
       languagesPath: './app/bundles'
     }
-	};
+  };
   const fn = new Fn(config);
   const filePath = fn.getFilePath(config.i18n.languagesPath, 'en');
   t.is(filePath, 'app/bundles/en.json');
@@ -29,7 +29,7 @@ test('get correct fileName for language file', async t => {
       projectID: 94359,
       languagesPath: './app/bundles'
     }
-	};
+  };
   const fn = new Fn(config);
   const fileName = fn.getFileName('en');
   t.is(fileName, 'en.json');

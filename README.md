@@ -1,5 +1,5 @@
 <p align="center">
-	<img src="https://raw.githubusercontent.com/contactlab/kubozer/master/Kubozer.png" alt="Kubozer"/>
+    <img src="https://raw.githubusercontent.com/contactlab/kubozer/master/Kubozer.png" alt="Kubozer"/>
 </p>
 
 ---
@@ -28,26 +28,26 @@ Other commands are included in the bundle of Kubozer:
 
 ## Install
 
-	$ yarn add kubozer
+    $ yarn add kubozer
 
 ## Usage
 
 ```bash
   Usage
-		$ [NODE_ENV=env_name] kubozer [command]
+        $ [NODE_ENV=env_name] kubozer [command]
 
-	Options
-		--build    Run the build task
-		--bump     Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease
-		--i18n     Use I18N capabilities
-		--upload   Use ONLY with --i18n option: upload a translation file
-		--download Use ONLY with --i18n option: download a translation file
+    Options
+        --build    Run the build task
+        --bump     Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease
+        --i18n     Use I18N capabilities
+        --upload   Use ONLY with --i18n option: upload a translation file
+        --download Use ONLY with --i18n option: download a translation file
 
-	Examples
-		$ NODE_ENV=production kubozer --build
-		$ kubozer --bump minor
-		$ kubozer --i18n --upload en
-		$ kubozer --i18n --download it
+    Examples
+        $ NODE_ENV=production kubozer --build
+        $ kubozer --bump minor
+        $ kubozer --i18n --upload en
+        $ kubozer --i18n --download it
 ```
 
 ## Enviroment typed-build
@@ -65,64 +65,64 @@ Example configuration.  **Kubozer will not assume nothing as default**.
 ```javascript
 // kubozer.conf.js
 module.exports = {
-	workspace: './test/workspace',
-	sourceFolder: './test/src-test',
-	buildFolder: './test/build',
-	// Relative to you workspace
-	assetsFolder: 'assets',
-	sourceCssFiles: ['/test.css'],
-	buildCssFile: 'style.min.css',
-	manifest: true,
-	stripConsole: true,
-	bump: {
-		files: [
-			'./test/src-test/package.json',
-			'./test/src-test/manifest.json'
-		]
-	},
-	copy: [
-		{
-			baseFolder: 'assets',
-			items: [
-				'imgs-others'
-			]
-		}, {
-			baseFolder: 'bundles',
-			items: [
-				''
-			]
-		}
-	],
-	replace: {
-		css: {
-			files: 'index.html',
-			commentRegex: ['<!--styles!-->((.|\n)*)<!--styles!-->'],
-			with: ['assets/style.min.css']
-		},
-		js: {
-			files: 'index.html',
-			commentRegex: ['<!--js!-->((.|\n)*)<!--js!-->'],
-			with: ['bundle.js']
-		}
-	}
-	vulcanize: {
-		srcTarget: 'index.html',
-		buildTarget: 'index.html',
-		conf: {
-			stripComments: true,
-			inlineScripts: true,
-			inlineStyles: true,
-			excludes: ['bundle.js']
-		}
-	},
-	i18n: {
-		secret: 'thisisyoursecret',
-		apiKey: 'heregoesyourapikey',
-		projectId: 'heyaprojectid',
-		defaultLanguage: 'en',
-		format: 'HIERARCHICAL_JSON'
-		languagesPath: './app/bundles'
-	}
+    workspace: './test/workspace',
+    sourceFolder: './test/src-test',
+    buildFolder: './test/build',
+    // Relative to you workspace
+    assetsFolder: 'assets',
+    sourceCssFiles: ['/test.css'],
+    buildCssFile: 'style.min.css',
+    manifest: true,
+    stripConsole: true,
+    bump: {
+        files: [
+            './test/src-test/package.json',
+            './test/src-test/manifest.json'
+        ]
+    },
+    copy: [
+        {
+            baseFolder: 'assets',
+            items: [
+                'imgs-others'
+            ]
+        }, {
+            baseFolder: 'bundles',
+            items: [
+                ''
+            ]
+        }
+    ],
+    replace: {
+        css: {
+            files: 'index.html',
+            commentRegex: ['<!--styles!-->((.|\n)*)<!--styles!-->'],
+            with: ['assets/style.min.css']
+        },
+        js: {
+            files: 'index.html',
+            commentRegex: ['<!--js!-->((.|\n)*)<!--js!-->'],
+            with: ['bundle.js']
+        }
+    }
+    vulcanize: {
+        srcTarget: 'index.html',
+        buildTarget: 'index.html',
+        conf: {
+            stripComments: true,
+            inlineScripts: true,
+            inlineStyles: true,
+            excludes: ['bundle.js']
+        }
+    },
+    i18n: {
+        secret: 'thisisyoursecret',
+        apiKey: 'heregoesyourapikey',
+        projectId: 'heyaprojectid',
+        defaultLanguage: 'en',
+        format: 'HIERARCHICAL_JSON'
+        languagesPath: './app/bundles'
+    }
 };
 ```
 
@@ -130,31 +130,31 @@ module.exports = {
 ```javascript
 // webpack.config.js
 module.exports = {
-	entry: {
-		main: './src/index.js',
-		// Other modules
-		vendors: ['fetch', 'array-from']
-	}
-	output: {
-		// Make sure this path is the same of the `buildFolder` of `kubozer.conf.js` if you want to build everithing in the same directory
-		path: './test/build',
-		// Make sure to use [name] or [id] in output.filename
-		//  when using multiple entry points
-		filename: '[name].bundle.js'
-	},
-	devtool: 'source-map',
-	module: {
-		loaders: [{
-			test: /\.js?$/,
-			// exclude: /(node_modules|bower_components)/,
-			exclude: ['node_modules', 'bundle.js', 'build'],
-			loader: 'babel-loader',
-			query: {
-				presets: ['es2015'],
-				plugins: ['transform-es2015-spread', 'syntax-object-rest-spread', 'transform-object-rest-spread']
-			}
-		}]
-	}
+    entry: {
+        main: './src/index.js',
+        // Other modules
+        vendors: ['fetch', 'array-from']
+    }
+    output: {
+        // Make sure this path is the same of the `buildFolder` of `kubozer.conf.js` if you want to build everithing in the same directory
+        path: './test/build',
+        // Make sure to use [name] or [id] in output.filename
+        //  when using multiple entry points
+        filename: '[name].bundle.js'
+    },
+    devtool: 'source-map',
+    module: {
+        loaders: [{
+            test: /\.js?$/,
+            // exclude: /(node_modules|bower_components)/,
+            exclude: ['node_modules', 'bundle.js', 'build'],
+            loader: 'babel-loader',
+            query: {
+                presets: ['es2015'],
+                plugins: ['transform-es2015-spread', 'syntax-object-rest-spread', 'transform-object-rest-spread']
+            }
+        }]
+    }
 };
 ```
 
@@ -173,14 +173,14 @@ const k = new Kubozer(config, webpackConfig);
 k.deletePrevBuild();
 
 k.copy()
-	.then(() => k.replace())
-	.then(() => k.build(isProd))
-	.then(res => {
-		console.log(res);
-	})
-	.catch(err => {
-		console.error(err);
-	});
+    .then(() => k.replace())
+    .then(() => k.build(isProd))
+    .then(res => {
+        console.log(res);
+    })
+    .catch(err => {
+        console.error(err);
+    });
 ```
 
 ## API
@@ -211,17 +211,17 @@ Bump to new version every file following the configuration.
 
 ## Development
 
-	$ git clone https://github.com/contactlab/kubozer.git#development
-	$ yarn
+    $ git clone https://github.com/contactlab/kubozer.git#development
+    $ yarn
 
 ### Build
 
-	$ yarn run build
+    $ yarn run build
 
 ### Testing
 > XO as linter and AVA for units.
 
-	$ yarn test
+    $ yarn test
 
 
 ### Git branching policies
