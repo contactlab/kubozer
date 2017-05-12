@@ -24,7 +24,17 @@
     "esnext": true,
     "space": true,
     "rules": {
-      "import/no-dynamic-require": 0
+      "import/no-dynamic-require": 0,
+      "capitalized-comments": 0,
+      "no-multi-spaces": [
+        "error",
+        {
+          "exceptions": {
+            "VariableDeclarator": true,
+            "ImportDeclaration": true
+          }
+        }
+      ]
     },
     "ignores": [
       "test/**/*",
