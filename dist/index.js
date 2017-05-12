@@ -45,6 +45,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+var COPY_COMPLETED = 'Copy completed.';
+var COPY_ERROR = 'copy() method was called but "copy" property is empty or undefined.';
+var REPLACE_COMPLETED = 'Replace-in-file completed.';
+
 var Kubozer = function () {
   function Kubozer(config, webpackConfig) {
     _classCallCheck(this, Kubozer);
@@ -110,7 +114,7 @@ var Kubozer = function () {
 
                 _fsExtra2.default.copySync(itemPath, destination);
 
-                return resolve((0, _result.success)('Copy completed.', { itemPath: itemPath, destination: destination }));
+                return resolve((0, _result.success)(COPY_COMPLETED, { itemPath: itemPath, destination: destination }));
               } catch (err) {
                 return reject(err);
               }
@@ -119,7 +123,7 @@ var Kubozer = function () {
         }
 
         // If "copy" is empty
-        reject((0, _result.error)('copy() method was called but "copy" property is empty or undefined.'));
+        reject((0, _result.error)(COPY_ERROR));
       });
     }
   }, {
@@ -160,7 +164,7 @@ var Kubozer = function () {
           var changedCSS = _replaceInFile2.default.sync(optionCSS);
           var changedJS = _replaceInFile2.default.sync(optionJS);
 
-          return resolve((0, _result.success)('Replace-in-file completed.', { changedCSS: changedCSS, changedJS: changedJS }));
+          return resolve((0, _result.success)(REPLACE_COMPLETED, { changedCSS: changedCSS, changedJS: changedJS }));
         } catch (err) {
           reject((0, _result.error)(err));
         }
@@ -286,6 +290,7 @@ var Kubozer = function () {
 
         if (exist) {
           _fsExtra2.default.copySync(pathManifest, pathManifestDist);
+
           return true;
         }
 

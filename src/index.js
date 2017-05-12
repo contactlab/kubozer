@@ -15,6 +15,10 @@ import Builder          from './lib/builder';
 import Minifier         from './lib/minifier';
 import OneSky           from './lib/i18n';
 
+const COPY_COMPLETED    = 'Copy completed.';
+const COPY_ERROR        = 'copy() method was called but "copy" property is empty or undefined.';
+const REPLACE_COMPLETED = 'Replace-in-file completed.';
+
 class Kubozer {
   constructor(config, webpackConfig) {
     if (!config || !webpackConfig) {
@@ -78,7 +82,7 @@ class Kubozer {
 
               fs.copySync(itemPath, destination);
 
-              return resolve(success('Copy completed.', {itemPath, destination}));
+              return resolve(success(COPY_COMPLETED, {itemPath, destination}));
             } catch (err) {
               return reject(err);
             }
@@ -87,7 +91,7 @@ class Kubozer {
       }
 
       // If "copy" is empty
-      reject(error('copy() method was called but "copy" property is empty or undefined.'));
+      reject(error(COPY_ERROR));
     });
   }
 
@@ -137,7 +141,7 @@ class Kubozer {
         const changedCSS = replaceInFile.sync(optionCSS);
         const changedJS  = replaceInFile.sync(optionJS);
 
-        return resolve(success('Replace-in-file completed.', {changedCSS, changedJS}));
+        return resolve(success(REPLACE_COMPLETED, {changedCSS, changedJS}));
       }	catch (err) {
         reject(error(err));
       }
@@ -255,6 +259,7 @@ class Kubozer {
 
       if (exist) {
         fs.copySync(pathManifest, pathManifestDist);
+
         return true;
       }
 

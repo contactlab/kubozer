@@ -13,6 +13,10 @@ import Vulcanize             from 'vulcanize';
 
 import {success, error} from './result';
 
+const WEBPACK_COMPLETED   = 'Webpack compilation completed';
+const VULCANIZE_COMPLETED = 'Vulcanize completed.';
+const VULCANIZE_NO_CONF   = 'Vulcanize configuration is not present. ---> config.vulcanize === undefined';
+
 export default class Builder {
   constructor(config, webpackConfig) {
     this.config = config;
@@ -48,7 +52,7 @@ export default class Builder {
             return reject(error(err));
           }
 
-          return resolve(success('Webpack compilation completed', [{completed: true}]));
+          return resolve(success(WEBPACK_COMPLETED, [{completed: true}]));
         });
       } catch (err) {
         return reject(error(err.message, err.name));
@@ -59,7 +63,7 @@ export default class Builder {
   vulcanize() {
     return new Promise((resolve, reject) => {
       if (this.config.vulcanize === undefined) {
-        reject(error(`Vulcanize configuration is not present. ---> config.vulcanize === undefined`));
+        reject(error(VULCANIZE_NO_CONF));
       }
 
       const vulcan = new Vulcanize(this.config.vulcanize.conf);
@@ -86,7 +90,7 @@ export default class Builder {
             return reject(err);
           }
 
-          return resolve(success('Vulcanize completed.', buildIndex));
+          return resolve(success(VULCANIZE_COMPLETED, buildIndex));
         });
       });
     });

@@ -37,6 +37,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+var WEBPACK_COMPLETED = 'Webpack compilation completed';
+var VULCANIZE_COMPLETED = 'Vulcanize completed.';
+var VULCANIZE_NO_CONF = 'Vulcanize configuration is not present. ---> config.vulcanize === undefined';
+
 var Builder = function () {
   function Builder(config, webpackConfig) {
     _classCallCheck(this, Builder);
@@ -78,7 +82,7 @@ var Builder = function () {
               return reject((0, _result.error)(err));
             }
 
-            return resolve((0, _result.success)('Webpack compilation completed', [{ completed: true }]));
+            return resolve((0, _result.success)(WEBPACK_COMPLETED, [{ completed: true }]));
           });
         } catch (err) {
           return reject((0, _result.error)(err.message, err.name));
@@ -92,7 +96,7 @@ var Builder = function () {
 
       return new Promise(function (resolve, reject) {
         if (_this2.config.vulcanize === undefined) {
-          reject((0, _result.error)('Vulcanize configuration is not present. ---> config.vulcanize === undefined'));
+          reject((0, _result.error)(VULCANIZE_NO_CONF));
         }
 
         var vulcan = new _vulcanize2.default(_this2.config.vulcanize.conf);
@@ -113,7 +117,7 @@ var Builder = function () {
               return reject(err);
             }
 
-            return resolve((0, _result.success)('Vulcanize completed.', buildIndex));
+            return resolve((0, _result.success)(VULCANIZE_COMPLETED, buildIndex));
           });
         });
       });
