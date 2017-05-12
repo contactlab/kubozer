@@ -21,6 +21,7 @@
   },
   "xo": {
     "esnext": true,
+    "space": true,
     "rules": {
       "import/no-dynamic-require": 0
     },
