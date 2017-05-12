@@ -22,6 +22,10 @@ var _replaceInFile = require('replace-in-file');
 
 var _replaceInFile2 = _interopRequireDefault(_replaceInFile);
 
+var _result = require('./lib/result');
+
+var _result2 = _interopRequireDefault(_result);
+
 var _builder = require('./lib/builder');
 
 var _builder2 = _interopRequireDefault(_builder);
@@ -50,7 +54,8 @@ var Kubozer = function () {
     this.webpackConfig = webpackConfig;
     this._checkForRequired();
 
-    this.Builder = new _builder2.default(this.config, this.webpackConfig, this._res);
+    // this.Builder = new Builder(this.config, this.webpackConfig, this._res);
+    this.Builder = new _builder2.default(this.config, this.webpackConfig, _result2.default);
     this.Minifier = new _minifier2.default(this.config);
 
     // Ensure no previous workspaces are present
@@ -102,7 +107,8 @@ var Kubozer = function () {
                 var destination = _path2.default.join(_path2.default.resolve(_this.config.buildFolder), type.baseFolder, item);
 
                 _fsExtra2.default.copySync(itemPath, destination);
-                return resolve(_this._res(undefined, { itemPath: itemPath, destination: destination }, 'Copy completed.'));
+                // return resolve(this._res(undefined, {itemPath, destination}, 'Copy completed.'));
+                return resolve((0, _result2.default)(undefined, { itemPath: itemPath, destination: destination }, 'Copy completed.'));
               } catch (err) {
                 return reject(err);
               }
@@ -111,14 +117,13 @@ var Kubozer = function () {
         }
 
         // If "copy" is empty
-        reject(_this._res(true, undefined, 'copy() method was called but "copy" property is empty or undefined.'));
+        // reject(this._res(true, undefined, 'copy() method was called but "copy" property is empty or undefined.'));
+        reject((0, _result2.default)(true, undefined, 'copy() method was called but "copy" property is empty or undefined.'));
       });
     }
   }, {
     key: 'replace',
     value: function replace() {
-      var _this2 = this;
-
       this._ensureWorkspace();
 
       var optionCSS = {};
@@ -153,16 +158,18 @@ var Kubozer = function () {
         try {
           var changedCSS = _replaceInFile2.default.sync(optionCSS);
           var changedJS = _replaceInFile2.default.sync(optionJS);
-          return resolve(_this2._res(undefined, { changedCSS: changedCSS, changedJS: changedJS }, 'Replace-in-file completed.'));
+          // return resolve(this._res(undefined, {changedCSS, changedJS}, 'Replace-in-file completed.'));
+          return resolve((0, _result2.default)(undefined, { changedCSS: changedCSS, changedJS: changedJS }, 'Replace-in-file completed.'));
         } catch (err) {
-          reject(_this2._res(true, undefined, err));
+          // reject(this._res(true, undefined, err));
+          reject((0, _result2.default)(true, undefined, err));
         }
       });
     }
   }, {
     key: 'build',
     value: function build(minify) {
-      var _this3 = this;
+      var _this2 = this;
 
       this._ensureWorkspace();
 
@@ -172,9 +179,9 @@ var Kubozer = function () {
       return this.Builder.webpack(minify).then(function (res) {
         resWebpack = res;
 
-        var promises = [_this3.Builder.vulcanize()];
+        var promises = [_this2.Builder.vulcanize()];
         if (minify) {
-          promises = promises.concat(_this3.Minifier.minifyCSS());
+          promises = promises.concat(_this2.Minifier.minifyCSS());
         }
 
         return Promise.all(promises);
@@ -198,18 +205,19 @@ var Kubozer = function () {
   }, {
     key: 'bump',
     value: function bump(type) {
-      var _this4 = this;
+      var _this3 = this;
 
       return new Promise(function (resolve, reject) {
         var types = ['patch', 'minor', 'major', 'prepatch', 'preminor', 'premajor', 'prerelease'];
         var notAType = types.indexOf(type) === -1;
         if (type === null || type === undefined || typeof type !== 'string' || notAType) {
-          return reject(_this4._res(true, undefined, 'BUMP(): type must be specified. This is not a valid type --> \'' + type + '\''));
+          // return reject(this._res(true, undefined, `BUMP(): type must be specified. This is not a valid type --> '${type}'`));
+          return reject((0, _result2.default)(true, undefined, 'BUMP(): type must be specified. This is not a valid type --> \'' + type + '\''));
         }
 
         var oldVersion = '';
         var newVersion = '';
-        var dataFiles = _this4.config.bump.files.reduce(function (acc, filePath) {
+        var dataFiles = _this3.config.bump.files.reduce(function (acc, filePath) {
           var fullFilePath = _path2.default.resolve(filePath);
           var data = JSON.parse(_fsExtra2.default.readFileSync(fullFilePath, 'utf8'));
           var old = data.version;
@@ -222,7 +230,8 @@ var Kubozer = function () {
           return acc.concat(data);
         }, []);
 
-        return resolve(_this4._res(undefined, dataFiles, 'Bump from ' + oldVersion + ' to ' + newVersion + ' completed.'));
+        // return resolve(this._res(undefined, dataFiles, `Bump from ${oldVersion} to ${newVersion} completed.`));
+        return resolve((0, _result2.default)(undefined, dataFiles, 'Bump from ' + oldVersion + ' to ' + newVersion + ' completed.'));
       });
     }
   }, {
@@ -288,12 +297,12 @@ var Kubozer = function () {
       err.message = msg + ' --> ' + entity;
       return err;
     }
-  }, {
-    key: '_res',
-    value: function _res(err, data, message) {
-      var stringified = JSON.stringify({ err: err, data: data, message: message });
-      return Object.assign({}, JSON.parse(stringified));
-    }
+
+    // _res(err, data, message) {
+    //   const stringified = JSON.stringify({err, data, message});
+    //   return Object.assign({}, JSON.parse(stringified));
+    // }
+
   }, {
     key: '_checkForRequired',
     value: function _checkForRequired() {

@@ -5,6 +5,7 @@ import fs from 'fs-extra';
 import semver from 'semver';
 import replaceInFile from 'replace-in-file';
 
+import result from './lib/result';
 import Builder from './lib/builder';
 import Minifier from './lib/minifier';
 import OneSky from './lib/i18n';
@@ -19,7 +20,7 @@ class Kubozer {
     this.webpackConfig = webpackConfig;
     this._checkForRequired();
 
-    this.Builder = new Builder(this.config, this.webpackConfig, this._res);
+    this.Builder = new Builder(this.config, this.webpackConfig, result);
     this.Minifier = new Minifier(this.config);
 
     // Ensure no previous workspaces are present
@@ -71,7 +72,7 @@ class Kubozer {
               );
 
               fs.copySync(itemPath, destination);
-              return resolve(this._res(undefined, {itemPath, destination}, 'Copy completed.'));
+              return resolve(result(undefined, {itemPath, destination}, 'Copy completed.'));
             } catch (err) {
               return reject(err);
             }
@@ -80,7 +81,7 @@ class Kubozer {
       }
 
       // If "copy" is empty
-      reject(this._res(true, undefined, 'copy() method was called but "copy" property is empty or undefined.'));
+      reject(result(true, undefined, 'copy() method was called but "copy" property is empty or undefined.'));
     });
   }
 
@@ -129,9 +130,9 @@ class Kubozer {
       try {
         const changedCSS = replaceInFile.sync(optionCSS);
         const changedJS = replaceInFile.sync(optionJS);
-        return resolve(this._res(undefined, {changedCSS, changedJS}, 'Replace-in-file completed.'));
+        return resolve(result(undefined, {changedCSS, changedJS}, 'Replace-in-file completed.'));
       }	catch (err) {
-        reject(this._res(true, undefined, err));
+        reject(result(true, undefined, err));
       }
     });
   }
@@ -177,7 +178,7 @@ class Kubozer {
       const types = ['patch', 'minor', 'major', 'prepatch', 'preminor', 'premajor', 'prerelease'];
       const notAType = types.indexOf(type) === -1;
       if (type === null || type === undefined || typeof type !== 'string' || notAType) {
-        return reject(this._res(true, undefined, `BUMP(): type must be specified. This is not a valid type --> '${type}'`));
+        return reject(result(true, undefined, `BUMP(): type must be specified. This is not a valid type --> '${type}'`));
       }
 
       let oldVersion = '';
@@ -195,7 +196,7 @@ class Kubozer {
         return acc.concat(data);
       }, []);
 
-      return resolve(this._res(undefined, dataFiles, `Bump from ${oldVersion} to ${newVersion} completed.`));
+      return resolve(result(undefined, dataFiles, `Bump from ${oldVersion} to ${newVersion} completed.`));
     });
   }
 
@@ -254,11 +255,6 @@ class Kubozer {
     const msg = 'Path must be a string. Received undefined';
     err.message = `${msg} --> ${entity}`;
     return err;
-  }
-
-  _res(err, data, message) {
-    const stringified = JSON.stringify({err, data, message});
-    return Object.assign({}, JSON.parse(stringified));
   }
 
   _checkForRequired() {
