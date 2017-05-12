@@ -217,7 +217,7 @@ var Kubozer = function () {
           oldVersion = old;
           newVersion = data.version;
 
-          var dataString = JSON.stringify(data, null, '\t');
+          var dataString = JSON.stringify(data, null, 2);
           _fsExtra2.default.writeFileSync(fullFilePath, dataString);
           return acc.concat(data);
         }, []);
