@@ -1,3 +1,8 @@
+/**
+ * Builds with Webpack and vulcanize index.html
+ * @module lib/builder
+ */
+
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {

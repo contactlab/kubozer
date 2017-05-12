@@ -1,10 +1,15 @@
+/**
+ * Builds with Webpack and vulcanize index.html
+ * @module lib/builder
+ */
+
 'use strict';
 
-import path from 'path';
-import fs from 'fs-extra';
-import webpack from 'webpack';
+import path                  from 'path';
+import fs                    from 'fs-extra';
+import webpack               from 'webpack';
 import WebpackNotifierPlugin from 'webpack-notifier';
-import Vulcanize from 'vulcanize';
+import Vulcanize             from 'vulcanize';
 
 import result from './result';
 
