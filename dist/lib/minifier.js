@@ -41,7 +41,7 @@ var Minifier = function () {
       _fsExtra2.default.ensureFileSync(buildFileOutput);
 
       var promise = _nodeMinify2.default.minify({
-        compressor: 'yui-css',
+        compressor: 'clean-css',
         publicFolder: srcPath,
         input: this.config.sourceCssFiles,
         output: buildFileOutput
