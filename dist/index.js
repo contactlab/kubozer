@@ -54,7 +54,6 @@ var Kubozer = function () {
     this.webpackConfig = webpackConfig;
     this._checkForRequired();
 
-    // this.Builder = new Builder(this.config, this.webpackConfig, this._res);
     this.Builder = new _builder2.default(this.config, this.webpackConfig, _result2.default);
     this.Minifier = new _minifier2.default(this.config);
 
@@ -107,7 +106,6 @@ var Kubozer = function () {
                 var destination = _path2.default.join(_path2.default.resolve(_this.config.buildFolder), type.baseFolder, item);
 
                 _fsExtra2.default.copySync(itemPath, destination);
-                // return resolve(this._res(undefined, {itemPath, destination}, 'Copy completed.'));
                 return resolve((0, _result2.default)(undefined, { itemPath: itemPath, destination: destination }, 'Copy completed.'));
               } catch (err) {
                 return reject(err);
@@ -117,7 +115,6 @@ var Kubozer = function () {
         }
 
         // If "copy" is empty
-        // reject(this._res(true, undefined, 'copy() method was called but "copy" property is empty or undefined.'));
         reject((0, _result2.default)(true, undefined, 'copy() method was called but "copy" property is empty or undefined.'));
       });
     }
@@ -158,10 +155,8 @@ var Kubozer = function () {
         try {
           var changedCSS = _replaceInFile2.default.sync(optionCSS);
           var changedJS = _replaceInFile2.default.sync(optionJS);
-          // return resolve(this._res(undefined, {changedCSS, changedJS}, 'Replace-in-file completed.'));
           return resolve((0, _result2.default)(undefined, { changedCSS: changedCSS, changedJS: changedJS }, 'Replace-in-file completed.'));
         } catch (err) {
-          // reject(this._res(true, undefined, err));
           reject((0, _result2.default)(true, undefined, err));
         }
       });
@@ -211,7 +206,6 @@ var Kubozer = function () {
         var types = ['patch', 'minor', 'major', 'prepatch', 'preminor', 'premajor', 'prerelease'];
         var notAType = types.indexOf(type) === -1;
         if (type === null || type === undefined || typeof type !== 'string' || notAType) {
-          // return reject(this._res(true, undefined, `BUMP(): type must be specified. This is not a valid type --> '${type}'`));
           return reject((0, _result2.default)(true, undefined, 'BUMP(): type must be specified. This is not a valid type --> \'' + type + '\''));
         }
 
@@ -230,7 +224,6 @@ var Kubozer = function () {
           return acc.concat(data);
         }, []);
 
-        // return resolve(this._res(undefined, dataFiles, `Bump from ${oldVersion} to ${newVersion} completed.`));
         return resolve((0, _result2.default)(undefined, dataFiles, 'Bump from ' + oldVersion + ' to ' + newVersion + ' completed.'));
       });
     }
@@ -297,12 +290,6 @@ var Kubozer = function () {
       err.message = msg + ' --> ' + entity;
       return err;
     }
-
-    // _res(err, data, message) {
-    //   const stringified = JSON.stringify({err, data, message});
-    //   return Object.assign({}, JSON.parse(stringified));
-    // }
-
   }, {
     key: '_checkForRequired',
     value: function _checkForRequired() {
