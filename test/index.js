@@ -209,7 +209,7 @@ test('replace() products correct output', async t => {
   const replRes = await fn.replace();
   const res = await fn.build();
   const fileReplace = fs.readFileSync(`${__dirname}/build/index.html`, 'utf8');
-  t.is(fileReplace, `<!DOCTYPE html><html><head>\n\t\t<meta charset=\"utf-8\">\n\t\t<title></title>\n\n\t\t\t\n\t\t\t\t<link rel=\"stylesheet\" href=\"/assets/style.css\">\n\t\t\t\t\n\n\t\t\t\n\t\t\t\t<script src=\"/assets/javascript.js\"></script>\n\t\t\t\t\n\n\t</head>\n\t<body>\n\n\t\n\n</body></html>`);
+  t.is(fileReplace, `<!DOCTYPE html><html><head>\n    <meta charset=\"utf-8\">\n    <title></title>\n\n      \n        <link rel=\"stylesheet\" href=\"/assets/style.css\">\n        \n\n      \n        <script src=\"/assets/javascript.js\"></script>\n        \n\n  </head>\n  <body>\n\n  \n\n</body></html>`);
 });
 
 test('correct bump() method', async t => {
