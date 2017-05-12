@@ -8,10 +8,10 @@ module.exports = {
   output: {
     // Make sure to use [name] or [id] in output.filename
     //  when using multiple entry points
-		path: outputPath,
+    path: outputPath,
     filename: output
   },
-	// stats: {
+  // stats: {
   //   colors: true,
   //   modules: true,
   //   reasons: true,
