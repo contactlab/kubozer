@@ -25,7 +25,7 @@ export default class Minifier {
     fs.ensureFileSync(buildFileOutput);
 
     const promise = compressor.minify({
-      compressor: 'yui-css',
+      compressor: 'clean-css',
       publicFolder: srcPath,
       input: this.config.sourceCssFiles,
       output: buildFileOutput
