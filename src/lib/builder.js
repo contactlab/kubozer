@@ -1,18 +1,17 @@
 'use strict';
 
 import path from 'path';
-
 import fs from 'fs-extra';
 import webpack from 'webpack';
 import WebpackNotifierPlugin from 'webpack-notifier';
 import Vulcanize from 'vulcanize';
 
+import result from './result';
+
 export default class Builder {
-  constructor(config, webpackConfig, resFunc) {
+  constructor(config, webpackConfig) {
     this.config = config;
     this.webpackConfig = webpackConfig;
-
-    this._res = resFunc;
   }
 
   webpack(minify) {
@@ -41,12 +40,12 @@ export default class Builder {
         const compiler = webpack(this.webpackConfig);
         compiler.run(err => {
           if (err) {
-            return reject(this._res(true, undefined, err));
+            return reject(result(true, undefined, err));
           }
-          return resolve(this._res(undefined, [{completed: true}], 'Webpack compilation completed'));
+          return resolve(result(undefined, [{completed: true}], 'Webpack compilation completed'));
         });
       } catch (err) {
-        return reject(this._res(err.name, undefined, err.message));
+        return reject(result(err.name, undefined, err.message));
       }
     });
   }
@@ -54,7 +53,7 @@ export default class Builder {
   vulcanize() {
     return new Promise((resolve, reject) => {
       if (this.config.vulcanize === undefined) {
-        reject(this._res(true, undefined, `Vulcanize configuration is not present. ---> config.vulcanize === undefined`));
+        reject(result(true, undefined, `Vulcanize configuration is not present. ---> config.vulcanize === undefined`));
       }
 
       const vulcan = new Vulcanize(this.config.vulcanize.conf);
@@ -71,14 +70,14 @@ export default class Builder {
       vulcan.process(workspaceIndex, (err, inlinedHTML) => {
         if (err) {
           const msg = `${err.message} | Did you checked the "excludes" property of "vulcanize" configuration?`;
-          return reject(this._res(true, undefined, err.message.search('no such file') > -1 ? msg : err.message));
+          return reject(result(true, undefined, err.message.search('no such file') > -1 ? msg : err.message));
         }
         fs.ensureFileSync(buildIndex);
         fs.writeFile(buildIndex, inlinedHTML, err => {
           if (err) {
             return reject(err);
           }
-          return resolve(this._res(undefined, buildIndex, 'Vulcanize completed.'));
+          return resolve(result(undefined, buildIndex, 'Vulcanize completed.'));
         });
       });
     });
