@@ -33,8 +33,6 @@ var _vulcanize2 = _interopRequireDefault(_vulcanize);
 
 var _result = require('./result');
 
-var _result2 = _interopRequireDefault(_result);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -77,12 +75,13 @@ var Builder = function () {
           var compiler = (0, _webpack3.default)(_this.webpackConfig);
           compiler.run(function (err) {
             if (err) {
-              return reject((0, _result2.default)(true, undefined, err));
+              return reject((0, _result.error)(err));
             }
-            return resolve((0, _result2.default)(undefined, [{ completed: true }], 'Webpack compilation completed'));
+
+            return resolve((0, _result.success)('Webpack compilation completed', [{ completed: true }]));
           });
         } catch (err) {
-          return reject((0, _result2.default)(err.name, undefined, err.message));
+          return reject((0, _result.error)(err.message, err.name));
         }
       });
     }
@@ -93,7 +92,7 @@ var Builder = function () {
 
       return new Promise(function (resolve, reject) {
         if (_this2.config.vulcanize === undefined) {
-          reject((0, _result2.default)(true, undefined, 'Vulcanize configuration is not present. ---> config.vulcanize === undefined'));
+          reject((0, _result.error)('Vulcanize configuration is not present. ---> config.vulcanize === undefined'));
         }
 
         var vulcan = new _vulcanize2.default(_this2.config.vulcanize.conf);
@@ -104,14 +103,17 @@ var Builder = function () {
         vulcan.process(workspaceIndex, function (err, inlinedHTML) {
           if (err) {
             var msg = err.message + ' | Did you checked the "excludes" property of "vulcanize" configuration?';
-            return reject((0, _result2.default)(true, undefined, err.message.search('no such file') > -1 ? msg : err.message));
+
+            return reject((0, _result.error)(err.message.search('no such file') > -1 ? msg : err.message));
           }
+
           _fsExtra2.default.ensureFileSync(buildIndex);
           _fsExtra2.default.writeFile(buildIndex, inlinedHTML, function (err) {
             if (err) {
               return reject(err);
             }
-            return resolve((0, _result2.default)(undefined, buildIndex, 'Vulcanize completed.'));
+
+            return resolve((0, _result.success)('Vulcanize completed.', buildIndex));
           });
         });
       });
