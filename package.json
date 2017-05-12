@@ -4,8 +4,9 @@
   "description": "Contactlab build utility",
   "main": "dist/index.js",
   "scripts": {
-    "pretest": "yarn run build",
-    "test": "xo && nyc ava --serial",
+    "lint": "xo",
+    "pretest": "yarn run lint && yarn run build",
+    "test": "nyc ava --serial",
     "report": "nyc report --reporter=html",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
     "build": "babel src -d dist",
