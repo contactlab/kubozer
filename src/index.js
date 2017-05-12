@@ -1,15 +1,19 @@
+/**
+ * Kubozer - ContactLab build tool.
+ * @module index
+ */
+
 'use strict';
 
-import path from 'path';
-import fs from 'fs-extra';
-import semver from 'semver';
+import path          from 'path';
+import fs            from 'fs-extra';
+import semver        from 'semver';
 import replaceInFile from 'replace-in-file';
 
-// import result from './lib/result';
 import {success, error} from './lib/result';
-import Builder from './lib/builder';
-import Minifier from './lib/minifier';
-import OneSky from './lib/i18n';
+import Builder          from './lib/builder';
+import Minifier         from './lib/minifier';
+import OneSky           from './lib/i18n';
 
 class Kubozer {
   constructor(config, webpackConfig) {
