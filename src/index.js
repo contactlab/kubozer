@@ -190,7 +190,7 @@ class Kubozer {
         oldVersion = old;
         newVersion = data.version;
 
-        const dataString = JSON.stringify(data, null, '\t');
+        const dataString = JSON.stringify(data, null, 2);
         fs.writeFileSync(fullFilePath, dataString);
         return acc.concat(data);
       }, []);
