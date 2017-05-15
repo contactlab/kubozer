@@ -49,7 +49,7 @@ test('hashedResources(config, webpackconfig)', async t => {
 
   const result = await hashedResources(CONFIG, WEBPACKCONFIG);
 
-  t.is(result, SUCCESS_MSG, 'should exit with success message');
+  t.is(result.message, SUCCESS_MSG, 'should exit with success message');
 
   const fileContent = await pify(fs.readFile)(path.resolve(DIST, 'index.html'), 'utf8');
 
@@ -60,13 +60,15 @@ test('hashedResources(config, webpackconfig)', async t => {
 test('hashedResources(undefined, webpackconfig)', async t => {
   const err = await t.throws(hashedResources(undefined, WEBPACKCONFIG));
 
-  t.is(err, ERROR_MSG, 'should reject with an error');
+  t.true(err.err, 'should return an error');
+  t.is(err.message, ERROR_MSG, 'should reject with an error message');
 });
 
 test('hashedResources(config, undefined)', async t => {
   const err = await t.throws(hashedResources(CONFIG, undefined));
 
-  t.is(err, ERROR_MSG, 'should reject with an error');
+  t.true(err.err, 'should return an error');
+  t.is(err.message, ERROR_MSG, 'should reject with an error message');
 });
 
 test.cb.after(t => {

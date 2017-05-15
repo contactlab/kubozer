@@ -29,20 +29,21 @@ var _replace = require('./replace');
 
 var _replace2 = _interopRequireDefault(_replace);
 
+var _result = require('./result');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-/**
- * Creates an hashed version of resources and replace references in `index.html`
- * @module lib/hashed-resources
- */
+var SUCCESS_MSG = exports.SUCCESS_MSG = 'Hashing resources completed'; /**
+                                                                        * Creates an hashed version of resources and replace references in `index.html`
+                                                                        * @module lib/hashed-resources
+                                                                        */
 
-var SUCCESS_MSG = exports.SUCCESS_MSG = 'Hashing resources completed';
 var ERROR_MSG = exports.ERROR_MSG = 'Missing configurations.';
 
 // hashedResources :: (Object, Object) -> Promise
 var hashedResources = function hashedResources(config, webpackconfig) {
-  return !config || !webpackconfig ? Promise.reject(ERROR_MSG) : (0, _hashed2.default)(config, webpackconfig).then((0, _compose2.default)(_fromTo2.default, _distribution2.default, (0, _relativeTo2.default)(config.buildFolder))).then((0, _replace2.default)(config)).then(function () {
-    return SUCCESS_MSG;
+  return !config || !webpackconfig ? Promise.reject((0, _result.error)(ERROR_MSG)) : (0, _hashed2.default)(config, webpackconfig).then((0, _compose2.default)(_fromTo2.default, _distribution2.default, (0, _relativeTo2.default)(config.buildFolder))).then((0, _replace2.default)(config)).then(function () {
+    return (0, _result.success)(SUCCESS_MSG);
   });
 };
 

@@ -5,11 +5,12 @@
 
 import compose from 'ramda/src/compose';
 
-import hashed       from './hashed';
-import relativeTo   from './relative-to';
-import distribution from './distribution';
-import fromTo       from './from-to';
-import replace      from './replace';
+import hashed           from './hashed';
+import relativeTo       from './relative-to';
+import distribution     from './distribution';
+import fromTo           from './from-to';
+import replace          from './replace';
+import {success, error} from './result';
 
 export const SUCCESS_MSG = 'Hashing resources completed';
 export const ERROR_MSG   = 'Missing configurations.';
@@ -17,10 +18,10 @@ export const ERROR_MSG   = 'Missing configurations.';
 // hashedResources :: (Object, Object) -> Promise
 const hashedResources = (config, webpackconfig) =>
   (!config || !webpackconfig) ?
-    Promise.reject(ERROR_MSG) :
+    Promise.reject(error(ERROR_MSG)) :
     hashed(config, webpackconfig)
       .then(compose(fromTo, distribution, relativeTo(config.buildFolder)))
       .then(replace(config))
-      .then(() => SUCCESS_MSG);
+      .then(() => success(SUCCESS_MSG));
 
 export default hashedResources;
