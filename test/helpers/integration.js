@@ -33,6 +33,7 @@ const clean = name => fs.remove(distDir(name));
 
 module.exports = {
   dist,
+  distDir,
   distFromTpl,
   clean
 };
