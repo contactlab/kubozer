@@ -3,8 +3,8 @@ import fs   from 'fs-extra';
 import test from 'ava';
 import pify from 'pify';
 
+import Kubozer       from '../dist';
 import {SUCCESS_MSG} from '../dist/lib/hashed-resources';
-import Fn            from './../dist/index';
 
 test('correct _createWorkspace when needed (build())', async t => {
   // Create the build folder
@@ -23,7 +23,7 @@ test('correct _createWorkspace when needed (build())', async t => {
     }
   };
   const webpackConfig = require('./src-test/webpack.test.config');
-  const fn            = new Fn(config, webpackConfig);
+  const fn            = new Kubozer(config, webpackConfig);
   const res           = await fn.build();
 
   t.true(fs.existsSync(path.join(__dirname, 'workspace')), 'Worskpace created correctly on init');
@@ -46,7 +46,7 @@ test('correct deleteWorkspace()', async t => {
   };
 
   const webpackConfig = require('./src-test/webpack.test.config');
-  const fn            = new Fn(config, webpackConfig);
+  const fn            = new Kubozer(config, webpackConfig);
   const res           = await fn.build();
 
   fn.deleteWorkspace();
@@ -66,7 +66,7 @@ test('correct deletePrevBuild()', t => {
   };
 
   const webpackConfig = require('./src-test/webpack.test.config');
-  const fn            = new Fn(config, webpackConfig);
+  const fn            = new Kubozer(config, webpackConfig);
 
   fn.deletePrevBuild();
 
@@ -95,7 +95,7 @@ test('correct copy() method', async t => {
 
   };
 
-  const fn            = new Fn(config, {});
+  const fn            = new Kubozer(config, {});
   const copiedBundles = await fn.copy('bundles');
   const buildDir      = path.resolve(config.buildFolder);
 
@@ -131,7 +131,7 @@ test('not thrown when manifest is NOT present during _copyManifest()', async t =
     ]
   };
 
-  const fn            = new Fn(config, {});
+  const fn            = new Kubozer(config, {});
   const copiedBundles = await fn.copy();
   const buildDir      = path.resolve(config.buildFolder);
 
@@ -176,7 +176,7 @@ test('correct replace() method', async t => {
   };
 
   const webpackConfig = require('./src-test/webpack.test.config');
-  const fn            = new Fn(config, webpackConfig);
+  const fn            = new Kubozer(config, webpackConfig);
   const replRes       = await fn.replace();
   const res           = await fn.build();
 
@@ -218,7 +218,7 @@ test('replace() products correct output', async t => {
   };
 
   const webpackConfig = require('./src-test/webpack.test.config');
-  const fn            = new Fn(config, webpackConfig);
+  const fn            = new Kubozer(config, webpackConfig);
   const replRes       = await fn.replace();
   const res           = await fn.build();
   const fileReplace   = fs.readFileSync(path.resolve(config.buildFolder, 'index.html'), 'utf8');
@@ -245,7 +245,7 @@ test('correct bump() method', async t => {
   fs.writeFileSync(path.join(srcTestDir, 'manifest.json'), JSON.stringify({version: '1.0.0'}));
 
   const webpackConfig = require('./src-test/webpack.test.config');
-  const fn            = new Fn(config, webpackConfig);
+  const fn            = new Kubozer(config, webpackConfig);
   const resBump       = await fn.bump('major');
 
   t.false(fs.existsSync(config.workspace), 'workspace correctly not created during the bump task');
@@ -275,7 +275,7 @@ test('correct build() method', async t => {
   };
 
   const webpackConfig = require('./src-test/webpack.test.config');
-  const fn            = new Fn(config, webpackConfig);
+  const fn            = new Kubozer(config, webpackConfig);
   const resBuild      = await fn.build();
   const buildDir      = path.resolve(config.buildFolder);
 
@@ -312,7 +312,7 @@ test('correct build() with minify method without stripConsole', async t => {
   };
 
   const webpackConfig = require('./src-test/webpack.test.config');
-  const fn            = new Fn(config, webpackConfig);
+  const fn            = new Kubozer(config, webpackConfig);
   const resBuild      = await fn.build(true);
   const buildDir      = path.resolve(config.buildFolder);
 
@@ -368,7 +368,7 @@ test('correct build() with minify method and stripConsole', async t => {
   };
 
   const webpackConfig = require('./src-test/webpack.test.config');
-  const fn            = new Fn(config, webpackConfig);
+  const fn            = new Kubozer(config, webpackConfig);
   const resBuild      = await fn.build(true);
   const buildDir      = path.resolve(config.buildFolder);
 
@@ -426,7 +426,7 @@ test('correct build() when webpack entry is an object', async t => {
   };
   webpackConfig.output.filename = '[name].bundle.js';
 
-  const fn       = new Fn(config, webpackConfig);
+  const fn       = new Kubozer(config, webpackConfig);
   const resBuild = await fn.build();
   const buildDir = path.resolve(config.buildFolder);
 
