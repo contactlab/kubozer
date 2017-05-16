@@ -1,3 +1,5 @@
+/* eslint "key-spacing": ["error", {"align": "colon"}] */
+
 import path from 'path';
 import fs   from 'fs-extra';
 import test from 'ava';
@@ -5,23 +7,13 @@ import pify from 'pify';
 
 import Kubozer       from '../dist';
 import {SUCCESS_MSG} from '../dist/lib/hashed-resources';
+import {
+  merge,
+  FOLDERS, VULCANIZE, VULCANIZE_NO_JS, VULCANIZE_NO_BUNDLE, COPY, REPLACE, MANIFEST, BUMP, CSS, STRIPCONSOLE
+} from './helpers/config';
 
 test('correct _createWorkspace when needed (build())', async t => {
-  // Create the build folder
-  const config = {
-    workspace: './test/workspace',
-    sourceFolder: './test/src-test',
-    buildFolder: './test/build',
-    vulcanize: {
-      srcTarget: 'index.html',
-      buildTarget: 'index.html',
-      conf: {
-        stripComments: true,
-        inlineScripts: true,
-        inlineStyles: true
-      }
-    }
-  };
+  const config        = merge([FOLDERS, VULCANIZE]);
   const webpackConfig = require('./src-test/webpack.test.config');
   const fn            = new Kubozer(config, webpackConfig);
   const res           = await fn.build();
@@ -30,21 +22,7 @@ test('correct _createWorkspace when needed (build())', async t => {
 });
 
 test('correct deleteWorkspace()', async t => {
-  const config = {
-    workspace: './test/workspace',
-    sourceFolder: './test/src-test',
-    buildFolder: './test/build',
-    vulcanize: {
-      srcTarget: 'index.html',
-      buildTarget: 'index.html',
-      conf: {
-        stripComments: true,
-        inlineScripts: true,
-        inlineStyles: true
-      }
-    }
-  };
-
+  const config        = merge([FOLDERS, VULCANIZE]);
   const webpackConfig = require('./src-test/webpack.test.config');
   const fn            = new Kubozer(config, webpackConfig);
   const res           = await fn.build();
@@ -59,14 +37,8 @@ test('correct deletePrevBuild()', t => {
 
   fs.ensureDirSync(pathToDir);
 
-  const config = {
-    workspace: './test/workspace',
-    sourceFolder: './test/src-test',
-    buildFolder: './test/build'
-  };
-
   const webpackConfig = require('./src-test/webpack.test.config');
-  const fn            = new Kubozer(config, webpackConfig);
+  const fn            = new Kubozer(FOLDERS, webpackConfig);
 
   fn.deletePrevBuild();
 
@@ -74,27 +46,7 @@ test('correct deletePrevBuild()', t => {
 });
 
 test('correct copy() method', async t => {
-  const config = {
-    workspace: './test/workspace',
-    sourceFolder: './test/src-test',
-    buildFolder: './test/build',
-    manifest: true,
-    copy: [
-      {
-        baseFolder: 'assets',
-        items: [
-          'imgs-others'
-        ]
-      }, {
-        baseFolder: 'bundles',
-        items: [
-          ''
-        ]
-      }
-    ]
-
-  };
-
+  const config        = merge([FOLDERS, COPY, MANIFEST]);
   const fn            = new Kubozer(config, {});
   const copiedBundles = await fn.copy('bundles');
   const buildDir      = path.resolve(config.buildFolder);
@@ -111,26 +63,7 @@ test('not thrown when manifest is NOT present during _copyManifest()', async t =
   fs.copySync(manifest, manifestBkp);
   fs.removeSync(manifest);
 
-  const config = {
-    workspace: './test/workspace',
-    sourceFolder: './test/src-test',
-    buildFolder: './test/build',
-    manifest: true,
-    copy: [
-      {
-        baseFolder: 'assets',
-        items: [
-          'imgs-others'
-        ]
-      }, {
-        baseFolder: 'bundles',
-        items: [
-          ''
-        ]
-      }
-    ]
-  };
-
+  const config        = merge([FOLDERS, COPY, MANIFEST]);
   const fn            = new Kubozer(config, {});
   const copiedBundles = await fn.copy();
   const buildDir      = path.resolve(config.buildFolder);
@@ -144,37 +77,7 @@ test('not thrown when manifest is NOT present during _copyManifest()', async t =
 });
 
 test('correct replace() method', async t => {
-  const config = {
-    workspace: './test/workspace',
-    sourceFolder: './test/src-test',
-    buildFolder: './test/build',
-    manifest: true,
-    vulcanize: {
-      srcTarget: 'index.html',
-      buildTarget: 'index.html',
-      conf: {
-        stripComments: true,
-        inlineScripts: true,
-        inlineStyles: true,
-        excludes: [
-          'javascript.js'
-        ]
-      }
-    },
-    replace: {
-      css: {
-        files: 'index.html',
-        commentRegex: ['<!--styles!--->((.|\n)*)<!--styles!--->'],
-        with: ['/assets/style.css']
-      },
-      js: {
-        files: 'index.html',
-        commentRegex: ['<!--js!--->((.|\n)*)<!--js!--->'],
-        with: ['/assets/javascript.js']
-      }
-    }
-  };
-
+  const config        = merge([FOLDERS, VULCANIZE_NO_JS, REPLACE, MANIFEST]);
   const webpackConfig = require('./src-test/webpack.test.config');
   const fn            = new Kubozer(config, webpackConfig);
   const replRes       = await fn.replace();
@@ -186,37 +89,7 @@ test('correct replace() method', async t => {
 });
 
 test('replace() products correct output', async t => {
-  const config = {
-    workspace: './test/workspace',
-    sourceFolder: './test/src-test',
-    buildFolder: './test/build',
-    manifest: true,
-    vulcanize: {
-      srcTarget: 'index.html',
-      buildTarget: 'index.html',
-      conf: {
-        stripComments: true,
-        inlineScripts: true,
-        inlineStyles: true,
-        excludes: [
-          'javascript.js'
-        ]
-      }
-    },
-    replace: {
-      css: {
-        files: 'index.html',
-        commentRegex: ['<!--styles!--->((.|\n)*)<!--styles!--->'],
-        with: ['/assets/style.css']
-      },
-      js: {
-        files: 'index.html',
-        commentRegex: ['<!--js!--->((.|\n)*)<!--js!--->'],
-        with: ['/assets/javascript.js']
-      }
-    }
-  };
-
+  const config        = merge([FOLDERS, VULCANIZE_NO_JS, REPLACE, MANIFEST]);
   const webpackConfig = require('./src-test/webpack.test.config');
   const fn            = new Kubozer(config, webpackConfig);
   const replRes       = await fn.replace();
@@ -228,19 +101,9 @@ test('replace() products correct output', async t => {
 });
 
 test('correct bump() method', async t => {
-  const config = {
-    workspace: './test/workspace',
-    buildFolder: './test/build',
-    sourceFolder: './test/src-test',
-    bump: {
-      files: [
-        './test/src-test/package.json',
-        './test/src-test/manifest.json'
-      ]
-    }
-  };
-
+  const config     = merge([FOLDERS, BUMP]);
   const srcTestDir = path.resolve(config.sourceFolder);
+
   fs.writeFileSync(path.join(srcTestDir, 'package.json'), JSON.stringify({version: '1.0.0'}));
   fs.writeFileSync(path.join(srcTestDir, 'manifest.json'), JSON.stringify({version: '1.0.0'}));
 
@@ -254,26 +117,7 @@ test('correct bump() method', async t => {
 });
 
 test('correct build() method', async t => {
-  const config = {
-    workspace: './test/workspace',
-    sourceFolder: './test/src-test',
-    buildFolder: './test/build',
-    manifest: true,
-    vulcanize: {
-      srcTarget: 'index.html',
-      buildTarget: 'index.html',
-      conf: {
-        stripComments: true,
-        inlineScripts: true,
-        inlineStyles: true,
-        excludes: [
-          'bundle-fake.js',
-          'js.js'
-        ]
-      }
-    }
-  };
-
+  const config        = merge([FOLDERS, VULCANIZE_NO_BUNDLE, MANIFEST]);
   const webpackConfig = require('./src-test/webpack.test.config');
   const fn            = new Kubozer(config, webpackConfig);
   const resBuild      = await fn.build();
@@ -288,29 +132,7 @@ test('correct build() method', async t => {
 });
 
 test('correct build() with minify method without stripConsole', async t => {
-  const config = {
-    workspace: './test/workspace',
-    sourceFolder: './test/src-test',
-    buildFolder: './test/build',
-    assetsFolder: 'assets',
-    sourceCssFiles: ['/test.css'],
-    buildCssFile: 'style.min.css',
-    manifest: true,
-    vulcanize: {
-      srcTarget: 'index.html',
-      buildTarget: 'index.html',
-      conf: {
-        stripComments: true,
-        inlineScripts: true,
-        inlineStyles: true,
-        excludes: [
-          'bundle-fake.js',
-          'js.js'
-        ]
-      }
-    }
-  };
-
+  const config        = merge([FOLDERS, VULCANIZE_NO_BUNDLE, MANIFEST, CSS]);
   const webpackConfig = require('./src-test/webpack.test.config');
   const fn            = new Kubozer(config, webpackConfig);
   const resBuild      = await fn.build(true);
@@ -343,30 +165,7 @@ test('correct build() with minify method without stripConsole', async t => {
 });
 
 test('correct build() with minify method and stripConsole', async t => {
-  const config = {
-    workspace: './test/workspace',
-    sourceFolder: './test/src-test',
-    buildFolder: './test/build',
-    assetsFolder: 'assets',
-    sourceCssFiles: ['/test.css'],
-    buildCssFile: 'style.min.css',
-    manifest: true,
-    stripConsole: true,
-    vulcanize: {
-      srcTarget: 'index.html',
-      buildTarget: 'index.html',
-      conf: {
-        stripComments: true,
-        inlineScripts: true,
-        inlineStyles: true,
-        excludes: [
-          'bundle-fake.js',
-          'js.js'
-        ]
-      }
-    }
-  };
-
+  const config        = merge([FOLDERS, VULCANIZE_NO_BUNDLE, MANIFEST, CSS, STRIPCONSOLE]);
   const webpackConfig = require('./src-test/webpack.test.config');
   const fn            = new Kubozer(config, webpackConfig);
   const resBuild      = await fn.build(true);
@@ -399,33 +198,14 @@ test('correct build() with minify method and stripConsole', async t => {
 });
 
 test('correct build() when webpack entry is an object', async t => {
-  const config = {
-    workspace: './test/workspace',
-    sourceFolder: './test/src-test',
-    buildFolder: './test/build',
-    manifest: true,
-    vulcanize: {
-      srcTarget: 'index.html',
-      buildTarget: 'index.html',
-      conf: {
-        stripComments: true,
-        inlineScripts: true,
-        inlineStyles: true,
-        excludes: [
-          'bundle-fake.js',
-          'js.js'
-        ]
-      }
-    }
-  };
-
   const webpackConfig = require('./src-test/webpack.test.config');
   webpackConfig.entry = {
-    main: webpackConfig.entry,
+    main   : webpackConfig.entry,
     vendors: ['ava']
   };
   webpackConfig.output.filename = '[name].bundle.js';
 
+  const config   = merge([FOLDERS, VULCANIZE_NO_BUNDLE, MANIFEST]);
   const fn       = new Kubozer(config, webpackConfig);
   const resBuild = await fn.build();
   const buildDir = path.resolve(config.buildFolder);
@@ -438,7 +218,7 @@ test('correct build() when webpack entry is an object', async t => {
   t.is(fs.existsSync(path.join(buildDir, 'vendors.bundle.js')), true);
 });
 
-test.afterEach.always(() => {
-  fs.removeSync(path.join('test', 'build'));
-  fs.removeSync(path.join('test', 'workspace'));
+test.afterEach.always(async () => {
+  await fs.remove(path.join('test', 'build'));
+  await fs.remove(path.join('test', 'workspace'));
 });
