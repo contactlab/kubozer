@@ -33,6 +33,10 @@ var _vulcanize2 = _interopRequireDefault(_vulcanize);
 
 var _result = require('./result');
 
+var _hashedResources = require('./hashed-resources');
+
+var _hashedResources2 = _interopRequireDefault(_hashedResources);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -121,6 +125,11 @@ var Builder = function () {
           });
         });
       });
+    }
+  }, {
+    key: 'hashed',
+    value: function hashed() {
+      return (0, _hashedResources2.default)(this.config, this.webpackConfig);
     }
   }]);
 

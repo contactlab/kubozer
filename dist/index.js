@@ -27,6 +27,10 @@ var _replaceInFile = require('replace-in-file');
 
 var _replaceInFile2 = _interopRequireDefault(_replaceInFile);
 
+var _objOf = require('ramda/src/objOf');
+
+var _objOf2 = _interopRequireDefault(_objOf);
+
 var _result = require('./lib/result');
 
 var _builder = require('./lib/builder');
@@ -177,31 +181,24 @@ var Kubozer = function () {
 
       this._ensureWorkspace();
 
-      var resWebpack = void 0;
-      var resVulcanize = void 0;
-
-      return this.Builder.webpack(minify).then(function (res) {
-        resWebpack = res;
-
-        var promises = [_this2.Builder.vulcanize()];
-        if (minify) {
-          promises = promises.concat(_this2.Minifier.minifyCSS());
-        }
-
-        return Promise.all(promises);
-      }).then(function (res) {
-        resVulcanize = res[0];
-        var dataReturn = {
-          resWebpack: resWebpack,
-          resVulcanize: resVulcanize
+      var intoAs = function intoAs(key, xs) {
+        return function (data) {
+          return xs.concat((0, _objOf2.default)(key, data));
         };
-        // Present only with `minify` true or just undefined
-        var resMinifiedCss = res[1];
-        if (resMinifiedCss) {
-          dataReturn.resMinifiedCss = resMinifiedCss;
-        }
+      };
 
-        return dataReturn;
+      return Promise.resolve([]).then(function (result) {
+        return _this2.Builder.webpack(minify).then(intoAs('resWebpack', result));
+      }).then(function (result) {
+        return _this2.Builder.vulcanize().then(intoAs('resVulcanize', result));
+      }).then(function (result) {
+        return minify ? _this2.Minifier.minifyCSS().then(intoAs('resMinifiedCss', result)) : result;
+      }).then(function (result) {
+        return minify ? _this2.Builder.hashed().then(intoAs('resHashed', result)) : result;
+      }).then(function (result) {
+        return result.reduce(function (acc, r) {
+          return Object.assign({}, acc, r);
+        }, {});
       }).catch(function (err) {
         throw err;
       });

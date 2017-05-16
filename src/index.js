@@ -9,6 +9,7 @@ import path          from 'path';
 import fs            from 'fs-extra';
 import semver        from 'semver';
 import replaceInFile from 'replace-in-file';
+import objOf         from 'ramda/src/objOf';
 
 import {success, error} from './lib/result';
 import Builder          from './lib/builder';
@@ -151,37 +152,31 @@ class Kubozer {
   build(minify) {
     this._ensureWorkspace();
 
-    let resWebpack;
-    let resVulcanize;
+    const intoAs = (key, xs) => data => xs.concat(objOf(key, data));
 
-    return this.Builder.webpack(minify)
-      .then(res => {
-        resWebpack = res;
-
-        let promises = [this.Builder.vulcanize()];
-        if (minify) {
-          promises = promises.concat(this.Minifier.minifyCSS());
-        }
-
-        return Promise.all(promises);
-      })
-      .then(res => {
-        resVulcanize = res[0];
-        const dataReturn = {
-          resWebpack,
-          resVulcanize
-        };
-        // Present only with `minify` true or just undefined
-        const resMinifiedCss = res[1];
-        if (resMinifiedCss) {
-          dataReturn.resMinifiedCss = resMinifiedCss;
-        }
-
-        return dataReturn;
-      })
-      .catch(err => {
-        throw err;
-      });
+    return Promise.resolve([])
+            .then(result =>
+              this.Builder.webpack(minify).then(intoAs('resWebpack', result))
+            )
+            .then(result =>
+              this.Builder.vulcanize().then(intoAs('resVulcanize', result))
+            )
+            .then(result =>
+              minify ?
+                this.Minifier.minifyCSS().then(intoAs('resMinifiedCss', result)) :
+                result
+            )
+            .then(result =>
+              minify ?
+                this.Builder.hashed().then(intoAs('resHashed', result)) :
+                result
+            )
+            .then(result =>
+              result.reduce((acc, r) => Object.assign({}, acc, r), {})
+            )
+            .catch(err => {
+              throw err;
+            });
   }
 
   bump(type) {

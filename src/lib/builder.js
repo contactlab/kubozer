@@ -12,6 +12,7 @@ import WebpackNotifierPlugin from 'webpack-notifier';
 import Vulcanize             from 'vulcanize';
 
 import {success, error} from './result';
+import hashedResources  from './hashed-resources';
 
 const WEBPACK_COMPLETED   = 'Webpack compilation completed';
 const VULCANIZE_COMPLETED = 'Vulcanize completed.';
@@ -94,5 +95,9 @@ export default class Builder {
         });
       });
     });
+  }
+
+  hashed() {
+    return hashedResources(this.config, this.webpackConfig);
   }
 }
