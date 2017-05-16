@@ -1,7 +1,16 @@
 sudo: false
+
 language: node_js
+
 node_js:
   - 'node'
   - '6'
+
+# safelist
+branches:
+  only:
+  - master
+  - develop
+
 script:
   - xo && nyc ava --serial && nyc report --reporter=text-lcov | coveralls
