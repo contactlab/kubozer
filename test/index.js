@@ -1,7 +1,10 @@
-import fs from 'fs-extra';
+import path from 'path';
+import fs   from 'fs-extra';
 import test from 'ava';
-import Fn from './../dist/index';
+import pify from 'pify';
 
+import {SUCCESS_MSG} from '../dist/lib/hashed-resources';
+import Fn            from './../dist/index';
 
 test('correct _createWorkspace when needed (build())', async t => {
   const confWebpack = require('./src-test/webpack.test.config');
@@ -269,7 +272,6 @@ test('correct build() method', async t => {
 });
 
 test('correct build() with minify method without stripConsole', async t => {
-  const confWebpack = require('./src-test/webpack.test.config');
   const config = {
     workspace: './test/workspace',
     sourceFolder: './test/src-test',
@@ -292,22 +294,39 @@ test('correct build() with minify method without stripConsole', async t => {
       }
     }
   };
-  const webpackConfig = confWebpack;
-  const fn = new Fn(config, webpackConfig);
-  const minify = true;
-  const resBuild = await fn.build(minify);
+
+  const webpackConfig = require('./src-test/webpack.test.config');
+  const fn            = new Fn(config, webpackConfig);
+  const resBuild      = await fn.build(true);
+  const buildDir      = path.resolve(config.buildFolder);
+
+  const {output}       = webpackConfig;
+  const bundleFileBase = path.basename(output.filename, '.js');
+  const styleFileBae   = path.basename(config.buildCssFile, '.css');
+
   t.not(resBuild.resWebpack, undefined, 'Webpack build result not UNDEFINED');
   t.is(resBuild.resVulcanize.data, `${__dirname}/build/index.html`, 'Vulcanize data build result correct');
   t.is(resBuild.resVulcanize.message, 'Vulcanize completed.', 'Vulcanize message build result correct');
   t.is(resBuild.resMinifiedCss, 'test{font-size:10px}', 'Vulcanize build result correct');
-  t.is(fs.existsSync(`${__dirname}/build/index.html`), true);
-  t.is(fs.existsSync(`${__dirname}/build/bundle.js`), true);
-  t.is(fs.existsSync(`${__dirname}/build/assets/style.min.css`), true);
-  t.is(fs.readFileSync(`${__dirname}/build/bundle.js`, 'utf8').includes('console.log'), true);
+  t.is(resBuild.resHashed.message, SUCCESS_MSG, 'hashing resources should work fine');
+
+  t.true(await fs.pathExists(path.join(buildDir, 'index.html')), 'index.html should exist in build dir');
+
+  const filesInBuildDir = await pify(fs.readdir)(buildDir);
+  const bundleFile      = filesInBuildDir.filter(f => f.indexOf(bundleFileBase) === 0)[0];
+
+  t.truthy(bundleFile, 'bundle should exist in build dir');
+
+  const filesInAssetsDir = await pify(fs.readdir)(path.join(buildDir, config.assetsFolder));
+  const styleFile        = filesInAssetsDir.filter(f => f.indexOf(styleFileBae) === 0)[0];
+
+  t.truthy(styleFile, 'style.min should exist in build dir');
+
+  const bundleContent = await pify(fs.readFile)(path.join(buildDir, bundleFile), 'utf8');
+  t.true(bundleContent.includes('console.log'), 'should not strip "console.log" away');
 });
 
 test('correct build() with minify method and stripConsole', async t => {
-  const confWebpack = require('./src-test/webpack.test.config');
   const config = {
     workspace: './test/workspace',
     sourceFolder: './test/src-test',
@@ -331,18 +350,36 @@ test('correct build() with minify method and stripConsole', async t => {
       }
     }
   };
-  const webpackConfig = confWebpack;
-  const fn = new Fn(config, webpackConfig);
-  const minify = true;
-  const resBuild = await fn.build(minify);
+
+  const webpackConfig = require('./src-test/webpack.test.config');
+  const fn            = new Fn(config, webpackConfig);
+  const resBuild      = await fn.build(true);
+  const buildDir      = path.resolve(config.buildFolder);
+
+  const {output}       = webpackConfig;
+  const bundleFileBase = path.basename(output.filename, '.js');
+  const styleFileBae   = path.basename(config.buildCssFile, '.css');
+
   t.not(resBuild.resWebpack, undefined, 'Webpack build result not UNDEFINED');
   t.is(resBuild.resVulcanize.data, `${__dirname}/build/index.html`, 'Vulcanize data build result correct');
   t.is(resBuild.resVulcanize.message, 'Vulcanize completed.', 'Vulcanize message build result correct');
   t.is(resBuild.resMinifiedCss, 'test{font-size:10px}', 'Vulcanize build result correct');
-  t.is(fs.existsSync(`${__dirname}/build/index.html`), true);
-  t.is(fs.existsSync(`${__dirname}/build/bundle.js`), true);
-  t.is(fs.existsSync(`${__dirname}/build/assets/style.min.css`), true);
-  t.is(fs.readFileSync(`${__dirname}/build/bundle.js`, 'utf8').includes('console.log'), false);
+  t.is(resBuild.resHashed.message, SUCCESS_MSG, 'hashing resources should work fine');
+
+  t.true(await fs.pathExists(path.join(buildDir, 'index.html')), 'index.html should exist in build dir');
+
+  const filesInBuildDir = await pify(fs.readdir)(buildDir);
+  const bundleFile      = filesInBuildDir.filter(f => f.indexOf(bundleFileBase) === 0)[0];
+
+  t.truthy(bundleFile, 'bundle should exist in build dir');
+
+  const filesInAssetsDir = await pify(fs.readdir)(path.join(buildDir, config.assetsFolder));
+  const styleFile        = filesInAssetsDir.filter(f => f.indexOf(styleFileBae) === 0)[0];
+
+  t.truthy(styleFile, 'style.min should exist in build dir');
+
+  const bundleContent = await pify(fs.readFile)(path.join(buildDir, bundleFile), 'utf8');
+  t.false(bundleContent.includes('console.log'), 'should strip "console.log" away');
 });
 
 test('correct build() when webpack entry is an object', async t => {
