@@ -1,29 +1,27 @@
 /* eslint "key-spacing": ["error", {"align": "colon"}] */
 
-import path   from 'path';
-import fs     from 'fs-extra';
-import test   from 'ava';
+import path from 'path';
+import test from 'ava';
 
 import hashed, {ERROR_MSG} from '../dist/lib/hashed';
+import helpers             from './helpers/integration';
 
-const DIST_DIR    = 'dist_hashed';
-const INTEGRATION = path.resolve(__dirname, 'integration');
-const TPL         = path.resolve(INTEGRATION, 'template');
-const DIST        = path.resolve(INTEGRATION, DIST_DIR);
-const CONFIG      = {
-  buildFolder : `./test/integration/${DIST_DIR}`,
+const NAME = 'hashed';
+
+const CONFIG = {
+  buildFolder : `./test/integration/${helpers.dist(NAME)}`,
   assetsFolder: 'assets',
   buildCssFile: 'css/style.css'
 };
 const WEBPACKCONFIG = {
   output: {
-    path    : `./test/integration/${DIST_DIR}`,
+    path    : `./test/integration/${helpers.dist(NAME)}`,
     filename: 'bundle.js'
   }
 };
 
-test.cb.before(t => {
-  fs.copy(TPL, DIST, t.end);
+test.before(async () => {
+  await helpers.distFromTpl(NAME);
 });
 
 test('hashed', t => {
@@ -57,6 +55,6 @@ test('hashed(config, undefined)', async t => {
   t.is(err.message, ERROR_MSG, 'should reject with an error');
 });
 
-test.cb.after(t => {
-  fs.remove(DIST, t.end);
+test.after.always(async () => {
+  await helpers.clean(NAME);
 });
