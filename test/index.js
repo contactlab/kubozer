@@ -7,9 +7,7 @@ import {SUCCESS_MSG} from '../dist/lib/hashed-resources';
 import Fn            from './../dist/index';
 
 test('correct _createWorkspace when needed (build())', async t => {
-  const confWebpack = require('./src-test/webpack.test.config');
   // Create the build folder
-  const pathToDir = `${__dirname}/workspace`;
   const config = {
     workspace: './test/workspace',
     sourceFolder: './test/src-test',
@@ -24,41 +22,41 @@ test('correct _createWorkspace when needed (build())', async t => {
       }
     }
   };
-  const webpackConfig = confWebpack;
-  const fn = new Fn(config, webpackConfig);
-  const res = await fn.build();
-  t.true(fs.existsSync(pathToDir), 'Worskpace created correctly on init');
+  const webpackConfig = require('./src-test/webpack.test.config');
+  const fn            = new Fn(config, webpackConfig);
+  const res           = await fn.build();
+
+  t.true(fs.existsSync(path.join(__dirname, 'workspace')), 'Worskpace created correctly on init');
 });
 
 test('correct deleteWorkspace()', async t => {
-  const confWebpack = require('./src-test/webpack.test.config');
-  // Create the build folder
-  const pathToDir = `${__dirname}/workspace`;
   const config = {
     workspace: './test/workspace',
     sourceFolder: './test/src-test',
     buildFolder: './test/build',
     vulcanize: {
-        srcTarget: 'index.html',
-        buildTarget: 'index.html',
-        conf: {
-          stripComments: true,
-          inlineScripts: true,
-          inlineStyles: true
-        }
+      srcTarget: 'index.html',
+      buildTarget: 'index.html',
+      conf: {
+        stripComments: true,
+        inlineScripts: true,
+        inlineStyles: true
       }
+    }
   };
-  const webpackConfig = confWebpack;
-  const fn = new Fn(config, webpackConfig);
-  const res = await fn.build();
+
+  const webpackConfig = require('./src-test/webpack.test.config');
+  const fn            = new Fn(config, webpackConfig);
+  const res           = await fn.build();
+
   fn.deleteWorkspace();
-  t.false(fs.existsSync(pathToDir), 'Worskpace deleted correctly on init');
+
+  t.false(fs.existsSync(path.join(__dirname, 'workspace')), 'Worskpace deleted correctly on init');
 });
 
 test('correct deletePrevBuild()', t => {
-  const confWebpack = require('./src-test/webpack.test.config');
-  // Create the build folder
-  const pathToDir = `${__dirname}/build`;
+  const pathToDir = path.join(__dirname, 'build');
+
   fs.ensureDirSync(pathToDir);
 
   const config = {
@@ -66,9 +64,12 @@ test('correct deletePrevBuild()', t => {
     sourceFolder: './test/src-test',
     buildFolder: './test/build'
   };
-  const webpackConfig = confWebpack;
-  const fn = new Fn(config, webpackConfig);
+
+  const webpackConfig = require('./src-test/webpack.test.config');
+  const fn            = new Fn(config, webpackConfig);
+
   fn.deletePrevBuild();
+
   t.false(fs.existsSync(pathToDir), 'Correctly removed old build.');
 });
 
@@ -93,17 +94,23 @@ test('correct copy() method', async t => {
     ]
 
   };
-  const webpackConfig = {};
-  const fn = new Fn(config, webpackConfig);
+
+  const fn            = new Fn(config, {});
   const copiedBundles = await fn.copy('bundles');
-  t.is(fs.existsSync(`${__dirname}/build/assets/imgs-others`), true);
-  t.is(fs.existsSync(`${__dirname}/build/bundles`), true);
-  t.is(fs.existsSync(`${__dirname}/build/manifest.json`), true, 'Manifest is correctly copied');
+  const buildDir      = path.resolve(config.buildFolder);
+
+  t.is(fs.existsSync(path.join(buildDir, 'assets/imgs-others')), true);
+  t.is(fs.existsSync(path.join(buildDir, 'bundles')), true);
+  t.is(fs.existsSync(path.join(buildDir, 'manifest.json')), true, 'Manifest is correctly copied');
 });
 
 test('not thrown when manifest is NOT present during _copyManifest()', async t => {
-  fs.copySync(__dirname + '/src-test/manifest.json', __dirname + '/src-test/manifest.backup.json');
-  fs.removeSync(__dirname + '/src-test/manifest.json');
+  const manifest    = path.join(__dirname, 'src-test/manifest.json');
+  const manifestBkp = path.join(__dirname, 'src-test/manifest.backup.json');
+
+  fs.copySync(manifest, manifestBkp);
+  fs.removeSync(manifest);
+
   const config = {
     workspace: './test/workspace',
     sourceFolder: './test/src-test',
@@ -122,20 +129,21 @@ test('not thrown when manifest is NOT present during _copyManifest()', async t =
         ]
       }
     ]
-
   };
-  const webpackConfig = {};
-  const fn = new Fn(config, webpackConfig);
+
+  const fn            = new Fn(config, {});
   const copiedBundles = await fn.copy();
-  t.is(fs.existsSync(`${__dirname}/build/assets/imgs-others`), true);
-  t.is(fs.existsSync(`${__dirname}/build/bundles`), true);
-  t.is(fs.existsSync(`${__dirname}/build/manifest.json`), false, 'Manifest is correctly NOT copied and no errors thrown');
-  fs.copySync(__dirname + '/src-test/manifest.backup.json', __dirname + '/src-test/manifest.json');
-  fs.removeSync(__dirname + '/src-test/manifest.backup.json');
+  const buildDir      = path.resolve(config.buildFolder);
+
+  t.is(fs.existsSync(path.join(buildDir, 'assets/imgs-others')), true);
+  t.is(fs.existsSync(path.join(buildDir, 'bundles')), true);
+  t.is(fs.existsSync(path.join(buildDir, 'manifest.json')), false, 'Manifest is correctly NOT copied and no errors thrown');
+
+  fs.copySync(manifestBkp, manifest);
+  fs.removeSync(manifestBkp);
 });
 
 test('correct replace() method', async t => {
-  const confWebpack = require('./src-test/webpack.test.config');
   const config = {
     workspace: './test/workspace',
     sourceFolder: './test/src-test',
@@ -159,24 +167,25 @@ test('correct replace() method', async t => {
         commentRegex: ['<!--styles!--->((.|\n)*)<!--styles!--->'],
         with: ['/assets/style.css']
       },
-       js: {
+      js: {
         files: 'index.html',
         commentRegex: ['<!--js!--->((.|\n)*)<!--js!--->'],
         with: ['/assets/javascript.js']
-       }
+      }
     }
   };
-  const webpackConfig = confWebpack;
-  const fn = new Fn(config, webpackConfig);
-  const replRes = await fn.replace();
-  const res = await fn.build();
+
+  const webpackConfig = require('./src-test/webpack.test.config');
+  const fn            = new Fn(config, webpackConfig);
+  const replRes       = await fn.replace();
+  const res           = await fn.build();
+
   t.is(replRes.err, undefined);
   t.true(Array.isArray(replRes.data.changedCSS));
   t.true(Array.isArray(replRes.data.changedJS));
 });
 
 test('replace() products correct output', async t => {
-  const confWebpack = require('./src-test/webpack.test.config');
   const config = {
     workspace: './test/workspace',
     sourceFolder: './test/src-test',
@@ -200,26 +209,25 @@ test('replace() products correct output', async t => {
         commentRegex: ['<!--styles!--->((.|\n)*)<!--styles!--->'],
         with: ['/assets/style.css']
       },
-       js: {
+      js: {
         files: 'index.html',
         commentRegex: ['<!--js!--->((.|\n)*)<!--js!--->'],
         with: ['/assets/javascript.js']
-       }
+      }
     }
   };
-  const webpackConfig = confWebpack;
-  const fn = new Fn(config, webpackConfig);
-  const replRes = await fn.replace();
-  const res = await fn.build();
-  const fileReplace = fs.readFileSync(`${__dirname}/build/index.html`, 'utf8');
+
+  const webpackConfig = require('./src-test/webpack.test.config');
+  const fn            = new Fn(config, webpackConfig);
+  const replRes       = await fn.replace();
+  const res           = await fn.build();
+  const fileReplace   = fs.readFileSync(path.resolve(config.buildFolder, 'index.html'), 'utf8');
+
+  // eslint-disable-next-line no-useless-escape
   t.is(fileReplace, `<!DOCTYPE html><html><head>\n    <meta charset=\"utf-8\">\n    <title></title>\n\n      \n        <link rel=\"stylesheet\" href=\"/assets/style.css\">\n        \n\n      \n        <script src=\"/assets/javascript.js\"></script>\n        \n\n  </head>\n  <body>\n\n  \n\n</body></html>`);
 });
 
 test('correct bump() method', async t => {
-  fs.writeFileSync('./test/src-test/package.json', JSON.stringify({version: '1.0.0'}));
-  fs.writeFileSync('./test/src-test/manifest.json', JSON.stringify({version: '1.0.0'}));
-
-  const confWebpack = require('./src-test/webpack.test.config');
   const config = {
     workspace: './test/workspace',
     buildFolder: './test/build',
@@ -231,17 +239,21 @@ test('correct bump() method', async t => {
       ]
     }
   };
-  const webpackConfig = confWebpack;
-  const fn = new Fn(config, webpackConfig);
-  const resBump = await fn.bump('major');
-  // Check if workspace was NOT created correclty
+
+  const srcTestDir = path.resolve(config.sourceFolder);
+  fs.writeFileSync(path.join(srcTestDir, 'package.json'), JSON.stringify({version: '1.0.0'}));
+  fs.writeFileSync(path.join(srcTestDir, 'manifest.json'), JSON.stringify({version: '1.0.0'}));
+
+  const webpackConfig = require('./src-test/webpack.test.config');
+  const fn            = new Fn(config, webpackConfig);
+  const resBump       = await fn.bump('major');
+
   t.false(fs.existsSync(config.workspace), 'workspace correctly not created during the bump task');
   t.true(Array.isArray(resBump.data));
   t.is(resBump.data[0].version, '2.0.0');
 });
 
 test('correct build() method', async t => {
-  const confWebpack = require('./src-test/webpack.test.config');
   const config = {
     workspace: './test/workspace',
     sourceFolder: './test/src-test',
@@ -261,14 +273,18 @@ test('correct build() method', async t => {
       }
     }
   };
-  const webpackConfig = confWebpack;
-  const fn = new Fn(config, webpackConfig);
-  const resBuild = await fn.build();
+
+  const webpackConfig = require('./src-test/webpack.test.config');
+  const fn            = new Fn(config, webpackConfig);
+  const resBuild      = await fn.build();
+  const buildDir      = path.resolve(config.buildFolder);
+
   t.not(resBuild.resWebpack, undefined, 'Webpack build result not UNDEFINED');
   t.not(resBuild.resVulcanize, undefined, 'Vulcanize build result not UNDEFINED');
-  t.is(fs.existsSync(`${__dirname}/build/index.html`), true);
-  t.is(fs.existsSync(`${__dirname}/build/bundle.js`), true);
-  t.is(fs.existsSync(`${__dirname}/build/bundle.js.map`), true);
+
+  t.is(fs.existsSync(path.join(buildDir, 'index.html')), true);
+  t.is(fs.existsSync(path.join(buildDir, 'bundle.js')), true);
+  t.is(fs.existsSync(path.join(buildDir, 'bundle.js.map')), true);
 });
 
 test('correct build() with minify method without stripConsole', async t => {
@@ -383,7 +399,6 @@ test('correct build() with minify method and stripConsole', async t => {
 });
 
 test('correct build() when webpack entry is an object', async t => {
-  const confWebpack = require('./src-test/webpack.test.config');
   const config = {
     workspace: './test/workspace',
     sourceFolder: './test/src-test',
@@ -403,22 +418,27 @@ test('correct build() when webpack entry is an object', async t => {
       }
     }
   };
-  const webpackConfig = confWebpack;
+
+  const webpackConfig = require('./src-test/webpack.test.config');
   webpackConfig.entry = {
     main: webpackConfig.entry,
     vendors: ['ava']
   };
   webpackConfig.output.filename = '[name].bundle.js';
-  const fn = new Fn(config, webpackConfig);
+
+  const fn       = new Fn(config, webpackConfig);
   const resBuild = await fn.build();
+  const buildDir = path.resolve(config.buildFolder);
+
   t.not(resBuild.resWebpack, undefined, 'Webpack build result not UNDEFINED');
   t.not(resBuild.resVulcanize, undefined, 'Vulcanize build result not UNDEFINED');
-  t.is(fs.existsSync(`${__dirname}/build/index.html`), true);
-  t.is(fs.existsSync(`${__dirname}/build/main.bundle.js`), true);
-  t.is(fs.existsSync(`${__dirname}/build/vendors.bundle.js`), true);
+
+  t.is(fs.existsSync(path.join(buildDir, 'index.html')), true);
+  t.is(fs.existsSync(path.join(buildDir, 'main.bundle.js')), true);
+  t.is(fs.existsSync(path.join(buildDir, 'vendors.bundle.js')), true);
 });
 
-test.afterEach.always(t => {
-  fs.removeSync('./test/build');
-  fs.removeSync('./test/workspace');
+test.afterEach.always(() => {
+  fs.removeSync(path.join('test', 'build'));
+  fs.removeSync(path.join('test', 'workspace'));
 });
