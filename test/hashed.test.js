@@ -13,6 +13,7 @@ const CONFIG = {
   assetsFolder: 'assets',
   buildCssFile: 'css/style.css'
 };
+
 const WEBPACKCONFIG = {
   output: {
     path    : `./test/integration/${helpers.dist(NAME)}`,
