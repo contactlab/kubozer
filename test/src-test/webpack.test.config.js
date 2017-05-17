@@ -1,30 +1,18 @@
-let entry = './test/src-test/app/index.js';
-let outputPath = './test/build';
-let output = 'bundle.js';
-let devtool = 'source-map';
+const path = require('path');
 
 module.exports = {
-  entry,
+  entry : path.join(__dirname, 'app', 'index.js'),
   output: {
-    // Make sure to use [name] or [id] in output.filename
-    //  when using multiple entry points
-    path: outputPath,
-    filename: output
+    path    : path.join(__dirname, '..', 'build'),
+    filename: 'bundle.js'
   },
-  // stats: {
-  //   colors: true,
-  //   modules: true,
-  //   reasons: true,
-  //   errorDetails: true
-  // },
-  devtool: devtool,
-  module: {
+  devtool: 'source-map',
+  module : {
     loaders: [{
-      test: /\.js?$/,
-      // exclude: /(node_modules|bower_components)/,
+      test   : /\.js?$/,
       exclude: ['node_modules', 'app/assets/bower', 'app/bundle.js', 'build'],
-      loader: 'babel-loader', // 'babel-loader' is also a legal name to reference
-      query: {
+      loader : 'babel-loader',
+      query  : {
         presets: ['es2015'],
         plugins: ['transform-es2015-spread', 'syntax-object-rest-spread', 'transform-object-rest-spread']
       }

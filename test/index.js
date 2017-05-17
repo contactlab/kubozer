@@ -1,45 +1,49 @@
 /* eslint "key-spacing": ["error", {"align": "colon"}] */
 
-import path from 'path';
-import fs   from 'fs-extra';
-import test from 'ava';
+import path   from 'path';
+import fs     from 'fs-extra';
+import test   from 'ava';
 
 import Kubozer       from '../dist';
 import {SUCCESS_MSG} from '../dist/lib/hashed-resources';
-import {
-  merge,
-  FOLDERS, VULCANIZE, VULCANIZE_NO_JS, VULCANIZE_NO_BUNDLE, COPY, REPLACE, MANIFEST, BUMP, CSS, STRIPCONSOLE
-} from './helpers/config';
+import tmpDir        from './helpers/tmp-dir';
+import hconf         from './helpers/config';
+
+test.beforeEach(async t => {
+  // eslint-disable-next-line ava/use-t-well
+  t.context.tmpDir = await tmpDir(path.join(__dirname, 'src-test'), t.title);
+});
 
 test('correct _createWorkspace when needed (build())', async t => {
-  const config        = merge([FOLDERS, VULCANIZE]);
-  const webpackConfig = require('./src-test/webpack.test.config');
+  const config        = hconf(t.context.tmpDir, ['FOLDERS', 'VULCANIZE']);
+  const webpackConfig = require(path.join(config.sourceFolder, 'webpack.test.config'));
   const kubozer       = new Kubozer(config, webpackConfig);
 
   await kubozer.build();
 
-  t.true(await fs.pathExists(path.join(__dirname, 'workspace')), 'Worskpace created correctly on init');
+  t.true(await fs.pathExists(config.workspace), 'Worskpace created correctly on init');
 });
 
 test('correct deleteWorkspace()', async t => {
-  const config        = merge([FOLDERS, VULCANIZE]);
-  const webpackConfig = require('./src-test/webpack.test.config');
+  const config        = hconf(t.context.tmpDir, ['FOLDERS', 'VULCANIZE']);
+  const webpackConfig = require(path.join(config.sourceFolder, 'webpack.test.config'));
   const kubozer       = new Kubozer(config, webpackConfig);
 
   await kubozer.build();
 
   kubozer.deleteWorkspace();
 
-  t.false(await fs.pathExists(path.join(__dirname, 'workspace')), 'Worskpace deleted correctly on init');
+  t.false(await fs.pathExists(config.workspace), 'Worskpace deleted correctly on init');
 });
 
 test('correct deletePrevBuild()', async t => {
-  const pathToDir = path.join(__dirname, 'build');
+  const pathToDir = path.join(t.context.tmpDir, 'build');
 
   await fs.ensureDir(pathToDir);
 
-  const webpackConfig = require('./src-test/webpack.test.config');
-  const kubozer       = new Kubozer(FOLDERS, webpackConfig);
+  const config        = hconf(t.context.tmpDir, ['FOLDERS']);
+  const webpackConfig = require(path.join(config.sourceFolder, 'webpack.test.config'));
+  const kubozer       = new Kubozer(config, webpackConfig);
 
   kubozer.deletePrevBuild();
 
@@ -47,7 +51,7 @@ test('correct deletePrevBuild()', async t => {
 });
 
 test('correct copy() method', async t => {
-  const config  = merge([FOLDERS, COPY, MANIFEST]);
+  const config  = hconf(t.context.tmpDir, ['FOLDERS', 'COPY', 'MANIFEST']);
   const kubozer = new Kubozer(config, {});
 
   await kubozer.copy('bundles');
@@ -60,13 +64,13 @@ test('correct copy() method', async t => {
 });
 
 test('not thrown when manifest is NOT present during _copyManifest()', async t => {
-  const manifest    = path.join(__dirname, 'src-test/manifest.json');
-  const manifestBkp = path.join(__dirname, 'src-test/manifest.backup.json');
+  const manifest    = path.join(t.context.tmpDir, 'src-test/manifest.json');
+  const manifestBkp = path.join(t.context.tmpDir, 'src-test/manifest.backup.json');
 
   await fs.copy(manifest, manifestBkp);
   await fs.remove(manifest);
 
-  const config  = merge([FOLDERS, COPY, MANIFEST]);
+  const config  = hconf(t.context.tmpDir, ['FOLDERS', 'COPY', 'MANIFEST']);
   const kubozer = new Kubozer(config, {});
 
   await kubozer.copy();
@@ -82,8 +86,8 @@ test('not thrown when manifest is NOT present during _copyManifest()', async t =
 });
 
 test('correct replace() method', async t => {
-  const config        = merge([FOLDERS, VULCANIZE_NO_JS, REPLACE, MANIFEST]);
-  const webpackConfig = require('./src-test/webpack.test.config');
+  const config        = hconf(t.context.tmpDir, ['FOLDERS', 'VULCANIZE_NO_JS', 'REPLACE', 'MANIFEST']);
+  const webpackConfig = require(path.join(config.sourceFolder, 'webpack.test.config'));
   const kubozer       = new Kubozer(config, webpackConfig);
   const replRes       = await kubozer.replace();
 
@@ -95,8 +99,8 @@ test('correct replace() method', async t => {
 });
 
 test('replace() products correct output', async t => {
-  const config        = merge([FOLDERS, VULCANIZE_NO_JS, REPLACE, MANIFEST]);
-  const webpackConfig = require('./src-test/webpack.test.config');
+  const config        = hconf(t.context.tmpDir, ['FOLDERS', 'VULCANIZE_NO_JS', 'REPLACE', 'MANIFEST']);
+  const webpackConfig = require(path.join(config.sourceFolder, 'webpack.test.config'));
   const kubozer       = new Kubozer(config, webpackConfig);
 
   await kubozer.replace();
@@ -109,13 +113,12 @@ test('replace() products correct output', async t => {
 });
 
 test('correct bump() method', async t => {
-  const config     = merge([FOLDERS, BUMP]);
-  const srcTestDir = path.resolve(config.sourceFolder);
+  const config     = hconf(t.context.tmpDir, ['FOLDERS', 'BUMP']);
 
-  await fs.writeFile(path.join(srcTestDir, 'package.json'), JSON.stringify({version: '1.0.0'}));
-  await fs.writeFile(path.join(srcTestDir, 'manifest.json'), JSON.stringify({version: '1.0.0'}));
+  await fs.writeFile(path.join(config.sourceFolder, 'package.json'), JSON.stringify({version: '1.0.0'}));
+  await fs.writeFile(path.join(config.sourceFolder, 'manifest.json'), JSON.stringify({version: '1.0.0'}));
 
-  const webpackConfig = require('./src-test/webpack.test.config');
+  const webpackConfig = require(path.join(config.sourceFolder, 'webpack.test.config'));
   const kubozer       = new Kubozer(config, webpackConfig);
   const resBump       = await kubozer.bump('major');
 
@@ -125,25 +128,23 @@ test('correct bump() method', async t => {
 });
 
 test('correct build() method', async t => {
-  const config        = merge([FOLDERS, VULCANIZE_NO_BUNDLE, MANIFEST]);
-  const webpackConfig = require('./src-test/webpack.test.config');
+  const config        = hconf(t.context.tmpDir, ['FOLDERS', 'VULCANIZE_NO_BUNDLE', 'MANIFEST']);
+  const webpackConfig = require(path.join(config.sourceFolder, 'webpack.test.config'));
   const kubozer       = new Kubozer(config, webpackConfig);
-  const buildDir      = path.resolve(config.buildFolder);
   const resBuild      = await kubozer.build();
 
   t.not(resBuild.resWebpack, undefined, 'Webpack build result not UNDEFINED');
   t.not(resBuild.resVulcanize, undefined, 'Vulcanize build result not UNDEFINED');
 
-  t.true(await fs.pathExists(path.join(buildDir, 'index.html')));
-  t.true(await fs.pathExists(path.join(buildDir, 'bundle.js')));
-  t.true(await fs.pathExists(path.join(buildDir, 'bundle.js.map')));
+  t.true(await fs.pathExists(path.join(config.buildFolder, 'index.html')));
+  t.true(await fs.pathExists(path.join(config.buildFolder, 'bundle.js')));
+  t.true(await fs.pathExists(path.join(config.buildFolder, 'bundle.js.map')));
 });
 
 test('correct build() with minify method without stripConsole', async t => {
-  const config        = merge([FOLDERS, VULCANIZE_NO_BUNDLE, MANIFEST, CSS]);
-  const webpackConfig = require('./src-test/webpack.test.config');
+  const config        = hconf(t.context.tmpDir, ['FOLDERS', 'VULCANIZE_NO_BUNDLE', 'MANIFEST', 'CSS']);
+  const webpackConfig = require(path.join(config.sourceFolder, 'webpack.test.config'));
   const kubozer       = new Kubozer(config, webpackConfig);
-  const buildDir      = path.resolve(config.buildFolder);
   const resBuild      = await kubozer.build(true);
 
   const {output}       = webpackConfig;
@@ -151,32 +152,31 @@ test('correct build() with minify method without stripConsole', async t => {
   const styleFileBae   = path.basename(config.buildCssFile, '.css');
 
   t.not(resBuild.resWebpack, undefined, 'Webpack build result not UNDEFINED');
-  t.is(resBuild.resVulcanize.data, `${__dirname}/build/index.html`, 'Vulcanize data build result correct');
+  t.is(resBuild.resVulcanize.data, path.join(config.buildFolder, 'index.html'), 'Vulcanize data build result correct');
   t.is(resBuild.resVulcanize.message, 'Vulcanize completed.', 'Vulcanize message build result correct');
   t.is(resBuild.resMinifiedCss, 'test{font-size:10px}', 'Vulcanize build result correct');
   t.is(resBuild.resHashed.message, SUCCESS_MSG, 'hashing resources should work fine');
 
-  t.true(await fs.pathExists(path.join(buildDir, 'index.html')), 'index.html should exist in build dir');
+  t.true(await fs.pathExists(path.join(config.buildFolder, 'index.html')), 'index.html should exist in build dir');
 
-  const filesInBuildDir = await fs.readdir(buildDir);
+  const filesInBuildDir = await fs.readdir(config.buildFolder);
   const bundleFile      = filesInBuildDir.filter(f => f.indexOf(bundleFileBase) === 0)[0];
 
   t.truthy(bundleFile, 'bundle should exist in build dir');
 
-  const filesInAssetsDir = await fs.readdir(path.join(buildDir, config.assetsFolder));
+  const filesInAssetsDir = await fs.readdir(path.join(config.buildFolder, config.assetsFolder));
   const styleFile        = filesInAssetsDir.filter(f => f.indexOf(styleFileBae) === 0)[0];
 
   t.truthy(styleFile, 'style.min should exist in build dir');
 
-  const bundleContent = await fs.readFile(path.join(buildDir, bundleFile), 'utf8');
+  const bundleContent = await fs.readFile(path.join(config.buildFolder, bundleFile), 'utf8');
   t.true(bundleContent.includes('console.log'), 'should not strip "console.log" away');
 });
 
 test('correct build() with minify method and stripConsole', async t => {
-  const config        = merge([FOLDERS, VULCANIZE_NO_BUNDLE, MANIFEST, CSS, STRIPCONSOLE]);
-  const webpackConfig = require('./src-test/webpack.test.config');
+  const config        = hconf(t.context.tmpDir, ['FOLDERS', 'VULCANIZE_NO_BUNDLE', 'MANIFEST', 'CSS', 'STRIPCONSOLE']);
+  const webpackConfig = require(path.join(config.sourceFolder, 'webpack.test.config'));
   const kubozer       = new Kubozer(config, webpackConfig);
-  const buildDir      = path.resolve(config.buildFolder);
   const resBuild      = await kubozer.build(true);
 
   const {output}       = webpackConfig;
@@ -184,49 +184,48 @@ test('correct build() with minify method and stripConsole', async t => {
   const styleFileBae   = path.basename(config.buildCssFile, '.css');
 
   t.not(resBuild.resWebpack, undefined, 'Webpack build result not UNDEFINED');
-  t.is(resBuild.resVulcanize.data, `${__dirname}/build/index.html`, 'Vulcanize data build result correct');
+  t.is(resBuild.resVulcanize.data, path.join(config.buildFolder, 'index.html'), 'Vulcanize data build result correct');
   t.is(resBuild.resVulcanize.message, 'Vulcanize completed.', 'Vulcanize message build result correct');
   t.is(resBuild.resMinifiedCss, 'test{font-size:10px}', 'Vulcanize build result correct');
   t.is(resBuild.resHashed.message, SUCCESS_MSG, 'hashing resources should work fine');
 
-  t.true(await fs.pathExists(path.join(buildDir, 'index.html')), 'index.html should exist in build dir');
+  t.true(await fs.pathExists(path.join(config.buildFolder, 'index.html')), 'index.html should exist in build dir');
 
-  const filesInBuildDir = await fs.readdir(buildDir);
+  const filesInBuildDir = await fs.readdir(config.buildFolder);
   const bundleFile      = filesInBuildDir.filter(f => f.indexOf(bundleFileBase) === 0)[0];
 
   t.truthy(bundleFile, 'bundle should exist in build dir');
 
-  const filesInAssetsDir = await fs.readdir(path.join(buildDir, config.assetsFolder));
+  const filesInAssetsDir = await fs.readdir(path.join(config.buildFolder, config.assetsFolder));
   const styleFile        = filesInAssetsDir.filter(f => f.indexOf(styleFileBae) === 0)[0];
 
   t.truthy(styleFile, 'style.min should exist in build dir');
 
-  const bundleContent = await fs.readFile(path.join(buildDir, bundleFile), 'utf8');
+  const bundleContent = await fs.readFile(path.join(config.buildFolder, bundleFile), 'utf8');
   t.false(bundleContent.includes('console.log'), 'should strip "console.log" away');
 });
 
 test('correct build() when webpack entry is an object', async t => {
-  const webpackConfig = require('./src-test/webpack.test.config');
+  const config   = hconf(t.context.tmpDir, ['FOLDERS', 'VULCANIZE_NO_BUNDLE', 'MANIFEST']);
+
+  const webpackConfig = require(path.join(config.sourceFolder, 'webpack.test.config'));
   webpackConfig.entry = {
     main   : webpackConfig.entry,
     vendors: ['ava']
   };
   webpackConfig.output.filename = '[name].bundle.js';
 
-  const config   = merge([FOLDERS, VULCANIZE_NO_BUNDLE, MANIFEST]);
   const kubozer  = new Kubozer(config, webpackConfig);
-  const buildDir = path.resolve(config.buildFolder);
   const resBuild = await kubozer.build();
 
   t.not(resBuild.resWebpack, undefined, 'Webpack build result not UNDEFINED');
   t.not(resBuild.resVulcanize, undefined, 'Vulcanize build result not UNDEFINED');
 
-  t.true(await fs.pathExists(path.join(buildDir, 'index.html')));
-  t.true(await fs.pathExists(path.join(buildDir, 'main.bundle.js')));
-  t.true(await fs.pathExists(path.join(buildDir, 'vendors.bundle.js')));
+  t.true(await fs.pathExists(path.join(config.buildFolder, 'index.html')));
+  t.true(await fs.pathExists(path.join(config.buildFolder, 'main.bundle.js')));
+  t.true(await fs.pathExists(path.join(config.buildFolder, 'vendors.bundle.js')));
 });
 
-test.afterEach.always(async () => {
-  await fs.remove(path.join('test', 'build'));
-  await fs.remove(path.join('test', 'workspace'));
+test.afterEach.always(async t => {
+  await fs.remove(t.context.tmpDir);
 });

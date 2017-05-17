@@ -5,8 +5,21 @@
 
 /* eslint "key-spacing": ["error", {"align": "colon"}] */
 
+const path      = require('path');
 const assocPath = require('ramda/src/assocPath');
-const mergeAll  = require('ramda/src/mergeAll');
+const compose   = require('ramda/src/compose');
+const when      = require('ramda/src/when');
+const contains  = require('ramda/src/contains');
+const flip      = require('ramda/src/flip');
+const merge     = require('ramda/src/merge');
+const prop      = require('ramda/src/prop');
+const is        = require('ramda/src/is');
+
+// has :: [a] -> a -> Boolean
+const has = flip(contains);
+
+// readOrExec :: (*, String, Object) -> *
+const readOrExec = (p, k, o) => compose(when(is(Function), a => a(p)), prop(k))(o);
 
 const VULCANIZE = {
   vulcanize: {
@@ -20,14 +33,21 @@ const VULCANIZE = {
   }
 };
 
-module.exports = {
-  merge: mergeAll,
+const CONFIG = {
+  FOLDERS: dir => ({
+    workspace   : path.join(dir, 'workspace'),
+    sourceFolder: path.join(dir, 'src-test'),
+    buildFolder : path.join(dir, 'build')
+  }),
 
-  FOLDERS: {
-    workspace   : './test/workspace',
-    sourceFolder: './test/src-test',
-    buildFolder : './test/build'
-  },
+  BUMP: dir => ({
+    bump: {
+      files: [
+        path.join(dir, 'src-test/package.json'),
+        path.join(dir, 'src-test/manifest.json')
+      ]
+    }
+  }),
 
   VULCANIZE,
 
@@ -72,15 +92,6 @@ module.exports = {
     manifest: true
   },
 
-  BUMP: {
-    bump: {
-      files: [
-        './test/src-test/package.json',
-        './test/src-test/manifest.json'
-      ]
-    }
-  },
-
   CSS: {
     assetsFolder  : 'assets',
     sourceCssFiles: ['/test.css'],
@@ -91,3 +102,9 @@ module.exports = {
     stripConsole: true
   }
 };
+
+module.exports = (dir, keys = []) =>
+  Object
+    .keys(CONFIG)
+    .filter(has(keys))
+    .reduce((acc, key) => merge(acc, readOrExec(dir, key, CONFIG)), {});
