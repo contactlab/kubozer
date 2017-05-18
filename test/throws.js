@@ -1,149 +1,114 @@
+/* eslint "key-spacing": ["error", {"align": "colon"}] */
+
+import path from 'path';
 import fs from 'fs-extra';
 import test from 'ava';
-import Fn from './../dist/index';
+
+import Kubozer from '../dist';
+import tmpDir  from './helpers/tmp-dir';
+import hconf   from './helpers/config';
+
+test.beforeEach(async t => {
+  // eslint-disable-next-line ava/use-t-well
+  const workDir = await tmpDir(path.join(__dirname, 'integration/src'), t.title);
+
+  t.context.tmpDir = workDir;
+  t.context.webpackConfig = require(path.join(workDir, 'src/webpack.test.config'));
+});
 
 test('throw error when both configs are missing', t => {
-  const err = t.throws(() => new Fn(), 'Missing configurations.');
+  t.throws(() => new Kubozer(), 'Missing configurations.');
 });
 
 test('throws copy() method without MANIFEST and files', async t => {
-  const config = {
-    workspace: './test/workspace',
-    sourceFolder: './test/src-test',
-    buildFolder: './test/build',
-    manifest: false
-  };
-  const webpackConfig = {};
-  const fn = new Fn(config, webpackConfig);
-  const err = await t.throws(fn.copy());
+  const config  = Object.assign({}, hconf(t.context.tmpDir, ['FOLDERS']), {manifest: false});
+  const kubozer = new Kubozer(config, {});
+  const err     = await t.throws(kubozer.copy());
+
   t.is(err.message, 'copy() method was called but "copy" property is empty or undefined.');
-  t.false(fs.existsSync(`${__dirname}/build/manifest.json`), 'Manifest is correctly NOT copied');
+  t.false(await fs.pathExists(path.join(config.buildFolder, 'manifest.json')), 'Manifest is correctly NOT copied');
 });
 
 test('throw error when "workspace" not present in config', t => {
-  const config = {};
-  const webpackConfig = {};
-  const err = t.throws(() => new Fn(config, webpackConfig), 'Path must be a string. Received undefined --> config.workspace');
+  t.throws(() => new Kubozer({}, {}), 'Path must be a string. Received undefined --> config.workspace');
 });
 
 test('throw error when "sourceFolder" not present in config', t => {
   const config = {
-    workspace: './test/workspace'
+    workspace: path.join(t.context.tmpDir, 'workspace')
   };
-  const webpackConfig = {};
-  const err = t.throws(() => new Fn(config, webpackConfig), 'Path must be a string. Received undefined --> config.sourceFolder');
+
+  t.throws(() => new Kubozer(config, {}), 'Path must be a string. Received undefined --> config.sourceFolder');
 });
 
 test('throw error when "buildFolder" not present in config', t => {
   const config = {
-    workspace: './test/workspace',
-    sourceFolder: './test/src-test'
+    workspace   : path.join(t.context.tmpDir, 'workspace'),
+    sourceFolder: path.join(t.context.tmpDir, 'src')
   };
-  const webpackConfig = {};
-  const err = t.throws(() => new Fn(config, webpackConfig), 'Path must be a string. Received undefined --> config.buildFolder');
+
+  t.throws(() => new Kubozer(config, {}), 'Path must be a string. Received undefined --> config.buildFolder');
 });
 
 test('throw error (build()) when "entry" within the "webpack configuration" is not present in config', async t => {
-  const confWebpack = require('./src-test/webpack.test.config');
-  const config = {
-    workspace: './test/workspace',
-    sourceFolder: './test/src-test',
-    buildFolder: './test/build',
-    vulcanize: {
-        srcTarget: 'index.html',
-        buildTarget: 'index.html',
-        conf: {
-          stripComments: true,
-          inlineScripts: true,
-          inlineStyles: true
-        }
-      }
-  };
+  const {tmpDir, webpackConfig} = t.context;
+  const config                  = hconf(tmpDir, ['FOLDERS', 'VULCANIZE']);
 
-  const webpackConfig = Object.assign({}, confWebpack);
-  delete webpackConfig.entry;
-  const fn = new Fn(config, webpackConfig);
-  const err = await t.throws(fn.build());
+  const _webpackConfig = Object.assign({}, webpackConfig);
+  delete _webpackConfig.entry;
+
+  const kubozer = new Kubozer(config, _webpackConfig);
+  const err     = await t.throws(kubozer.build());
+
   t.is(err.err, 'WebpackOptionsValidationError');
-  t.is(err.message, `Invalid configuration object. Webpack has been initialised using a configuration object that does not match the API schema.\n - configuration misses the property 'entry'.\n   object { <key>: non-empty string | [non-empty string] } | non-empty string | [non-empty string] | function\n   The entry point(s) of the compilation.`)
+  t.is(err.message, `Invalid configuration object. Webpack has been initialised using a configuration object that does not match the API schema.\n - configuration misses the property 'entry'.\n   object { <key>: non-empty string | [non-empty string] } | non-empty string | [non-empty string] | function\n   The entry point(s) of the compilation.`);
 });
 
-
-// A test for the future, when check for output.path and filename
-
-// test('throw error (build()) when a required prop within the "webpack configuration" is not present in config', async t => {
-// 	const confWebpack = require('./src-test/webpack.test.config');
-// 	const config = {
-// 		workspace: './test/workspace',
-// 		sourceFolder: './test/src-test',
-// 		buildFolder: './test/build',
-// 	};
-
-// 	const webpackConfig = Object.assign({}, confWebpack);
-// 	delete webpackConfig.output;
-// 	const fn = new Fn(config, webpackConfig);
-// 	const err = await t.throws(fn.build());
-// 	// t.true(err.err);
-// 	t.is(err, 'Webpack entry point is not present. ---> webpackConfig.entry === undefined')
-// });
-
 test('throw error (build()) when "vulcanize" not present in config', async t => {
-  const confWebpack = require('./src-test/webpack.test.config');
-  const config = {
-    workspace: './test/workspace',
-    sourceFolder: './test/src-test',
-    buildFolder: './test/build',
-  };
-  const webpackConfig = confWebpack;
-  const fn = new Fn(config, webpackConfig);
-  const err = await t.throws(fn.build());
+  const {tmpDir, webpackConfig} = t.context;
+  const config                  = hconf(tmpDir, ['FOLDERS']);
+
+  const kubozer = new Kubozer(config, webpackConfig);
+  const err     = await t.throws(kubozer.build());
+
   t.true(err.err);
-  t.is(err.message, 'Vulcanize configuration is not present. ---> config.vulcanize === undefined')
+  t.is(err.message, 'Vulcanize configuration is not present. ---> config.vulcanize === undefined');
 });
 
 test('throw error when bump() method is called without params', async t => {
-    const confWebpack = require('./src-test/webpack.test.config');
-    const config = {
-      workspace: './test/workspace',
-      buildFolder: './test/build',
-      sourceFolder: './test/src-test',
-      bump: {
-        files: [
-          './test/src-test/package.json',
-          './test/src-test/manifest.json'
-        ]
-      }
-    };
-    const webpackConfig = confWebpack;
-    const fn = new Fn(config, webpackConfig);
-    const err = await t.throws(fn.bump());
-    t.is(err.message, `BUMP(): type must be specified. This is not a valid type --> 'undefined'`);
+  const {tmpDir, webpackConfig} = t.context;
+  const config                  = hconf(tmpDir, ['FOLDERS', 'BUMP']);
+
+  const kubozer = new Kubozer(config, webpackConfig);
+  const err     = await t.throws(kubozer.bump());
+
+  t.is(err.message, `BUMP(): type must be specified. This is not a valid type --> 'undefined'`);
 });
 
 test('throw error vulcanize throws and error', async t => {
-    const confWebpack = require('./src-test/webpack.test.config');
-    const config = {
-      workspace: './test/workspace',
-      buildFolder: './test/build',
-      sourceFolder: './test/src-test',
-      vulcanize: {
-        srcTarget: 'asdasdasdaindex.html',
-        buildTarget: 'index.html',
-        conf: {
-          stripComments: true,
-          inlineScripts: true,
-          inlineStyles: true
-        }
+  const VULCANIZE = {
+    vulcanize: {
+      srcTarget  : 'asdasdasdaindex.html',
+      buildTarget: 'index.html',
+      conf       : {
+        stripComments: true,
+        inlineScripts: true,
+        inlineStyles : true
       }
-    };
-    const webpackConfig = confWebpack;
-    const fn = new Fn(config, webpackConfig);
-    const err = await t.throws(fn.build());
-    t.is(err.message, `ENOENT: no such file or directory, open '${__dirname}/workspace/asdasdasdaindex.html' | Did you checked the \"excludes\" property of \"vulcanize\" configuration?`);
+    }
+  };
+
+  const {tmpDir, webpackConfig} = t.context;
+  const config                  = Object.assign({}, hconf(tmpDir, ['FOLDERS']), VULCANIZE);
+
+  const kubozer          = new Kubozer(config, webpackConfig);
+  const err              = await t.throws(kubozer.build());
+  const vulcanizeSrcPath = path.join(config.workspace, VULCANIZE.vulcanize.srcTarget);
+
+  // eslint-disable-next-line no-useless-escape
+  t.is(err.message, `ENOENT: no such file or directory, open '${vulcanizeSrcPath}' | Did you checked the \"excludes\" property of \"vulcanize\" configuration?`);
 });
 
-
-test.afterEach.always(t => {
-  fs.removeSync('./test/build');
-  fs.removeSync('./test/workspace');
+test.afterEach.always(async t => {
+  await fs.remove(t.context.tmpDir);
 });
