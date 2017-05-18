@@ -211,7 +211,7 @@ test('correct build() when webpack entry is an object', async t => {
   const webpackConfig = require(path.join(config.sourceFolder, 'webpack.test.config'));
   webpackConfig.entry = {
     main   : webpackConfig.entry,
-    vendors: ['ava']
+    vendors: ['babel-cli']
   };
   webpackConfig.output.filename = '[name].bundle.js';
 
