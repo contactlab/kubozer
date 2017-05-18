@@ -5,28 +5,14 @@ import fs   from 'fs-extra';
 import test from 'ava';
 
 import hashed, {ERROR_MSG} from '../dist/lib/hashed';
-// import helpers             from './helpers/integration';
-import tmpDir             from './helpers/tmp-dir';
+import tmpDir              from './helpers/tmp-dir';
 
-// const NAME = 'hashed';
-
-// const CONFIG = {
-//   buildFolder : `./test/integration/${helpers.dist(NAME)}`,
-//   assetsFolder: 'assets',
-//   buildCssFile: 'css/style.css'
-// };
 const _config = dir => ({
   buildFolder : path.join(dir, 'dist'),
   assetsFolder: 'assets',
   buildCssFile: 'css/style.css'
 });
 
-// const WEBPACKCONFIG = {
-//   output: {
-//     path    : `./test/integration/${helpers.dist(NAME)}`,
-//     filename: 'bundle.js'
-//   }
-// };
 const _webpackConfig = dir => ({
   output: {
     path    : path.join(dir, 'dist'),
@@ -34,12 +20,13 @@ const _webpackConfig = dir => ({
   }
 });
 
-// test.before(async () => {
-//   await helpers.distFromTpl(NAME);
-// });
 test.beforeEach(async t => {
   // eslint-disable-next-line ava/use-t-well
-  t.context.tmpDir = await tmpDir(path.join(__dirname, 'integration/dist'), t.title);
+  const workDir = await tmpDir(path.join(__dirname, 'integration/dist'), t.title);
+
+  t.context.tmpDir = workDir;
+  t.context.config = _config(workDir);
+  t.context.webpack = _webpackConfig(workDir);
 });
 
 test('hashed', t => {
@@ -47,8 +34,7 @@ test('hashed', t => {
 });
 
 test('hashed(config, webpackconfig)', async t => {
-  const config  = _config(t.context.tmpDir);
-  const webpack = _webpackConfig(t.context.tmpDir);
+  const {config, webpack} = t.context;
   const result  = await hashed(config, webpack);
 
   const bundleFile = path.relative('.', path.join(webpack.output.path, webpack.output.filename));
@@ -64,24 +50,19 @@ test('hashed(config, webpackconfig)', async t => {
 });
 
 test('hashed(undefined, webpackconfig)', async t => {
-  // const config  = _config(t.context.tmpDir);
-  const webpack = _webpackConfig(t.context.tmpDir);
+  const {webpack} = t.context;
   const err = await t.throws(hashed(undefined, webpack));
 
   t.is(err.message, ERROR_MSG, 'should reject with an error');
 });
 
 test('hashed(config, undefined)', async t => {
-  const config  = _config(t.context.tmpDir);
-  // const webpack = _webpackConfig(t.context.tmpDir);
+  const {config} = t.context;
   const err = await t.throws(hashed(config, undefined));
 
   t.is(err.message, ERROR_MSG, 'should reject with an error');
 });
 
-// test.after.always(async () => {
-//   await helpers.clean(NAME);
-// });
 test.afterEach.always(async t => {
   await fs.remove(t.context.tmpDir);
 });
