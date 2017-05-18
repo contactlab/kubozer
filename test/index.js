@@ -11,7 +11,7 @@ import hconf         from './helpers/config';
 
 test.beforeEach(async t => {
   // eslint-disable-next-line ava/use-t-well
-  t.context.tmpDir = await tmpDir(path.join(__dirname, 'src-test'), t.title);
+  t.context.tmpDir = await tmpDir(path.join(__dirname, 'integration/src'), t.title);
 });
 
 test('correct _createWorkspace when needed (build())', async t => {
@@ -64,8 +64,8 @@ test('correct copy() method', async t => {
 });
 
 test('not thrown when manifest is NOT present during _copyManifest()', async t => {
-  const manifest    = path.join(t.context.tmpDir, 'src-test/manifest.json');
-  const manifestBkp = path.join(t.context.tmpDir, 'src-test/manifest.backup.json');
+  const manifest    = path.join(t.context.tmpDir, 'src/manifest.json');
+  const manifestBkp = path.join(t.context.tmpDir, 'src/manifest.backup.json');
 
   await fs.copy(manifest, manifestBkp);
   await fs.remove(manifest);

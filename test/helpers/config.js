@@ -36,15 +36,15 @@ const VULCANIZE = {
 const CONFIG = {
   FOLDERS: dir => ({
     workspace   : path.join(dir, 'workspace'),
-    sourceFolder: path.join(dir, 'src-test'),
+    sourceFolder: path.join(dir, 'src'),
     buildFolder : path.join(dir, 'build')
   }),
 
   BUMP: dir => ({
     bump: {
       files: [
-        path.join(dir, 'src-test/package.json'),
-        path.join(dir, 'src-test/manifest.json')
+        path.join(dir, 'src/package.json'),
+        path.join(dir, 'src/manifest.json')
       ]
     }
   }),
