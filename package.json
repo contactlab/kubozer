@@ -37,8 +37,7 @@
       ]
     },
     "ignores": [
-      "test/**/*",
-      "_testing.js"
+      "test/**/*"
     ]
   },
   "ava": {
