@@ -11,13 +11,16 @@ import hconf         from './helpers/config';
 
 test.beforeEach(async t => {
   // eslint-disable-next-line ava/use-t-well
-  t.context.tmpDir = await tmpDir(path.join(__dirname, 'integration/src'), t.title);
+  const workDir = await tmpDir(path.join(__dirname, 'integration/src'), t.title);
+
+  t.context.tmpDir = workDir;
+  t.context.webpackConfig = require(path.join(workDir, 'src/webpack.test.config'));
 });
 
 test('correct _createWorkspace when needed (build())', async t => {
-  const config        = hconf(t.context.tmpDir, ['FOLDERS', 'VULCANIZE']);
-  const webpackConfig = require(path.join(config.sourceFolder, 'webpack.test.config'));
-  const kubozer       = new Kubozer(config, webpackConfig);
+  const {tmpDir, webpackConfig} = t.context;
+  const config                  = hconf(tmpDir, ['FOLDERS', 'VULCANIZE']);
+  const kubozer                 = new Kubozer(config, webpackConfig);
 
   await kubozer.build();
 
@@ -25,9 +28,9 @@ test('correct _createWorkspace when needed (build())', async t => {
 });
 
 test('correct deleteWorkspace()', async t => {
-  const config        = hconf(t.context.tmpDir, ['FOLDERS', 'VULCANIZE']);
-  const webpackConfig = require(path.join(config.sourceFolder, 'webpack.test.config'));
-  const kubozer       = new Kubozer(config, webpackConfig);
+  const {tmpDir, webpackConfig} = t.context;
+  const config                  = hconf(tmpDir, ['FOLDERS', 'VULCANIZE']);
+  const kubozer                 = new Kubozer(config, webpackConfig);
 
   await kubozer.build();
 
@@ -37,13 +40,13 @@ test('correct deleteWorkspace()', async t => {
 });
 
 test('correct deletePrevBuild()', async t => {
-  const pathToDir = path.join(t.context.tmpDir, 'build');
+  const {tmpDir, webpackConfig} = t.context;
+  const pathToDir               = path.join(tmpDir, 'build');
 
   await fs.ensureDir(pathToDir);
 
-  const config        = hconf(t.context.tmpDir, ['FOLDERS']);
-  const webpackConfig = require(path.join(config.sourceFolder, 'webpack.test.config'));
-  const kubozer       = new Kubozer(config, webpackConfig);
+  const config  = hconf(tmpDir, ['FOLDERS']);
+  const kubozer = new Kubozer(config, webpackConfig);
 
   kubozer.deletePrevBuild();
 
@@ -86,10 +89,10 @@ test('not thrown when manifest is NOT present during _copyManifest()', async t =
 });
 
 test('correct replace() method', async t => {
-  const config        = hconf(t.context.tmpDir, ['FOLDERS', 'VULCANIZE_NO_JS', 'REPLACE', 'MANIFEST']);
-  const webpackConfig = require(path.join(config.sourceFolder, 'webpack.test.config'));
-  const kubozer       = new Kubozer(config, webpackConfig);
-  const replRes       = await kubozer.replace();
+  const {tmpDir, webpackConfig} = t.context;
+  const config                  = hconf(tmpDir, ['FOLDERS', 'VULCANIZE_NO_JS', 'REPLACE', 'MANIFEST']);
+  const kubozer                 = new Kubozer(config, webpackConfig);
+  const replRes                 = await kubozer.replace();
 
   await kubozer.build();
 
@@ -99,9 +102,9 @@ test('correct replace() method', async t => {
 });
 
 test('replace() products correct output', async t => {
-  const config        = hconf(t.context.tmpDir, ['FOLDERS', 'VULCANIZE_NO_JS', 'REPLACE', 'MANIFEST']);
-  const webpackConfig = require(path.join(config.sourceFolder, 'webpack.test.config'));
-  const kubozer       = new Kubozer(config, webpackConfig);
+  const {tmpDir, webpackConfig} = t.context;
+  const config                  = hconf(tmpDir, ['FOLDERS', 'VULCANIZE_NO_JS', 'REPLACE', 'MANIFEST']);
+  const kubozer                 = new Kubozer(config, webpackConfig);
 
   await kubozer.replace();
   await kubozer.build();
@@ -113,14 +116,14 @@ test('replace() products correct output', async t => {
 });
 
 test('correct bump() method', async t => {
-  const config     = hconf(t.context.tmpDir, ['FOLDERS', 'BUMP']);
+  const {tmpDir, webpackConfig} = t.context;
+  const config                  = hconf(tmpDir, ['FOLDERS', 'BUMP']);
 
   await fs.writeFile(path.join(config.sourceFolder, 'package.json'), JSON.stringify({version: '1.0.0'}));
   await fs.writeFile(path.join(config.sourceFolder, 'manifest.json'), JSON.stringify({version: '1.0.0'}));
 
-  const webpackConfig = require(path.join(config.sourceFolder, 'webpack.test.config'));
-  const kubozer       = new Kubozer(config, webpackConfig);
-  const resBump       = await kubozer.bump('major');
+  const kubozer = new Kubozer(config, webpackConfig);
+  const resBump = await kubozer.bump('major');
 
   t.false(await fs.pathExists(config.workspace), 'workspace correctly not created during the bump task');
   t.true(Array.isArray(resBump.data));
@@ -128,10 +131,10 @@ test('correct bump() method', async t => {
 });
 
 test('correct build() method', async t => {
-  const config        = hconf(t.context.tmpDir, ['FOLDERS', 'VULCANIZE_NO_BUNDLE', 'MANIFEST']);
-  const webpackConfig = require(path.join(config.sourceFolder, 'webpack.test.config'));
-  const kubozer       = new Kubozer(config, webpackConfig);
-  const resBuild      = await kubozer.build();
+  const {tmpDir, webpackConfig} = t.context;
+  const config                  = hconf(tmpDir, ['FOLDERS', 'VULCANIZE_NO_BUNDLE', 'MANIFEST']);
+  const kubozer                 = new Kubozer(config, webpackConfig);
+  const resBuild                = await kubozer.build();
 
   t.not(resBuild.resWebpack, undefined, 'Webpack build result not UNDEFINED');
   t.not(resBuild.resVulcanize, undefined, 'Vulcanize build result not UNDEFINED');
@@ -142,10 +145,10 @@ test('correct build() method', async t => {
 });
 
 test('correct build() with minify method without stripConsole', async t => {
-  const config        = hconf(t.context.tmpDir, ['FOLDERS', 'VULCANIZE_NO_BUNDLE', 'MANIFEST', 'CSS']);
-  const webpackConfig = require(path.join(config.sourceFolder, 'webpack.test.config'));
-  const kubozer       = new Kubozer(config, webpackConfig);
-  const resBuild      = await kubozer.build(true);
+  const {tmpDir, webpackConfig} = t.context;
+  const config                  = hconf(tmpDir, ['FOLDERS', 'VULCANIZE_NO_BUNDLE', 'MANIFEST', 'CSS']);
+  const kubozer                 = new Kubozer(config, webpackConfig);
+  const resBuild                = await kubozer.build(true);
 
   const {output}       = webpackConfig;
   const bundleFileBase = path.basename(output.filename, '.js');
@@ -174,10 +177,10 @@ test('correct build() with minify method without stripConsole', async t => {
 });
 
 test('correct build() with minify method and stripConsole', async t => {
-  const config        = hconf(t.context.tmpDir, ['FOLDERS', 'VULCANIZE_NO_BUNDLE', 'MANIFEST', 'CSS', 'STRIPCONSOLE']);
-  const webpackConfig = require(path.join(config.sourceFolder, 'webpack.test.config'));
-  const kubozer       = new Kubozer(config, webpackConfig);
-  const resBuild      = await kubozer.build(true);
+  const {tmpDir, webpackConfig} = t.context;
+  const config                  = hconf(tmpDir, ['FOLDERS', 'VULCANIZE_NO_BUNDLE', 'MANIFEST', 'CSS', 'STRIPCONSOLE']);
+  const kubozer                 = new Kubozer(config, webpackConfig);
+  const resBuild                = await kubozer.build(true);
 
   const {output}       = webpackConfig;
   const bundleFileBase = path.basename(output.filename, '.js');
@@ -206,9 +209,9 @@ test('correct build() with minify method and stripConsole', async t => {
 });
 
 test('correct build() when webpack entry is an object', async t => {
-  const config   = hconf(t.context.tmpDir, ['FOLDERS', 'VULCANIZE_NO_BUNDLE', 'MANIFEST']);
+  const {tmpDir, webpackConfig} = t.context;
+  const config                  = hconf(tmpDir, ['FOLDERS', 'VULCANIZE_NO_BUNDLE', 'MANIFEST']);
 
-  const webpackConfig = require(path.join(config.sourceFolder, 'webpack.test.config'));
   webpackConfig.entry = {
     main   : webpackConfig.entry,
     vendors: ['babel-cli']
