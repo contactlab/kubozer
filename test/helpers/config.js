@@ -63,6 +63,12 @@ const CONFIG = {
     VULCANIZE
   ),
 
+  VULCANIZE_NO_BUNDLE_STD: assocPath(
+    ['vulcanize', 'conf', 'excludes'],
+    ['bundle.js'],
+    VULCANIZE
+  ),
+
   COPY: {
     copy: [{
       baseFolder: 'assets',
