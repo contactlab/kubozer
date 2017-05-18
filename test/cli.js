@@ -5,24 +5,17 @@ import fs      from 'fs-extra';
 import test    from 'ava';
 import execa   from 'execa';
 import figures from 'figures';
-import chalk   from 'chalk';
 
-import tmpDir from './helpers/tmp-dir';
-import hconf  from './helpers/config';
+import tmpDir                     from './helpers/tmp-dir';
+import hconf                      from './helpers/config';
+import {red, severe, warn, green} from './helpers/messages';
+import kubozerConf                from './helpers/kubozer-conf';
+import merge                      from './helpers/merge';
 
 const CLI = path.join(__dirname, '../dist/cli.js');
 const DIR = 'src';
 
-// --- Utilities
-const red         = chalk.red;
-const severe      = red.bold.underline;
-const warn        = chalk.underline.yellow;
-const green       = chalk.green;
-const merge       = (...args) => Object.assign.apply(null, [{}, ...args]);
-const intoParent  = (dir, file) => fs.move(path.join(dir, DIR, file), path.join(dir, file), {overwrite: true});
-const kubozerConf = (dir, config) =>
-  fs.writeFile(path.join(dir, 'kubozer.conf.js'), `module.exports = ${JSON.stringify(config)};`);
-// --- /Utilities
+const intoParent = (dir, file) => fs.move(path.join(dir, DIR, file), path.join(dir, file), {overwrite: true});
 
 test.beforeEach(async t => {
   // eslint-disable-next-line ava/use-t-well
