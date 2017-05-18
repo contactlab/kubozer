@@ -13,7 +13,7 @@ const hash = str =>
     .createHash('sha256')
     .update(str)
     .digest('hex')
-    .substr(0, 8);
+    .substr(0, 16);
 
 // tmpDir :: (String, String) -> Promise<String>
 const tmpDir = (from, name) => {
