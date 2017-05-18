@@ -1,7 +1,7 @@
 /* eslint "key-spacing": ["error", {"align": "colon"}] */
 
 import path from 'path';
-import fs from 'fs-extra';
+import fs   from 'fs-extra';
 import test from 'ava';
 
 import Kubozer from '../dist';
