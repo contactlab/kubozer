@@ -1,29 +1,32 @@
 /* eslint "key-spacing": ["error", {"align": "colon"}] */
 
-import path   from 'path';
-import fs     from 'fs-extra';
-import test   from 'ava';
+import path from 'path';
+import fs   from 'fs-extra';
+import test from 'ava';
 
 import hashed, {ERROR_MSG} from '../dist/lib/hashed';
+import tmpDir              from './helpers/tmp-dir';
 
-const DIST_DIR    = 'dist_hashed';
-const INTEGRATION = path.resolve(__dirname, 'integration');
-const TPL         = path.resolve(INTEGRATION, 'template');
-const DIST        = path.resolve(INTEGRATION, DIST_DIR);
-const CONFIG      = {
-  buildFolder : `./test/integration/${DIST_DIR}`,
+const _config = dir => ({
+  buildFolder : path.join(dir, 'dist'),
   assetsFolder: 'assets',
   buildCssFile: 'css/style.css'
-};
-const WEBPACKCONFIG = {
+});
+
+const _webpackConfig = dir => ({
   output: {
-    path    : `./test/integration/${DIST_DIR}`,
+    path    : path.join(dir, 'dist'),
     filename: 'bundle.js'
   }
-};
+});
 
-test.cb.before(t => {
-  fs.copy(TPL, DIST, t.end);
+test.beforeEach(async t => {
+  // eslint-disable-next-line ava/use-t-well
+  const workDir = await tmpDir(path.join(__dirname, 'integration/dist'), t.title);
+
+  t.context.tmpDir = workDir;
+  t.context.config = _config(workDir);
+  t.context.webpack = _webpackConfig(workDir);
 });
 
 test('hashed', t => {
@@ -31,10 +34,11 @@ test('hashed', t => {
 });
 
 test('hashed(config, webpackconfig)', async t => {
-  const result = await hashed(CONFIG, WEBPACKCONFIG);
+  const {config, webpack} = t.context;
+  const result  = await hashed(config, webpack);
 
-  const bundleFile = path.join(WEBPACKCONFIG.output.path, WEBPACKCONFIG.output.filename);
-  const styleFile  = path.join(CONFIG.buildFolder, CONFIG.assetsFolder, CONFIG.buildCssFile);
+  const bundleFile = path.relative('.', path.join(webpack.output.path, webpack.output.filename));
+  const styleFile  = path.relative('.', path.join(config.buildFolder, config.assetsFolder, config.buildCssFile));
 
   const bundleFileBase = path.join(path.dirname(bundleFile), path.basename(bundleFile, '.js'));
   const styleFileBase  = path.join(path.dirname(styleFile), path.basename(styleFile, '.css'));
@@ -46,17 +50,19 @@ test('hashed(config, webpackconfig)', async t => {
 });
 
 test('hashed(undefined, webpackconfig)', async t => {
-  const err = await t.throws(hashed(undefined, WEBPACKCONFIG));
+  const {webpack} = t.context;
+  const err = await t.throws(hashed(undefined, webpack));
 
   t.is(err.message, ERROR_MSG, 'should reject with an error');
 });
 
 test('hashed(config, undefined)', async t => {
-  const err = await t.throws(hashed(CONFIG, undefined));
+  const {config} = t.context;
+  const err = await t.throws(hashed(config, undefined));
 
   t.is(err.message, ERROR_MSG, 'should reject with an error');
 });
 
-test.cb.after(t => {
-  fs.remove(DIST, t.end);
+test.afterEach.always(async t => {
+  await fs.remove(t.context.tmpDir);
 });
