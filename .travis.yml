@@ -13,4 +13,4 @@ branches:
   - develop
 
 script:
-  - xo && nyc ava --serial && nyc report --reporter=text-lcov | coveralls
+  - xo && nyc ava && nyc report --reporter=text-lcov | coveralls
