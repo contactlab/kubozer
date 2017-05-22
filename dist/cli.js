@@ -64,7 +64,8 @@ var build = function build(k, isProd) {
     currentStep += 1;
     spinner.success(msgs[currentStep]);
 
-    if (_path2.default.resolve(config.buildFolder) !== _path2.default.resolve(webpackConfig.output.path)) {
+    // if (path.resolve(config.buildFolder) !== path.resolve(webpackConfig.output.path)) {
+    if (_path2.default.resolve(k.config.buildFolder) !== _path2.default.resolve(k.webpackConfig.output.path)) {
       log.warn('⚠️ WARNING: the "buildFolder" and the "webpackConfig.output.path" are not the same.');
     }
 

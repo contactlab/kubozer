@@ -69,7 +69,7 @@ const build = (k, isProd) => {
       currentStep += 1;
       spinner.success(msgs[currentStep]);
 
-      if (path.resolve(config.buildFolder) !== path.resolve(webpackConfig.output.path)) {
+      if (path.resolve(k.config.buildFolder) !== path.resolve(k.webpackConfig.output.path)) {
         log.warn('⚠️ WARNING: the "buildFolder" and the "webpackConfig.output.path" are not the same.');
       }
 
