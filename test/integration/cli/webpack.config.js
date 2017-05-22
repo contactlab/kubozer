@@ -11,11 +11,7 @@ module.exports = {
     loaders: [{
       test   : /\.js?$/,
       exclude: ['node_modules', 'test/bundle.js', 'test/build'],
-      loader : 'babel-loader',
-      query  : {
-        presets: ['es2015'],
-        plugins: ['transform-es2015-spread', 'syntax-object-rest-spread', 'transform-object-rest-spread']
-      }
+      loader : 'babel-loader'
     }]
   }
 };

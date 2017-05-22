@@ -6,16 +6,22 @@ import test    from 'ava';
 import execa   from 'execa';
 import figures from 'figures';
 
-import tmpDir                     from './helpers/tmp-dir';
-import hconf                      from './helpers/config';
-import {red, severe, warn, green} from './helpers/messages';
-import kubozerConf                from './helpers/kubozer-conf';
-import merge                      from './helpers/merge';
+import tmpDir      from './helpers/tmp-dir';
+import hconf       from './helpers/config';
+import kubozerConf from './helpers/kubozer-conf';
+import merge       from './helpers/merge';
+
+import {red, severe, warn, green, blue, cyan} from './helpers/messages';
 
 const CLI = path.join(__dirname, '../dist/cli.js');
 const DIR = 'src';
 
 const intoParent = (dir, file) => fs.move(path.join(dir, DIR, file), path.join(dir, file), {overwrite: true});
+const execaOpts = (dir, isProd = false) => ({
+  cwd: dir,
+  env: isProd ? {NODE_ENV: 'production', FORCE_COLOR: true} : {FORCE_COLOR: true}
+});
+const lines = (...args) => [...args].join('\n');
 
 test.beforeEach(async t => {
   // eslint-disable-next-line ava/use-t-well
@@ -43,9 +49,11 @@ test('throws when a file is not found during BUMP', async t => {
 
   await kubozerConf(tmpDir, config);
 
-  const actual   = await execa.stderr(CLI, ['--bump', 'major'], {cwd: tmpDir});
-  const expected = (red(figures.cross) + ' Bumped version.')
-                    .concat(severe(`\n⚠️ ERROR: ENOENT: no such file or directory, open '${extra}'`));
+  const actual   = await execa.stderr(CLI, ['--bump', 'major'], execaOpts(tmpDir));
+  const expected = lines(
+    `${red(figures.cross)} Bumped version.`,
+    severe(`⚠️ ERROR: ENOENT: no such file or directory, open '${extra}'`)
+  );
 
   t.is(actual, expected);
 });
@@ -55,9 +63,11 @@ test('throws param is not passed to BUMP', async t => {
 
   await intoParent(tmpDir, 'kubozer.conf.js');
 
-  const actual   = await execa.stderr(CLI, ['--bump'], {cwd: tmpDir});
-  const expected = (red(figures.cross) + ' Bumped version.')
-                    .concat(severe(`\n⚠️ ERROR: BUMP(): type must be specified. This is not a valid type --> 'true'`));
+  const actual   = await execa.stderr(CLI, ['--bump'], execaOpts(tmpDir));
+  const expected = lines(
+    `${red(figures.cross)} Bumped version.`,
+    severe(`⚠️ ERROR: BUMP(): type must be specified. This is not a valid type --> 'true'`)
+  );
 
   t.is(actual, expected);
 });
@@ -71,7 +81,7 @@ test('throws on constructor initialization', async t => {
 
   await kubozerConf(tmpDir, config);
 
-  const actual   = await execa.stderr(CLI, ['--bump'], {cwd: tmpDir});
+  const actual   = await execa.stderr(CLI, ['--bump'], execaOpts(tmpDir));
   const expected = severe(`\n⚠️ ERROR: Path must be a string. Received undefined --> config.sourceFolder`);
 
   t.is(actual, expected);
@@ -83,10 +93,11 @@ test('throw if `copy` object is not present', async t => {
 
   await kubozerConf(tmpDir, config);
 
-  const actual   = await execa.stderr(CLI, ['--build'], {cwd: tmpDir, env: {NODE_ENV: 'production'}});
-  const expected = (red(figures.cross) + ' COPY: Files copied correctly.')
-                  // eslint-disable-next-line no-useless-escape
-                  .concat(severe('\n⚠️ ERROR: copy() method was called but \"copy\" property is empty or undefined.'));
+  const actual   = await execa.stderr(CLI, ['--build'], execaOpts(tmpDir, true));
+  const expected = lines(
+    `${red(figures.cross)} COPY: Files copied correctly.`,
+    severe('⚠️ ERROR: copy() method was called but "copy" property is empty or undefined.')
+  );
 
   t.is(actual, expected);
 });
@@ -108,9 +119,11 @@ test('throw if not found elment to `copy`', async t => {
   await kubozerConf(tmpDir, config);
 
   const img      = path.join(config.workspace, config.assetsFolder, 'imgs-asdasdasdasdasdasdasd');
-  const actual   = await execa.stderr(CLI, ['--build'], {cwd: tmpDir});
-  const expected = (red(figures.cross) + ' COPY: Files copied correctly.')
-                    .concat(severe(`\n⚠️ ERROR: ENOENT: no such file or directory, stat '${img}'`));
+  const actual   = await execa.stderr(CLI, ['--build'], execaOpts(tmpDir));
+  const expected = lines(
+    `${red(figures.cross)} COPY: Files copied correctly.`,
+    severe(`⚠️ ERROR: ENOENT: no such file or directory, stat '${img}'`)
+  );
 
   t.is(actual, expected);
 });
@@ -135,9 +148,11 @@ test('warn when webpack output.path is NOT the same of kubozer buildFolder', asy
 
   await kubozerConf(tmpDir, config);
 
-  const actual   = await execa.stdout(CLI, ['--build'], {cwd: tmpDir});
-  const expected = ('\n> Started STAGING build')
-                    .concat(warn('\n⚠️ WARNING: the "buildFolder" and the "webpackConfig.output.path" are not the same.'));
+  const actual   = await execa.stdout(CLI, ['--build'], execaOpts(tmpDir));
+  const expected = lines(
+    blue('\n> Started STAGING build'),
+    warn('⚠️ WARNING: the "buildFolder" and the "webpackConfig.output.path" are not the same.')
+  );
 
   t.is(actual, expected);
 });
@@ -147,9 +162,9 @@ test('do STAGING build without NODE_ENV declared', async t => {
 
   await intoParent(tmpDir, 'kubozer.conf.js');
 
-  const actual = await execa.stdout(CLI, ['--build'], {cwd: tmpDir});
+  const actual = await execa.stdout(CLI, ['--build'], execaOpts(tmpDir));
 
-  t.is(actual, '\n> Started STAGING build');
+  t.is(actual, blue('\n> Started STAGING build'));
 });
 
 test('do PRODUCTION build with NODE_ENV declared', async t => {
@@ -157,9 +172,9 @@ test('do PRODUCTION build with NODE_ENV declared', async t => {
 
   await intoParent(tmpDir, 'kubozer.conf.js');
 
-  const actual = await execa.stdout(CLI, ['--build'], {cwd: tmpDir, env: {NODE_ENV: 'production'}});
+  const actual = await execa.stdout(CLI, ['--build'], execaOpts(tmpDir, true));
 
-  t.is(actual, '\n> Started PRODUCTION build');
+  t.is(actual, cyan('\n> Started PRODUCTION build'));
 });
 
 test('do build and remove workspace correctly', async t => {
@@ -167,7 +182,7 @@ test('do build and remove workspace correctly', async t => {
 
   await intoParent(tmpDir, 'kubozer.conf.js');
 
-  await execa(CLI, ['--build'], {cwd: tmpDir});
+  await execa(CLI, ['--build'], execaOpts(tmpDir));
 
   t.false(await fs.pathExists(path.join(tmpDir, 'workspace')));
 });
@@ -177,7 +192,7 @@ test('do BUMP', async t => {
 
   await intoParent(tmpDir, 'kubozer.conf.js');
 
-  const actual   = await execa.stderr(CLI, ['--bump', 'major'], {cwd: tmpDir});
+  const actual   = await execa.stderr(CLI, ['--bump', 'major'], execaOpts(tmpDir));
   const expected = `${green(figures.tick)} Bump from 2.0.0 to 3.0.0 completed.`;
 
   t.is(actual, expected);
@@ -188,18 +203,23 @@ test('show help command when arg is not passed', async t => {
 
   await intoParent(tmpDir, 'kubozer.conf.js');
 
-  const actual   = await execa.stdout(CLI, {cwd: tmpDir});
-  const expected = ('\n  Contactlab build utility\n')
-    .concat('\n  Usage\n    $ [NODE_ENV=env_name] kubozer [command]\n')
-    .concat('\n  Options\n  ')
-    .concat('  --build    Run the build task\n  ')
-    .concat('  --bump     Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease\n  ')
-    .concat('  --i18n     Use I18N capabilities\n  ')
-    .concat('  --upload   Use ONLY with --i18n option: upload a translation file\n  ')
-    .concat('  --download Use ONLY with --i18n option: download a translation file\n')
-    .concat('\n  Examples\n    $ NODE_ENV=production kubozer --build\n    $ kubozer --bump minor\n  ')
-    .concat('  $ kubozer --i18n --upload en\n  ')
-    .concat('  $ kubozer --i18n --download it');
+  const actual   = await execa.stdout(CLI, execaOpts(tmpDir));
+  const expected = lines(
+    '\n  Contactlab build utility',
+    '\n  Usage',
+    '    $ [NODE_ENV=env_name] kubozer [command]',
+    '\n  Options',
+    '    --build    Run the build task',
+    '    --bump     Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease',
+    '    --i18n     Use I18N capabilities',
+    '    --upload   Use ONLY with --i18n option: upload a translation file',
+    '    --download Use ONLY with --i18n option: download a translation file',
+    '\n  Examples',
+    '    $ NODE_ENV=production kubozer --build',
+    '    $ kubozer --bump minor',
+    '    $ kubozer --i18n --upload en',
+    '    $ kubozer --i18n --download it'
+  );
 
   t.is(actual, expected);
 });

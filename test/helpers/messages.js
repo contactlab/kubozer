@@ -7,11 +7,11 @@
 
 const chalk = require('chalk');
 
-const red = chalk.red;
-
 module.exports = {
-  red,
-  severe: red.bold.underline,
+  red   : chalk.red,
+  severe: chalk.bold.underline.red,
   warn  : chalk.underline.yellow,
-  green : chalk.green
+  green : chalk.green,
+  blue  : chalk.blue.underline,
+  cyan  : chalk.cyan.underline
 };
