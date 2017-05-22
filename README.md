@@ -37,14 +37,17 @@ Usage
     $ [NODE_ENV=env_name] kubozer [option]
 
 Options
-    --build    Run the build task
-    --bump     Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease
-    --i18n     Use I18N capabilities
-    --upload   Use ONLY with --i18n option: upload a translation file
-    --download Use ONLY with --i18n option: download a translation file
+    --build          Run the build task
+    --bump           Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease
+    --config         Load specified Kubozer configuration file
+    --webpack-config Load specified Webpack configuration file
+    --i18n           Use I18N capabilities
+    --upload         Use ONLY with --i18n option: upload a translation file
+    --download       Use ONLY with --i18n option: download a translation file
 
 Examples
     $ NODE_ENV=production kubozer --build
+    $ kubozer --build --config=../../kubozer.conf.js --webpack-config=another-webpack.config.js
     $ kubozer --bump minor
     $ kubozer --i18n --upload en
     $ kubozer --i18n --download it
