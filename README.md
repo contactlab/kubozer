@@ -13,7 +13,6 @@
 [![npm](https://img.shields.io/npm/dt/kubozer.svg?style=flat-square)](https://github.com/contactlab/kubozer)
 [![Package Quality](http://npm.packagequality.com/shield/kubozer.png?style=flat-square)](http://packagequality.com/#?package=kubozer)
 
-
 Kubozer is a wrapper of some tools for building production (and development) application written in Polymer 1.x. and ***ESnext*** syntax.
 
 ## Features
@@ -21,6 +20,7 @@ Kubozer is a wrapper of some tools for building production (and development) app
 - **Replace** part of the `html` files where needed (like change the link within the index.html to your production-ready script) with [replace-in-file]()
 - **Build** both `js` with [Webpack](https://github.com/webpack/webpack) and `html` (Polymer) with [Vulcanize](https://www.npmjs.com/package/vulcanize)
 - **Minify** minify `CSS` with [node-minify](https://www.npmjs.com/package/node-minify) and `JS` with the Uglify Webpack plugin (only with `PRODUCTION` build)
+- **Add a hash** to the built `js` and `css` files names in order to invalidate browser cache on every release (only with `PRODUCTION` build)
 
 Other commands are included in the bundle of Kubozer:
 - **Bump** for bump the version of your project
@@ -33,21 +33,21 @@ Other commands are included in the bundle of Kubozer:
 ## Usage
 
 ```bash
-  Usage
-        $ [NODE_ENV=env_name] kubozer [command]
+Usage
+    $ [NODE_ENV=env_name] kubozer [option]
 
-    Options
-        --build    Run the build task
-        --bump     Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease
-        --i18n     Use I18N capabilities
-        --upload   Use ONLY with --i18n option: upload a translation file
-        --download Use ONLY with --i18n option: download a translation file
+Options
+    --build    Run the build task
+    --bump     Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease
+    --i18n     Use I18N capabilities
+    --upload   Use ONLY with --i18n option: upload a translation file
+    --download Use ONLY with --i18n option: download a translation file
 
-    Examples
-        $ NODE_ENV=production kubozer --build
-        $ kubozer --bump minor
-        $ kubozer --i18n --upload en
-        $ kubozer --i18n --download it
+Examples
+    $ NODE_ENV=production kubozer --build
+    $ kubozer --bump minor
+    $ kubozer --i18n --upload en
+    $ kubozer --i18n --download it
 ```
 
 ## Enviroment typed-build
@@ -189,25 +189,28 @@ k.copy()
 Simply delete the previous build in the "workspace" directory.
 
 ### copy()
-#### return `promise`
 Copy every elements within the object `copy`.
 
+#### return `Promise`
+
 ### replace()
-#### return `promise`
 HTML replace in file. Set a placeholder in your HTML and remove/replace the inner elements during the build.
 
-### build(minify)
-#### minify
-Type `boolean`
-Choose if minify the content of js files with GCC
-#### return `promise`
+#### return `Promise`
+
+### build([minify])
 `Webpack` and `Vulcanize` following the configuration.
 
+#### minify: boolean
+Choose if minify the content of js files with [UglifyJS](https://github.com/mishoo/UglifyJS2) and css files with [clean-css](https://github.com/jakubpawlowicz/clean-css).
+#### return `Promise`
 
 ### bump(type)
-#### type - [patch|minor|major|prepatch|preminor|premajor|prerelease]
 Bump to new version every file following the configuration.
 
+#### type: string
+Allowed values: patch | minor | major | prepatch | preminor | premajor | prerelease
+#### return `Promise`
 
 ## Development
 
