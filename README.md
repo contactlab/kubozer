@@ -189,25 +189,28 @@ k.copy()
 Simply delete the previous build in the "workspace" directory.
 
 ### copy()
-#### return `promise`
 Copy every elements within the object `copy`.
 
+#### return `Promise`
+
 ### replace()
-#### return `promise`
 HTML replace in file. Set a placeholder in your HTML and remove/replace the inner elements during the build.
 
-### build(minify)
-#### minify
-Type `boolean`
-Choose if minify the content of js files with GCC
-#### return `promise`
+#### return `Promise`
+
+### build([minify])
 `Webpack` and `Vulcanize` following the configuration.
 
+#### minify: boolean
+Choose if minify the content of js files with [UglifyJS](https://github.com/mishoo/UglifyJS2) and css files with [clean-css](https://github.com/jakubpawlowicz/clean-css).
+#### return `Promise`
 
 ### bump(type)
-#### type - [patch|minor|major|prepatch|preminor|premajor|prerelease]
 Bump to new version every file following the configuration.
 
+#### type: string
+Allowed values: patch | minor | major | prepatch | preminor | premajor | prerelease
+#### return `Promise`
 
 ## Development
 
