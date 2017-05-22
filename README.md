@@ -1,5 +1,5 @@
 <p align="center">
-	<img src="https://raw.githubusercontent.com/contactlab/kubozer/master/Kubozer.png" alt="Kubozer"/>
+    <img src="https://raw.githubusercontent.com/contactlab/kubozer/master/Kubozer.png" alt="Kubozer"/>
 </p>
 
 ---
@@ -13,39 +13,49 @@
 [![npm](https://img.shields.io/npm/dt/kubozer.svg?style=flat-square)](https://github.com/contactlab/kubozer)
 [![Package Quality](http://npm.packagequality.com/shield/kubozer.png?style=flat-square)](http://packagequality.com/#?package=kubozer)
 
+Kubozer is a wrapper of some tools for building production (and development) application written in Polymer 1.x. and ***ESnext*** syntax.
 
-Kubozer is a wrapper of some tools for building production (and development) application written in Polymer 1.x. and ***ESnext*** syntax.  
-
-## Features  
-- **Copy** whatever files you need into your `build` directory 
+## Features
+- **Copy** whatever files you need into your `build` directory
 - **Replace** part of the `html` files where needed (like change the link within the index.html to your production-ready script) with [replace-in-file]()
 - **Build** both `js` with [Webpack](https://github.com/webpack/webpack) and `html` (Polymer) with [Vulcanize](https://www.npmjs.com/package/vulcanize)
 - **Minify** minify `CSS` with [node-minify](https://www.npmjs.com/package/node-minify) and `JS` with the Uglify Webpack plugin (only with `PRODUCTION` build)
+- **Add a hash** to the built `js` and `css` files names in order to invalidate browser cache on every release (only with `PRODUCTION` build)
 
-Other commands are included in the bundle of Kubozer: 
+Other commands are included in the bundle of Kubozer:
 - **Bump** for bump the version of your project
+- **Translate** with [OneSkyApp](https://www.oneskyapp.com/)
 
 ## Install
 
-	$ yarn add kubozer
+    $ yarn add kubozer
 
 ## Usage
 
 ```bash
-  Usage
-    $ [NODE_ENV=env_name] kubozer [command]
+Usage
+    $ [NODE_ENV=env_name] kubozer [option]
 
-  Options
-  --bump Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease
+Options
+    --build          Run the build task
+    --bump           Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease
+    --config         Load specified Kubozer configuration file
+    --webpack-config Load specified Webpack configuration file
+    --i18n           Use I18N capabilities
+    --upload         Use ONLY with --i18n option: upload a translation file
+    --download       Use ONLY with --i18n option: download a translation file
 
-  Examples
-    $ kubozer --build
+Examples
+    $ NODE_ENV=production kubozer --build
+    $ kubozer --build --config=../../kubozer.conf.js --webpack-config=another-webpack.config.js
     $ kubozer --bump minor
+    $ kubozer --i18n --upload en
+    $ kubozer --i18n --download it
 ```
 
-## Enviroment typed-build 
+## Enviroment typed-build
 
-The `PRODUCTION` build `(NODE_ENV=production)` will add the **minify** step to the process.  The **default** build will not produce a minified **JS** and also **CSS**.  
+The `PRODUCTION` build `(NODE_ENV=production)` will add the **minify** step to the process.  The **default** build will not produce a minified **JS** and also **CSS**.
 
 If you want to handle a dynamic configuration, you can simply check the `process.env.NODE_ENV` within the `kubozer.conf.js` (or also `webpack.config.js`) and change the ***exported*** configuration in relation to the NODE_ENV.
 
@@ -53,61 +63,69 @@ If you want to handle a dynamic configuration, you can simply check the `process
 
 Kubozer will search for two configurations file: `kubozer.conf.js` and `webpack.config.js` (standard Webpack configuration file)
 
-### Kubozer 
-Example configuration.  **Kubozer will not assume nothing as default**.  
-```javascript 
+### Kubozer
+Example configuration.  **Kubozer will not assume nothing as default**.
+```javascript
 // kubozer.conf.js
 module.exports = {
-	workspace: './test/workspace',
-	sourceFolder: './test/src-test',
-	buildFolder: './test/build',
-	// Relative to you workspace
-	assetsFolder: 'assets',
-	sourceCssFiles: ['/test.css'],	
-	buildCssFile: 'style.min.css',
-	manifest: true,
-	stripConsole: true,
-	bump: {
-		files: [
-			'./test/src-test/package.json',
-			'./test/src-test/manifest.json'
-		]
-	},
-	copy: [
-		{
-			baseFolder: 'assets',
-			items: [
-				'imgs-others'
-			]
-		}, {
-			baseFolder: 'bundles',
-			items: [
-				''
-			]
-		}
-	],	
-	replace: {
-		css: {
-			files: 'index.html',
-			commentRegex: ['<!--styles!-->((.|\n)*)<!--styles!-->'],
-			with: ['assets/style.min.css']
-		},
-		js: {
-			files: 'index.html',
-			commentRegex: ['<!--js!-->((.|\n)*)<!--js!-->'],
-			with: ['bundle.js']
-		}
-	}
-	vulcanize: {
-		srcTarget: 'index.html',
-		buildTarget: 'index.html',
-		conf: {
-			stripComments: true,
-			inlineScripts: true,
-			inlineStyles: true,
-			excludes: ['bundle.js']
-		}
-	}
+    workspace: './test/workspace',
+    sourceFolder: './test/src-test',
+    buildFolder: './test/build',
+    // Relative to you workspace
+    assetsFolder: 'assets',
+    sourceCssFiles: ['/test.css'],
+    buildCssFile: 'style.min.css',
+    manifest: true,
+    stripConsole: true,
+    bump: {
+        files: [
+            './test/src-test/package.json',
+            './test/src-test/manifest.json'
+        ]
+    },
+    copy: [
+        {
+            baseFolder: 'assets',
+            items: [
+                'imgs-others'
+            ]
+        }, {
+            baseFolder: 'bundles',
+            items: [
+                ''
+            ]
+        }
+    ],
+    replace: {
+        css: {
+            files: 'index.html',
+            commentRegex: ['<!--styles!-->((.|\n)*)<!--styles!-->'],
+            with: ['assets/style.min.css']
+        },
+        js: {
+            files: 'index.html',
+            commentRegex: ['<!--js!-->((.|\n)*)<!--js!-->'],
+            with: ['bundle.js']
+        }
+    }
+    vulcanize: {
+        srcTarget: 'index.html',
+        buildTarget: 'index.html',
+        conf: {
+            stripComments: true,
+            inlineScripts: true,
+            inlineStyles: true,
+            excludes: ['bundle.js']
+        }
+    },
+    i18n: {
+        secret: 'thisisyoursecret',
+        apiKey: 'heregoesyourapikey',
+        projectId: 'heyaprojectid',
+        defaultLanguage: 'en',
+        format: 'HIERARCHICAL_JSON'
+        languagesPath: './app/bundles'
+    }
 };
 ```
 
@@ -115,31 +133,31 @@ module.exports = {
 ```javascript
 // webpack.config.js
 module.exports = {
-	entry: {
-		main: './src/index.js',
-		// Other modules
-		vendors: ['fetch', 'array-from']
-	}
-	output: {
-		// Make sure this path is the same of the `buildFolder` of `kubozer.conf.js` if you want to build everithing in the same directory
-		path: './test/build',
-		// Make sure to use [name] or [id] in output.filename
-		//  when using multiple entry points
-		filename: '[name].bundle.js'
-	},
-	devtool: 'source-map',
-	module: {
-		loaders: [{
-			test: /\.js?$/,
-			// exclude: /(node_modules|bower_components)/,
-			exclude: ['node_modules', 'bundle.js', 'build'],
-			loader: 'babel-loader',
-			query: {
-				presets: ['es2015'],
-				plugins: ['transform-es2015-spread', 'syntax-object-rest-spread', 'transform-object-rest-spread']
-			}
-		}]
-	}
+    entry: {
+        main: './src/index.js',
+        // Other modules
+        vendors: ['fetch', 'array-from']
+    }
+    output: {
+        // Make sure this path is the same of the `buildFolder` of `kubozer.conf.js` if you want to build everithing in the same directory
+        path: './test/build',
+        // Make sure to use [name] or [id] in output.filename
+        //  when using multiple entry points
+        filename: '[name].bundle.js'
+    },
+    devtool: 'source-map',
+    module: {
+        loaders: [{
+            test: /\.js?$/,
+            // exclude: /(node_modules|bower_components)/,
+            exclude: ['node_modules', 'bundle.js', 'build'],
+            loader: 'babel-loader',
+            query: {
+                presets: ['es2015'],
+                plugins: ['transform-es2015-spread', 'syntax-object-rest-spread', 'transform-object-rest-spread']
+            }
+        }]
+    }
 };
 ```
 
@@ -158,14 +176,14 @@ const k = new Kubozer(config, webpackConfig);
 k.deletePrevBuild();
 
 k.copy()
-	.then(() => k.replace())
-	.then(() => k.build(isProd))
-	.then(res => {
-		console.log(res);
-	})
-	.catch(err => {
-		console.error(err);
-	});
+    .then(() => k.replace())
+    .then(() => k.build(isProd))
+    .then(res => {
+        console.log(res);
+    })
+    .catch(err => {
+        console.error(err);
+    });
 ```
 
 ## API
@@ -174,39 +192,42 @@ k.copy()
 Simply delete the previous build in the "workspace" directory.
 
 ### copy()
-#### return `promise`
 Copy every elements within the object `copy`.
 
+#### return `Promise`
+
 ### replace()
-#### return `promise`
 HTML replace in file. Set a placeholder in your HTML and remove/replace the inner elements during the build.
 
-### build(minify)
-#### minify  
-Type `boolean`  
-Choose if minify the content of js files with GCC  
-#### return `promise`
+#### return `Promise`
+
+### build([minify])
 `Webpack` and `Vulcanize` following the configuration.
 
+#### minify: boolean
+Choose if minify the content of js files with [UglifyJS](https://github.com/mishoo/UglifyJS2) and css files with [clean-css](https://github.com/jakubpawlowicz/clean-css).
+#### return `Promise`
 
 ### bump(type)
-#### type - [patch|minor|major|prepatch|preminor|premajor|prerelease]
 Bump to new version every file following the configuration.
 
+#### type: string
+Allowed values: patch | minor | major | prepatch | preminor | premajor | prerelease
+#### return `Promise`
 
 ## Development
 
-	$ git clone https://github.com/contactlab/kubozer.git#development
-	$ yarn
+    $ git clone https://github.com/contactlab/kubozer.git#development
+    $ yarn
 
 ### Build
 
-	$ yarn run build
+    $ yarn run build
 
 ### Testing
 > XO as linter and AVA for units.
 
-	$ yarn test
+    $ yarn test
 
 
 ### Git branching policies
