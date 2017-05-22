@@ -209,17 +209,59 @@ test('show help command when arg is not passed', async t => {
     '\n  Usage',
     '    $ [NODE_ENV=env_name] kubozer [command]',
     '\n  Options',
-    '    --build    Run the build task',
-    '    --bump     Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease',
-    '    --i18n     Use I18N capabilities',
-    '    --upload   Use ONLY with --i18n option: upload a translation file',
-    '    --download Use ONLY with --i18n option: download a translation file',
+    '    --build          Run the build task',
+    '    --bump           Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease',
+    '    --config         Load specified Kubozer configuration file',
+    '    --webpack-config Load specified Webpack configuration file',
+    '    --i18n           Use I18N capabilities',
+    '    --upload         Use ONLY with --i18n option: upload a translation file',
+    '    --download       Use ONLY with --i18n option: download a translation file',
     '\n  Examples',
     '    $ NODE_ENV=production kubozer --build',
+    '    $ kubozer --build --config=../../kubozer.conf.js --webpack-config=another-webpack.config.js',
     '    $ kubozer --bump minor',
     '    $ kubozer --i18n --upload en',
     '    $ kubozer --i18n --download it'
   );
+
+  t.is(actual, expected);
+});
+
+test('override configuration file path with --config', async t => {
+  const {tmpDir} = t.context;
+
+  await intoParent(tmpDir, 'kubozer_alt.conf.js');
+
+  const actual   = await execa.stderr(CLI, ['--bump', 'major', '--config', 'kubozer_alt.conf.js'], execaOpts(tmpDir));
+  const expected = `${green(figures.tick)} Bump from 12.0.0 to 13.0.0 completed.`;
+
+  t.is(actual, expected);
+});
+
+test('override webpack configuration file path with --webpack-config', async t => {
+  const {tmpDir} = t.context;
+
+  await intoParent(tmpDir, 'kubozer_alt.conf.js');
+  await intoParent(tmpDir, 'webpack_alt.config.js');
+
+  await execa(
+    CLI,
+    ['--build', '--config=kubozer_alt.conf.js', '--webpack-config=webpack_alt.config.js'],
+    execaOpts(tmpDir)
+  );
+
+  t.true(await fs.pathExists(path.join(tmpDir, 'build/bundle_alt.js')));
+});
+
+test('throws if --config or ---webpack-config files do not exist', async t => {
+  const {tmpDir} = t.context;
+
+  const actual = await execa.stderr(
+    CLI,
+    ['--build', '--config=kubozer_alt.conf.js', '--webpack-config=webpack_alt.config.js'],
+    execaOpts(tmpDir)
+  );
+  const expected = severe(`\n⚠️ ERROR: Cannot find module '${path.join(tmpDir, 'kubozer_alt.conf.js')}'`);
 
   t.is(actual, expected);
 });

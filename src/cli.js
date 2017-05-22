@@ -1,39 +1,34 @@
 #! /usr/bin/env node
 
-import path from 'path';
-import meow from 'meow';
+import path    from 'path';
+import meow    from 'meow';
 import hasFlag from 'has-flag';
 
 import Spinner from './lib/spinner';
-import Logger from './lib/logger';
+import Logger  from './lib/logger';
 import Kubozer from './index';
 
-const config = require(path.resolve('kubozer.conf'));
-const webpackConfig = require(path.resolve('webpack.config'));
-
-const NODE_ENV = process.env.NODE_ENV;
-
-const isProduction = () => {
-  return NODE_ENV === 'production';
-};
+const isProduction = () => process.env.NODE_ENV === 'production';
 
 const cli = meow(`
   Usage
     $ [NODE_ENV=env_name] kubozer [command]
 
   Options
-    --build    Run the build task
-    --bump     Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease
-    --i18n     Use I18N capabilities
-    --upload   Use ONLY with --i18n option: upload a translation file
-    --download Use ONLY with --i18n option: download a translation file
+    --build          Run the build task
+    --bump           Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease
+    --config         Load specified Kubozer configuration file
+    --webpack-config Load specified Webpack configuration file
+    --i18n           Use I18N capabilities
+    --upload         Use ONLY with --i18n option: upload a translation file
+    --download       Use ONLY with --i18n option: download a translation file
 
   Examples
     $ NODE_ENV=production kubozer --build
+    $ kubozer --build --config=../../kubozer.conf.js --webpack-config=another-webpack.config.js
     $ kubozer --bump minor
     $ kubozer --i18n --upload en
     $ kubozer --i18n --download it
-
 `);
 
 const log = new Logger();
@@ -69,7 +64,7 @@ const build = (k, isProd) => {
       currentStep += 1;
       spinner.success(msgs[currentStep]);
 
-      if (path.resolve(config.buildFolder) !== path.resolve(webpackConfig.output.path)) {
+      if (path.resolve(k.config.buildFolder) !== path.resolve(k.webpackConfig.output.path)) {
         log.warn('⚠️ WARNING: the "buildFolder" and the "webpackConfig.output.path" are not the same.');
       }
 
@@ -83,7 +78,7 @@ const build = (k, isProd) => {
         spinner.success(msgs[currentStep]);
       }
 
-      return new Promise(resolve => resolve(true));
+      return true;
     })
     .then(() => {
       currentStep += 1;
@@ -102,9 +97,7 @@ const bump = (k, type) => {
   log.set('\n> Bumping version', 'yellow');
 
   k.bump(type)
-    .then(res => {
-      spinner.success(res.message);
-    })
+    .then(res => spinner.success(res.message))
     .catch(err => {
       spinner.fail('Bumped version.');
       log.fail(`⚠️ ERROR: ${err.message}`);
@@ -116,12 +109,8 @@ const upload = (k, language) => {
   spinner.set(`>> Uploading translations for ${language}...`);
   /* istanbul ignore next */
   k.upload(language)
-    .then(() => {
-      spinner.success(`Translations uploaded succesfully for ${language}`);
-    })
-    .catch(err => {
-      spinner.fail(`Something went wrong uploading your translation file for ${language}: ${err.message}`);
-    });
+    .then(() => spinner.success(`Translations uploaded succesfully for ${language}`))
+    .catch(err => spinner.fail(`Something went wrong uploading your translation file for ${language}: ${err.message}`));
 };
 
 const download = (k, language) => {
@@ -129,17 +118,19 @@ const download = (k, language) => {
   spinner.set(`>> Downloading translations for ${language}...`);
   /* istanbul ignore next */
   k.download(language)
-    .then(() => {
-      spinner.success(`Translations downloaded succesfully for ${language}`);
-    })
-    .catch(err => {
-      spinner.fail(`Something went wrong downloading your translation file for ${language}: ${err.message}`);
-    });
+    .then(() => spinner.success(`Translations downloaded succesfully for ${language}`))
+    .catch(err =>
+      spinner.fail(`Something went wrong downloading your translation file for ${language}: ${err.message}`)
+    );
 };
 
 const main = () => {
   try {
+    const config        = require(path.resolve(cli.flags.config || 'kubozer.conf'));
+    const webpackConfig = require(path.resolve(cli.flags.webpackConfig || 'webpack.config'));
+
     const k = new Kubozer(config, webpackConfig);
+
     /* istanbul ignore next */
     spinner.clear();
 
