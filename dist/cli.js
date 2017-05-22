@@ -64,7 +64,6 @@ var build = function build(k, isProd) {
     currentStep += 1;
     spinner.success(msgs[currentStep]);
 
-    // if (path.resolve(config.buildFolder) !== path.resolve(webpackConfig.output.path)) {
     if (_path2.default.resolve(k.config.buildFolder) !== _path2.default.resolve(k.webpackConfig.output.path)) {
       log.warn('⚠️ WARNING: the "buildFolder" and the "webpackConfig.output.path" are not the same.');
     }
@@ -78,9 +77,8 @@ var build = function build(k, isProd) {
       spinner.success(msgs[currentStep]);
     }
 
-    return new Promise(function (resolve) {
-      return resolve(true);
-    });
+    // return new Promise(resolve => resolve(true));
+    return true;
   }).then(function () {
     currentStep += 1;
     spinner.success(msgs[currentStep]);
@@ -97,7 +95,7 @@ var bump = function bump(k, type) {
   log.set('\n> Bumping version', 'yellow');
 
   k.bump(type).then(function (res) {
-    spinner.success(res.message);
+    return spinner.success(res.message);
   }).catch(function (err) {
     spinner.fail('Bumped version.');
     log.fail('\u26A0\uFE0F ERROR: ' + err.message);
@@ -109,9 +107,9 @@ var upload = function upload(k, language) {
   spinner.set('>> Uploading translations for ' + language + '...');
   /* istanbul ignore next */
   k.upload(language).then(function () {
-    spinner.success('Translations uploaded succesfully for ' + language);
+    return spinner.success('Translations uploaded succesfully for ' + language);
   }).catch(function (err) {
-    spinner.fail('Something went wrong uploading your translation file for ' + language + ': ' + err.message);
+    return spinner.fail('Something went wrong uploading your translation file for ' + language + ': ' + err.message);
   });
 };
 
@@ -120,9 +118,9 @@ var download = function download(k, language) {
   spinner.set('>> Downloading translations for ' + language + '...');
   /* istanbul ignore next */
   k.download(language).then(function () {
-    spinner.success('Translations downloaded succesfully for ' + language);
+    return spinner.success('Translations downloaded succesfully for ' + language);
   }).catch(function (err) {
-    spinner.fail('Something went wrong downloading your translation file for ' + language + ': ' + err.message);
+    return spinner.fail('Something went wrong downloading your translation file for ' + language + ': ' + err.message);
   });
 };
 

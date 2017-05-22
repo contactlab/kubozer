@@ -83,7 +83,8 @@ const build = (k, isProd) => {
         spinner.success(msgs[currentStep]);
       }
 
-      return new Promise(resolve => resolve(true));
+      // return new Promise(resolve => resolve(true));
+      return true;
     })
     .then(() => {
       currentStep += 1;
@@ -102,9 +103,7 @@ const bump = (k, type) => {
   log.set('\n> Bumping version', 'yellow');
 
   k.bump(type)
-    .then(res => {
-      spinner.success(res.message);
-    })
+    .then(res => spinner.success(res.message))
     .catch(err => {
       spinner.fail('Bumped version.');
       log.fail(`⚠️ ERROR: ${err.message}`);
@@ -116,12 +115,8 @@ const upload = (k, language) => {
   spinner.set(`>> Uploading translations for ${language}...`);
   /* istanbul ignore next */
   k.upload(language)
-    .then(() => {
-      spinner.success(`Translations uploaded succesfully for ${language}`);
-    })
-    .catch(err => {
-      spinner.fail(`Something went wrong uploading your translation file for ${language}: ${err.message}`);
-    });
+    .then(() => spinner.success(`Translations uploaded succesfully for ${language}`))
+    .catch(err => spinner.fail(`Something went wrong uploading your translation file for ${language}: ${err.message}`));
 };
 
 const download = (k, language) => {
@@ -129,12 +124,10 @@ const download = (k, language) => {
   spinner.set(`>> Downloading translations for ${language}...`);
   /* istanbul ignore next */
   k.download(language)
-    .then(() => {
-      spinner.success(`Translations downloaded succesfully for ${language}`);
-    })
-    .catch(err => {
-      spinner.fail(`Something went wrong downloading your translation file for ${language}: ${err.message}`);
-    });
+    .then(() => spinner.success(`Translations downloaded succesfully for ${language}`))
+    .catch(err =>
+      spinner.fail(`Something went wrong downloading your translation file for ${language}: ${err.message}`)
+    );
 };
 
 const main = () => {
