@@ -126,9 +126,6 @@ const download = (k, language) => {
 
 const main = () => {
   try {
-    // const configFile        = cli.flags.config || 'kubozer.conf';
-    // const webpackConfigFile = cli.flags.webpackConfig || 'webpack.config';
-
     const config        = require(path.resolve(cli.flags.config || 'kubozer.conf'));
     const webpackConfig = require(path.resolve(cli.flags.webpackConfig || 'webpack.config'));
 
