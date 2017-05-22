@@ -27,16 +27,11 @@ var _index2 = _interopRequireDefault(_index);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var config = require(_path2.default.resolve('kubozer.conf'));
-var webpackConfig = require(_path2.default.resolve('webpack.config'));
-
-var NODE_ENV = process.env.NODE_ENV;
-
 var isProduction = function isProduction() {
-  return NODE_ENV === 'production';
+  return process.env.NODE_ENV === 'production';
 };
 
-var cli = (0, _meow2.default)('\n  Usage\n    $ [NODE_ENV=env_name] kubozer [command]\n\n  Options\n    --build    Run the build task\n    --bump     Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease\n    --i18n     Use I18N capabilities\n    --upload   Use ONLY with --i18n option: upload a translation file\n    --download Use ONLY with --i18n option: download a translation file\n\n  Examples\n    $ NODE_ENV=production kubozer --build\n    $ kubozer --bump minor\n    $ kubozer --i18n --upload en\n    $ kubozer --i18n --download it\n\n');
+var cli = (0, _meow2.default)('\n  Usage\n    $ [NODE_ENV=env_name] kubozer [command]\n\n  Options\n    --build          Run the build task\n    --bump           Semver label for version bump: patch, minor, major, prepatch, preminor, premajor, prerelease\n    --config         Load specified Kubozer configuration file\n    --webpack-config Load specified Webpack configuration file\n    --i18n           Use I18N capabilities\n    --upload         Use ONLY with --i18n option: upload a translation file\n    --download       Use ONLY with --i18n option: download a translation file\n\n  Examples\n    $ NODE_ENV=production kubozer --build\n    $ kubozer --build --config=../../kubozer.conf.js --webpack-config=another-webpack.config.js\n    $ kubozer --bump minor\n    $ kubozer --i18n --upload en\n    $ kubozer --i18n --download it\n');
 
 var log = new _logger2.default();
 // Start spinner
@@ -77,7 +72,6 @@ var build = function build(k, isProd) {
       spinner.success(msgs[currentStep]);
     }
 
-    // return new Promise(resolve => resolve(true));
     return true;
   }).then(function () {
     currentStep += 1;
@@ -126,7 +120,14 @@ var download = function download(k, language) {
 
 var main = function main() {
   try {
+    // const configFile        = cli.flags.config || 'kubozer.conf';
+    // const webpackConfigFile = cli.flags.webpackConfig || 'webpack.config';
+
+    var config = require(_path2.default.resolve(cli.flags.config || 'kubozer.conf'));
+    var webpackConfig = require(_path2.default.resolve(cli.flags.webpackConfig || 'webpack.config'));
+
     var k = new _index2.default(config, webpackConfig);
+
     /* istanbul ignore next */
     spinner.clear();
 
