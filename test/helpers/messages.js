@@ -11,5 +11,7 @@ module.exports = {
   red   : chalk.red,
   severe: chalk.bold.underline.red,
   warn  : chalk.underline.yellow,
-  green : chalk.green
+  green : chalk.green,
+  blue  : chalk.blue.underline,
+  cyan  : chalk.cyan.underline
 };
