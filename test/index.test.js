@@ -115,6 +115,18 @@ test('replace() products correct output', async t => {
   t.is(fileReplace, `<!DOCTYPE html><html><head>\n    <meta charset=\"utf-8\">\n    <title></title>\n\n      \n        <link rel=\"stylesheet\" href=\"/assets/style.css\">\n        \n\n      \n        <script src=\"/assets/javascript.js\"></script>\n        \n\n  </head>\n  <body>\n\n  \n\n</body></html>`);
 });
 
+test('when running replace() the "replace" property of configuration is not mandatory', async t => {
+  const {tmpDir, webpackConfig} = t.context;
+  const config                  = hconf(tmpDir, ['FOLDERS', 'VULCANIZE_NO_JS', 'MANIFEST']);
+  const kubozer                 = new Kubozer(config, webpackConfig);
+
+  const res = await kubozer.replace();
+  t.deepEqual(res.data.changedCSS, []);
+  t.deepEqual(res.data.changedJS, []);
+  t.is(res.message, 'Replace-in-file completed.');
+  t.is(res.error, undefined);
+});
+
 test('correct bump() method', async t => {
   const {tmpDir, webpackConfig} = t.context;
   const config                  = hconf(tmpDir, ['FOLDERS', 'BUMP']);

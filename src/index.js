@@ -98,7 +98,7 @@ class Kubozer {
 
   replace() {
     this._ensureWorkspace();
-
+    const defaultOptions = {files: 'nothing', from: 'nothing', to: 'nothing'};
     const optionCSS = {};
     const optionJS = {};
 
@@ -133,14 +133,10 @@ class Kubozer {
       });
     }
 
-    if (optionJS.files === undefined && optionCSS.files === undefined) {
-      throw new Error('WARNING REPLACE(): replace method called but "files" not found in configuration');
-    }
-
     return new Promise((resolve, reject) => {
       try {
-        const changedCSS = replaceInFile.sync(optionCSS);
-        const changedJS  = replaceInFile.sync(optionJS);
+        const changedCSS = replaceInFile.sync(optionCSS.files ? optionCSS : defaultOptions);
+        const changedJS  = replaceInFile.sync(optionJS.files ? optionJS : defaultOptions);
 
         return resolve(success(REPLACE_COMPLETED, {changedCSS, changedJS}));
       }	catch (err) {
