@@ -134,7 +134,7 @@ var Kubozer = function () {
     key: 'replace',
     value: function replace() {
       this._ensureWorkspace();
-
+      var defaultOptions = { files: 'nothing', from: 'nothing', to: 'nothing' };
       var optionCSS = {};
       var optionJS = {};
 
@@ -159,14 +159,10 @@ var Kubozer = function () {
         });
       }
 
-      if (optionJS.files === undefined && optionCSS.files === undefined) {
-        throw new Error('WARNING REPLACE(): replace method called but "files" not found in configuration');
-      }
-
       return new Promise(function (resolve, reject) {
         try {
-          var changedCSS = _replaceInFile2.default.sync(optionCSS);
-          var changedJS = _replaceInFile2.default.sync(optionJS);
+          var changedCSS = _replaceInFile2.default.sync(optionCSS.files ? optionCSS : defaultOptions);
+          var changedJS = _replaceInFile2.default.sync(optionJS.files ? optionJS : defaultOptions);
 
           return resolve((0, _result.success)(REPLACE_COMPLETED, { changedCSS: changedCSS, changedJS: changedJS }));
         } catch (err) {
