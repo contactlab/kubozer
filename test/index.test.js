@@ -103,7 +103,7 @@ test('correct replace() method', async t => {
 
 test('replace() products correct output', async t => {
   const {tmpDir, webpackConfig} = t.context;
-  const config                  = hconf(tmpDir, ['FOLDERS', 'VULCANIZE_NO_JS', 'REPLACE', 'MANIFEST']);
+  const config                  = hconf(tmpDir, ['FOLDERS', 'VULCANIZE_NO_JS', 'REPLACE']);
   const kubozer                 = new Kubozer(config, webpackConfig);
 
   await kubozer.replace();
@@ -117,7 +117,7 @@ test('replace() products correct output', async t => {
 
 test('when running replace() the "replace" property of configuration is not mandatory', async t => {
   const {tmpDir, webpackConfig} = t.context;
-  const config                  = hconf(tmpDir, ['FOLDERS', 'VULCANIZE_NO_JS', 'MANIFEST']);
+  const config                  = hconf(tmpDir, ['FOLDERS']);
   const kubozer                 = new Kubozer(config, webpackConfig);
 
   const res = await kubozer.replace();
