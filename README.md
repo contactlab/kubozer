@@ -1,4 +1,4 @@
-# :warning: Deprecated
+# :warning: This project is no longer mantained
 
 <p align="center">
     <img src="https://raw.githubusercontent.com/contactlab/kubozer/master/Kubozer.png" alt="Kubozer"/>
